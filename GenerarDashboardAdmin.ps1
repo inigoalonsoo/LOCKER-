@@ -160,22 +160,28 @@ $historialUso = $historialFiltrado | Where-Object {
     $fecha -ge $fechaDesde
 } | Where-Object { $_.Accion -like '*Extracci*' }
 
-# --- Registro de uso: contar usos por instrumento desde $fechaDesde ---
-$usosPorConsigna = $historialUso | Group-Object Consigna | ForEach-Object {
+# --- Registro de uso: construir mapa de usos por consigna desde historialUso ---
+# Primero, generar el mapa de conteos desde el CSV filtrado
+$mapaUsos = @{}  # clave: consignaKey -> { TotalUsos, UltimUso }
+$historialUso | Group-Object Consigna | ForEach-Object {
     $consignaKey = "$([int]$_.Name)"
-    $info = if ($mapaInstrumentos.ContainsKey($consignaKey)) { $mapaInstrumentos[$consignaKey] } else {
-        # Intentar obtener descripcion del CSV
-        $desc = ($_.Group | Select-Object -First 1).Descripcion
-        @{ CodigoGHI = ''; Descripcion = ConvertTo-HtmlEntities $desc; FechaCaducidad = $null }
-    }
+    $ultimaFecha = ($_.Group | ForEach-Object {
+        try { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch { [DateTime]::MinValue }
+    } | Sort-Object -Descending | Select-Object -First 1)
+    $mapaUsos[$consignaKey] = @{ TotalUsos = $_.Count; UltimUso = $ultimaFecha }
+}
+
+# Ahora iterar sobre TODOS los instrumentos del sistema (SQL), con 0 si no tienen usos
+$usosPorConsigna = $mapaInstrumentos.Keys | ForEach-Object {
+    $k    = $_
+    $info = $mapaInstrumentos[$k]
+    $usos = if ($mapaUsos.ContainsKey($k)) { $mapaUsos[$k] } else { @{ TotalUsos = 0; UltimUso = [DateTime]::MinValue } }
     [PSCustomObject]@{
-        NumConsigna  = $_.Name
+        NumConsigna  = $k
         CodigoGHI    = $info.CodigoGHI
         Descripcion  = $info.Descripcion
-        TotalUsos    = $_.Count
-        UltimUso     = ($_.Group | ForEach-Object {
-            try { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch { [DateTime]::MinValue }
-        } | Sort-Object -Descending | Select-Object -First 1)
+        TotalUsos    = $usos.TotalUsos
+        UltimUso     = $usos.UltimUso
     }
 } | Sort-Object TotalUsos -Descending
 
@@ -748,14 +754,19 @@ $html += @"
 
 $rankIdx = 0
 foreach ($item in $usosPorConsigna) {
-    $rankIdx++
-    $rankClass = switch ($rankIdx) { 1 { 'rank-1' } 2 { 'rank-2' } 3 { 'rank-3' } default { 'rank-n' } }
-    $pctBarra  = [int](($item.TotalUsos / $maxUsos) * 100)
-    $ultFecha  = if ($item.UltimUso -gt [DateTime]::MinValue) { $item.UltimUso.ToString('dd/MM/yyyy') } else { '-' }
-    $codGHI    = if ($item.CodigoGHI) { $item.CodigoGHI } else { '-' }
+    $tieneUsos  = $item.TotalUsos -gt 0
+    if ($tieneUsos) { $rankIdx++ }
+    $rankClass  = if (-not $tieneUsos) { 'rank-n' } else {
+        switch ($rankIdx) { 1 { 'rank-1' } 2 { 'rank-2' } 3 { 'rank-3' } default { 'rank-n' } }
+    }
+    $rankLabel  = if ($tieneUsos) { "$rankIdx" } else { '&mdash;' }
+    $pctBarra   = if ($tieneUsos) { [int](($item.TotalUsos / $maxUsos) * 100) } else { 0 }
+    $ultFecha   = if ($item.UltimUso -gt [DateTime]::MinValue) { $item.UltimUso.ToString('dd/MM/yyyy') } else { '<span style="color:var(--ghi-text-medium);font-style:italic;">Sin usos</span>' }
+    $codGHI     = if ($item.CodigoGHI) { $item.CodigoGHI } else { '-' }
+    $rowStyle   = if ($tieneUsos) { '' } else { 'opacity:0.5;' }
     $html += @"
-                        <tr>
-                            <td><span class="rank-num $rankClass">$rankIdx</span></td>
+                        <tr style="$rowStyle">
+                            <td><span class="rank-num $rankClass">$rankLabel</span></td>
                             <td><strong>$codGHI</strong></td>
                             <td>$($item.Descripcion)</td>
                             <td style="text-align:center;">$($item.NumConsigna)</td>
