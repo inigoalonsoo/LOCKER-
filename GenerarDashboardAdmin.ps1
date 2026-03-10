@@ -236,6 +236,63 @@ $totalCaducados     = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'CADUCADO
 $totalUrgentes      = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'URGENTE' }).Count
 $totalUsuarios      = $listaUsuarios.Count
 $totalAdmins        = ($listaUsuarios | Where-Object { $_.EsAdmin }).Count
+$totalProximos      = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'PROXIMO' }).Count
+$totalCalibrado     = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'CALIBRADO' }).Count
+$totalSinFecha      = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'SIN FECHA' }).Count
+
+# --- Datos para graficos ---
+$usadosCount   = ($usosPorConsigna | Where-Object { $_.TotalUsos -gt 0 }).Count
+$noUsadosCount = $totalInstrumentos - $usadosCount
+$pctUsados     = if ($totalInstrumentos -gt 0) { [int]($usadosCount / $totalInstrumentos * 100) } else { 0 }
+$donutUsadoGradient = "conic-gradient(#10B981 0% ${pctUsados}%, rgba(255,255,255,0.08) ${pctUsados}% 100%)"
+
+# Donut calibracion (conic-gradient multi-color)
+if ($totalInstrumentos -gt 0) {
+    $d1 = [int]($totalCaducados  / $totalInstrumentos * 360)
+    $d2 = $d1 + [int]($totalUrgentes  / $totalInstrumentos * 360)
+    $d3 = $d2 + [int]($totalProximos  / $totalInstrumentos * 360)
+    $d4 = $d3 + [int]($totalCalibrado / $totalInstrumentos * 360)
+    $calibDonutGradient = "conic-gradient(#EF4444 0deg ${d1}deg, #F59E0B ${d1}deg ${d2}deg, #3B82F6 ${d2}deg ${d3}deg, #10B981 ${d3}deg ${d4}deg, rgba(255,255,255,0.08) ${d4}deg 360deg)"
+} else {
+    $calibDonutGradient = "rgba(255,255,255,0.08)"
+}
+
+# SVG grafico de barras mensual (extracciones por mes)
+$porMesBruto = @{}
+$historialUso | ForEach-Object {
+    try {
+        $d = [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
+        $k = $d.ToString('yyyy-MM')
+        if (-not $porMesBruto.ContainsKey($k)) { $porMesBruto[$k] = 0 }
+        $porMesBruto[$k]++
+    } catch {}
+}
+$mesesOrdenados = $porMesBruto.Keys | Sort-Object
+$maxMes = if ($porMesBruto.Count -gt 0) { ($porMesBruto.Values | Measure-Object -Maximum).Maximum } else { 1 }
+$svgW = 480; $svgH = 140; $padH = 22; $chartH = $svgH - $padH
+$numM = [Math]::Max($mesesOrdenados.Count, 1)
+$bW   = [int](($svgW - 8 * ($numM + 1)) / $numM)
+$svgBars = ''
+$mIdx = 0
+foreach ($mes in $mesesOrdenados) {
+    $cnt  = $porMesBruto[$mes]
+    $barH = [Math]::Max(4, [int]($cnt / $maxMes * ($chartH - 20)))
+    $x    = 8 + $mIdx * ($bW + 8)
+    $y    = $chartH - $barH
+    try { $lbl = ([DateTime]::ParseExact($mes, 'yyyy-MM', $null)).ToString('MMM').ToUpper() } catch { $lbl = $mes }
+    $svgBars += "<rect x='$x' y='$y' width='$bW' height='$barH' rx='4' fill='url(#bg)'/>"
+    $svgBars += "<text x='$([int]($x+$bW/2))' y='$($chartH+16)' text-anchor='middle' fill='#B0B0B0' font-size='11' font-family='Arial'>$lbl</text>"
+    $svgBars += "<text x='$([int]($x+$bW/2))' y='$($y-5)' text-anchor='middle' fill='white' font-size='12' font-weight='bold' font-family='Arial'>$cnt</text>"
+    $mIdx++
+}
+$svgChart = "<svg width='100%' viewBox='0 0 $svgW $svgH' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='#E63946'/><stop offset='100%25' stop-color='#9B1825'/></linearGradient></defs>$svgBars</svg>"
+
+# Top instrumento
+$topInst = $usosPorConsigna | Where-Object { $_.TotalUsos -gt 0 } | Select-Object -First 1
+$topNombre = if ($topInst) { $topInst.Descripcion } else { '&mdash;' }
+$topCodigo = if ($topInst) { $topInst.CodigoGHI } else { '' }
+$topUsos   = if ($topInst) { $topInst.TotalUsos } else { 0 }
+
 
 # =============================================
 # PASO 4: Generar HTML
@@ -606,6 +663,63 @@ $html = @"
         .calib-bar-urg  { background: linear-gradient(90deg,#F59E0B,#D97706); }
         .dias-texto { font-size: 0.82em; color: var(--ghi-text-medium); white-space: nowrap; }
 
+        /* CHARTS ROW */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 180px;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .chart-card.wide {
+            align-items: stretch;
+            padding: 20px 24px;
+        }
+        .chart-card h4 {
+            font-size: 0.78em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--ghi-text-medium);
+            margin: 0;
+            align-self: flex-start;
+        }
+        .donut-wrap { position: relative; width: 110px; height: 110px; }
+        .donut {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+        }
+        .donut-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            background: #111;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .donut-num  { font-size: 1.4em; font-weight: 900; color: var(--ghi-white); line-height:1; }
+        .donut-lbl  { font-size: 0.65em; color: var(--ghi-text-medium); }
+        .chart-legend { display: flex; flex-direction: column; gap: 5px; align-self: stretch; }
+        .legend-item {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.78em; color: var(--ghi-text-light);
+        }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink:0; }
+        .chart-subtitle { font-size: 0.75em; color: var(--ghi-text-medium); text-align:center; }
+        @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .charts-row { grid-template-columns: 1fr; } }
+
         /* FOOTER */
         .footer {
             text-align: center;
@@ -731,6 +845,37 @@ $html += @"
     <!-- ================================================ -->
     <div class="tab-content content-uso">
         <div class="table-container">
+            <!-- GRAFICOS DE USO -->
+"@
+$html += @"
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h4>&#127381; Actividad</h4>
+                    <div class="donut-wrap">
+                        <div class="donut" style="background:$donutUsadoGradient;"></div>
+                        <div class="donut-center">
+                            <span class="donut-num">$usadosCount</span>
+                            <span class="donut-lbl">de $totalInstrumentos</span>
+                        </div>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#10B981;"></div>Usados: $usadosCount</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.12);"></div>Sin uso: $noUsadosCount</div>
+                    </div>
+                    <span class="chart-subtitle">Desde $fechaDesdeTxt</span>
+                </div>
+                <div class="chart-card wide">
+                    <h4>&#128200; Extracciones por mes</h4>
+                    $svgChart
+                </div>
+                <div class="chart-card">
+                    <h4>&#127942; Top instrumento</h4>
+                    <div style="font-family:monospace;font-size:1.1em;font-weight:900;color:var(--ghi-red);margin-top:4px;">$topCodigo</div>
+                    <div style="font-size:0.78em;color:var(--ghi-text-medium);text-align:center;line-height:1.4;margin-top:4px;">$topNombre</div>
+                    <div style="font-size:2em;font-weight:900;color:var(--ghi-white);">&nbsp;$topUsos&nbsp;</div>
+                    <span class="chart-subtitle">usos desde $fechaDesdeTxt</span>
+                </div>
+            </div>
             <div class="table-header">
                 <div>
                     <h2>&#128202; Registro de Uso de Instrumentos</h2>
@@ -801,6 +946,38 @@ $html += @"
     <!-- ================================================ -->
     <div class="tab-content content-calibracion">
         <div class="table-container">
+            <!-- GRAFICOS CALIBRACION -->
+"@
+$html += @"
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h4>&#127381; Estado global</h4>
+                    <div class="donut-wrap">
+                        <div class="donut" style="background:$calibDonutGradient;"></div>
+                        <div class="donut-center">
+                            <span class="donut-num">$totalInstrumentos</span>
+                            <span class="donut-lbl">total</span>
+                        </div>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#EF4444;"></div>Caducados: $totalCaducados</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#F59E0B;"></div>Urgentes: $totalUrgentes</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#3B82F6;"></div>Pr&oacute;ximos: $totalProximos</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#10B981;"></div>Calibrados: $totalCalibrado</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.12);"></div>Sin fecha: $totalSinFecha</div>
+                    </div>
+                </div>
+                <div class="chart-card wide" style="justify-content:center;gap:12px;">
+                    <h4>&#128202; Distribuci&oacute;n de estados</h4>
+                    <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+                        <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.82em;color:#FCA5A5;">Caducados</span><strong style="color:#EF4444;">$totalCaducados</strong></div><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.06);"><div style="height:10px;border-radius:5px;background:#EF4444;width:$(if($totalInstrumentos){[int]($totalCaducados/$totalInstrumentos*100)}else{0})%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.82em;color:#FDE68A;">Urgentes (&lt;30d)</span><strong style="color:#F59E0B;">$totalUrgentes</strong></div><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.06);"><div style="height:10px;border-radius:5px;background:#F59E0B;width:$(if($totalInstrumentos){[int]($totalUrgentes/$totalInstrumentos*100)}else{0})%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.82em;color:#BFDBFE;">Pr&oacute;ximos (&lt;90d)</span><strong style="color:#3B82F6;">$totalProximos</strong></div><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.06);"><div style="height:10px;border-radius:5px;background:#3B82F6;width:$(if($totalInstrumentos){[int]($totalProximos/$totalInstrumentos*100)}else{0})%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.82em;color:#A7F3D0;">Calibrados</span><strong style="color:#10B981;">$totalCalibrado</strong></div><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.06);"><div style="height:10px;border-radius:5px;background:#10B981;width:$(if($totalInstrumentos){[int]($totalCalibrado/$totalInstrumentos*100)}else{0})%;"></div></div></div>
+                        <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.82em;color:var(--ghi-text-medium);">Sin fecha</span><strong style="color:var(--ghi-text-medium);">$totalSinFecha</strong></div><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.06);"><div style="height:10px;border-radius:5px;background:rgba(255,255,255,0.2);width:$(if($totalInstrumentos){[int]($totalSinFecha/$totalInstrumentos*100)}else{0})%;"></div></div></div>
+                    </div>
+                </div>
+            </div>
             <div class="table-header">
                 <div>
                     <h2>&#128197; Estado de Calibraci&oacute;n</h2>
