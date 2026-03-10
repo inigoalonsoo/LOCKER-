@@ -32,6 +32,7 @@ $archivoHistorial = "$carpetaOneDrive\HistorialCompleto.csv"
 $archivoHTML      = "$carpetaOneDrive\DashboardAdmin.html"
 
 $hoy = Get-Date
+$fechaDesde = [DateTime]::new(2025, 11, 1)  # Desde vuelta de calibracion (nov 2025)
 
 # =============================================
 # FUNCION: Convertir caracteres especiales a HTML entities
@@ -151,8 +152,15 @@ if (Test-Path $archivoHistorial) {
 # Filtrar consigna 100 (evento sistema)
 $historialFiltrado = $historial | Where-Object { $_.Consigna -ne '100' }
 
-# --- Registro de uso: contar usos por instrumento (cada fila del CSV es 1 uso) ---
-$usosPorConsigna = $historialFiltrado | Group-Object Consigna | ForEach-Object {
+# Filtrar historial DESDE nov 2025 para el Registro de Uso (instrumentos volvieron de calibracion)
+$historialUso = $historialFiltrado | Where-Object {
+    $fecha = [DateTime]::MinValue
+    try { $fecha = [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch {}
+    $fecha -ge $fechaDesde
+}
+
+# --- Registro de uso: contar usos por instrumento desde $fechaDesde ---
+$usosPorConsigna = $historialUso | Group-Object Consigna | ForEach-Object {
     $consignaKey = "$([int]$_.Name)"
     $info = if ($mapaInstrumentos.ContainsKey($consignaKey)) { $mapaInstrumentos[$consignaKey] } else {
         # Intentar obtener descripcion del CSV
@@ -214,7 +222,8 @@ $listaCalib = $mapaInstrumentos.Keys | ForEach-Object {
 } | Sort-Object Urgencia, DiasRestantes
 
 # --- Stats globales ---
-$totalMovimientos   = $historialFiltrado.Count
+$totalMovimientos   = $historialUso.Count
+$fechaDesdeTxt      = $fechaDesde.ToString('dd/MM/yyyy')
 $totalInstrumentos  = $mapaInstrumentos.Count
 $totalCaducados     = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'CADUCADO' }).Count
 $totalUrgentes      = ($listaCalib | Where-Object { $_.EstadoCalib -eq 'URGENTE' }).Count
@@ -673,9 +682,9 @@ $html += @"
             <div class="sublabel">En el sistema</div>
         </div>
         <div class="stat-card">
-            <h3>Total Movimientos</h3>
+            <h3>Movimientos (desde nov 2025)</h3>
             <div class="number">$totalMovimientos</div>
-            <div class="sublabel">Acumulado hist&oacute;rico</div>
+            <div class="sublabel">Desde $fechaDesdeTxt</div>
         </div>
         <div class="stat-card red">
             <h3>Caducados</h3>
@@ -718,7 +727,7 @@ $html += @"
             <div class="table-header">
                 <div>
                     <h2>&#128202; Registro de Uso de Instrumentos</h2>
-                    <div class="subtitle">Ordenado de mayor a menor uso &mdash; $totalMovimientos movimientos totales</div>
+                    <div class="subtitle">Ordenado de mayor a menor uso &mdash; $totalMovimientos movimientos desde $fechaDesdeTxt</div>
                 </div>
             </div>
             <div class="table-wrapper">
