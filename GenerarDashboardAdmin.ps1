@@ -152,12 +152,13 @@ if (Test-Path $archivoHistorial) {
 # Filtrar consigna 100 (evento sistema)
 $historialFiltrado = $historial | Where-Object { $_.Consigna -ne '100' }
 
-# Filtrar historial DESDE nov 2025 para el Registro de Uso (instrumentos volvieron de calibracion)
+# Filtrar historial DESDE nov 2025 y solo Extracciones (= usos reales)
+# Cada uso fisico = 1 Extraccion + 1 Devolucion en el CSV -> solo contar la Extraccion
 $historialUso = $historialFiltrado | Where-Object {
     $fecha = [DateTime]::MinValue
     try { $fecha = [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch {}
     $fecha -ge $fechaDesde
-}
+} | Where-Object { $_.Accion -like '*Extracci*' }
 
 # --- Registro de uso: contar usos por instrumento desde $fechaDesde ---
 $usosPorConsigna = $historialUso | Group-Object Consigna | ForEach-Object {
