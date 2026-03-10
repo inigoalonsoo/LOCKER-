@@ -1,0 +1,14 @@
+# Archivos generados automáticamente (no subir al repo)
+*.html
+EstadoAnterior.json
+HistorialCompleto.csv
+EXPORT_*.txt
+
+# Archivos temporales
+*.tmp
+*.log
+Thumbs.db
+.DS_Store
+
+# Módulos PowerShell descargados localmente
+ImportExcel_module/

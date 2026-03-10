@@ -1,0 +1,31 @@
+# .gitignore — Locker ACTUM Dashboard
+
+# Datos reales (no subir al repositorio)
+HistorialCompleto.csv
+DashboardLocker.html
+
+# Archivos temporales y de trabajo
+*.txt
+!assets/logo_base64.txt
+GenerarDashboard_TILDES.txt
+script_b64.txt
+
+# Archivos de investigación (temporales)
+analisis_final_bd.md
+comandos_*.md
+consulta_sql_final.md
+historial_conversacion.md
+resultados_*.md
+task.md
+Invisible*.md
+
+# Scripts de un solo uso
+InvestigarACTUM.ps1
+MoverArchivosOneDrive.ps1
+CopiarLogo.ps1
+ExportarLocker.ps1
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
+desktop.ini
