@@ -247,12 +247,12 @@ Register-ScheduledTask -TaskName "GenerarDashboardAdmin" -Action $accion -Trigge
 ```
 > Nota: se actualiza cada 1 min, igual que el DashboardLocker principal.
 
-### Pasos de despliegue (estado 2026-02-26):
+### Pasos de despliegue (estado 2026-03-10):
 1. ✅ Copiar `GenerarDashboardAdmin.ps1` al locker como `C:\ACTUM\GenerarDashboardAdmin.ps1`
 2. ✅ Copiar `EjecutarAdminOculto.vbs` al locker como `C:\ACTUM\EjecutarAdminOculto.vbs`
 3. ✅ Ejecutar el script para generar el HTML inicial: `cd C:\ACTUM; .\GenerarDashboardAdmin.ps1`
 4. ✅ Verificar que `DashboardAdmin.html` aparece en `C:\Users\User\OneDrive...\LockerACTUM\` — CONFIRMADO FUNCIONANDO
-5. ⏳ **PENDIENTE**: Crear la tarea programada con el comando de arriba (cada 1 min)
+5. ✅ **COMPLETADO 2026-03-10**: Tarea programada `GenerarDashboardAdmin` creada — State: Ready, NextRunTime cada 1 min
 
 ### Columnas SQL confirmadas — Tabla `Usuario` (2026-02-26)
 
