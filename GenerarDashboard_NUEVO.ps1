@@ -1,0 +1,406 @@
+# Script para generar Dashboard HTML del Locker
+$carpetaUser = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM"
+$carpetaDesarrollo = "c:\Users\ialopez\OneDrive - GHI HORNOS INDUSTRIALES S.L\Antigravity\GHI"
+$carpetaACTUM = "C:\ACTUM"
+
+if (Test-Path $carpetaUser) {
+    $carpetaOneDrive = $carpetaUser
+} else {
+    $carpetaOneDrive = $carpetaDesarrollo
+}
+
+$archivoHistorial = "$carpetaOneDrive\HistorialCompleto.csv"
+$archivoHTML = "$carpetaOneDrive\DashboardLocker.html"
+
+# =============================================
+# PASO 1: Construir mapa Consigna -> CodigoCaja
+# desde EXPORT_Cajas.txt (solo disponible en locker)
+# =============================================
+$mapaCodigos = @{} # clave: numero consigna (string) -> valor: codigo caja (ej: "L-010")
+
+$exportCajasPath = "$carpetaACTUM\EXPORT_Cajas.txt"
+if (Test-Path $exportCajasPath) {
+    $lineas = Get-Content $exportCajasPath -Encoding UTF8
+    $seccion = 0
+    $cajasMap = @{}     # Codigo (int) -> CodigoCliente (ej: "L-010")
+    $consignasMap = @{} # CodigoCliente consigna -> Caja_Codigo
+
+    foreach ($linea in $lineas) {
+        if ($linea -match '^Codigo,CodigoCliente,Descripcion') { $seccion = 1; continue }
+        if ($linea -match '^Codigo,CodigoCliente,Bloque') { $seccion = 2; continue }
+        if ($linea -match '^-' -or [string]::IsNullOrWhiteSpace($linea)) { continue }
+
+        $campos = $linea -split ','
+        if ($seccion -eq 1 -and $campos.Count -ge 2) {
+            # Codigo -> CodigoCliente (ej: 11 -> L-010)
+            $cajasMap[$campos[0].Trim()] = $campos[1].Trim()
+        }
+        if ($seccion -eq 2 -and $campos.Count -ge 6) {
+            # CodigoCliente de consigna -> Caja_Codigo (ej: "11" -> "11")
+            $consignasMap[$campos[1].Trim()] = $campos[5].Trim()
+        }
+    }
+
+    # Cruzar: consigna CodigoCliente -> Caja_Codigo -> CodigoCliente caja
+    foreach ($consignaCodigo in $consignasMap.Keys) {
+        $cajaCodigo = $consignasMap[$consignaCodigo]
+        if ($cajasMap.ContainsKey($cajaCodigo)) {
+            $mapaCodigos[$consignaCodigo] = $cajasMap[$cajaCodigo]
+        }
+    }
+}
+
+# =============================================
+# PASO 2: Leer historial
+# =============================================
+$estadoInstrumentos = @()
+$historial = @()
+
+if (Test-Path $archivoHistorial) {
+    $historial = Import-Csv -Path $archivoHistorial -Delimiter ";" -Encoding UTF8
+}
+
+# Filtrar consigna 100 (sistema) y obtener ultima accion por consigna
+if ($historial.Count -gt 0) {
+    $historialFiltrado = $historial | Where-Object { $_.Consigna -ne '100' }
+    $ultimaAccionPorConsigna = $historialFiltrado |
+        Sort-Object { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } -Descending |
+        Group-Object Consigna |
+        ForEach-Object { $_.Group | Select-Object -First 1 }
+
+    foreach ($mov in $ultimaAccionPorConsigna) {
+        $estado = if ($mov.Accion -like '*Extracci*') { 'En uso' } elseif ($mov.Accion -like '*Devoluci*') { 'Disponible' } else { 'Desconocido' }
+        $usuarioActual = if ($estado -eq 'En uso') { "$($mov.Usuario) $($mov.Apellidos)" } else { '' }
+
+        # Obtener codigo de caja desde el mapa o desde el inicio de la descripcion
+        $codigoCaja = ''
+        if ($mapaCodigos.ContainsKey($mov.Consigna)) {
+            $codigoCaja = $mapaCodigos[$mov.Consigna]
+        } elseif ($mov.Descripcion -match '^([A-Z]-\d+)') {
+            $codigoCaja = $matches[1]
+        }
+
+        $estadoInstrumentos += [PSCustomObject]@{
+            NumConsigna   = $mov.Consigna
+            Instrumento   = $mov.Descripcion
+            CodigoCaja    = $codigoCaja
+            Estado        = $estado
+            UsuarioActual = $usuarioActual
+        }
+    }
+}
+
+$totalMovimientos = ($historial | Where-Object { $_.Consigna -ne '100' }).Count
+$totalInstrumentos = $estadoInstrumentos.Count
+$instrumentosEnUso = ($estadoInstrumentos | Where-Object { $_.Estado -eq 'En uso' }).Count
+$instrumentosDisponibles = ($estadoInstrumentos | Where-Object { $_.Estado -eq 'Disponible' }).Count
+$ultimosMovimientos = $historial |
+    Where-Object { $_.Consigna -ne '100' } |
+    Sort-Object { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } -Descending |
+    Group-Object FechaHoraApertura, Usuario, Consigna, Accion |
+    ForEach-Object { $_.Group | Select-Object -First 1 }
+
+# =============================================
+# PASO 3: Generar HTML
+# =============================================
+$html = @"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOCKER INSTRUMENTACI&Oacute;N - GHI SMART FURNACES</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {
+            --ghi-red: #C31E2E;
+            --ghi-red-dark: #9B1825;
+            --ghi-red-light: #E63946;
+            --ghi-black: #0A0A0A;
+            --ghi-white: #FFFFFF;
+            --ghi-grey: #1A1A1A;
+            --ghi-grey-medium: #2D2D2D;
+            --ghi-grey-light: #404040;
+            --ghi-text-light: #E0E0E0;
+            --ghi-text-medium: #B0B0B0;
+            --success: #10B981;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--ghi-black) 0%, var(--ghi-grey) 100%);
+            color: var(--ghi-white);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding: 25px 35px;
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        .logo-section { display: flex; align-items: center; gap: 20px; }
+        .logo { width: 150px; height: 50px; }
+        .title-section h1 {
+            font-size: 1.8em; font-weight: 800;
+            background: linear-gradient(135deg, var(--ghi-red) 0%, var(--ghi-red-light) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 4px;
+        }
+        .title-section p { color: var(--ghi-text-medium); font-size: 0.95em; font-weight: 500; }
+        .live-indicator {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px; background: var(--glass-bg);
+            border: 1px solid var(--glass-border); border-radius: 25px;
+        }
+        .pulse-dot {
+            width: 10px; height: 10px; background: var(--success);
+            border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        .tabs {
+            display: flex; gap: 10px; margin-bottom: 30px;
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 12px; padding: 8px;
+        }
+        .tab {
+            flex: 1; padding: 14px 24px; background: transparent; border: none;
+            color: var(--ghi-text-light); font-size: 1em; font-weight: 600;
+            cursor: pointer; border-radius: 8px; transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .tab:hover { background: var(--ghi-grey-light); }
+        .tab.active { background: var(--ghi-red); color: white; box-shadow: 0 4px 12px rgba(195,30,46,0.4); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px; margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); padding: 25px;
+            border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .stat-card h3 {
+            color: var(--ghi-text-medium); font-size: 0.9em; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+        }
+        .stat-card .number {
+            font-size: 2.5em; font-weight: 800;
+            background: linear-gradient(135deg, var(--ghi-red) 0%, var(--ghi-red-light) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1; margin-bottom: 8px;
+        }
+        .stat-card .label { color: var(--ghi-text-light); font-size: 0.85em; font-weight: 500; }
+        .table-container {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); padding: 35px;
+            border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); overflow: hidden;
+        }
+        .table-header { margin-bottom: 25px; }
+        .table-header h2 { color: var(--ghi-white); font-weight: 700; font-size: 1.5em; }
+        .table-wrapper { overflow-x: auto; border-radius: 12px; background: var(--ghi-grey-medium); }
+        table { width: 100%; border-collapse: collapse; }
+        thead {
+            background: linear-gradient(135deg, var(--ghi-red-dark) 0%, var(--ghi-red) 100%);
+            position: sticky; top: 0; z-index: 10;
+        }
+        th {
+            padding: 16px 20px; text-align: left; font-weight: 700;
+            font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;
+            color: white; border-bottom: 2px solid var(--ghi-red-light);
+        }
+        tbody tr { border-bottom: 1px solid var(--glass-border); transition: background 0.2s ease; }
+        tbody tr:hover { background: var(--ghi-grey-light); }
+        td { padding: 16px 20px; color: var(--ghi-text-light); font-size: 0.95em; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
+        .badge-disponible { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .badge-en-uso { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+        .badge-ocupada { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; padding: 8px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); display: inline-block; }
+        .badge-libre { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 8px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: inline-block; }
+        .actualizado {
+            text-align: center; margin-top: 30px; padding: 15px;
+            color: var(--ghi-text-medium); font-size: 0.9em;
+            background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border);
+        }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--ghi-grey-medium); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--ghi-red); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ghi-red-light); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <svg class="logo" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#C31E2E"/>
+                    <g fill="white">
+                        <path d="M 30 40 Q 32 32 35 40 M 38 35 Q 40 28 43 35 M 46 40 Q 48 32 51 40 M 54 35 Q 56 28 59 35 M 62 40 Q 64 32 67 40" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <rect x="35" y="45" width="27" height="25" rx="2"/>
+                        <line x1="38" y1="52" x2="59" y2="52" stroke="white" stroke-width="2"/>
+                        <line x1="38" y1="60" x2="59" y2="60" stroke="white" stroke-width="2"/>
+                    </g>
+                    <text x="110" y="60" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="bold" fill="#C31E2E">ghi</text>
+                    <text x="110" y="75" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#C31E2E" letter-spacing="1">SMART</text>
+                    <text x="110" y="88" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#C31E2E" letter-spacing="1">FURNACES</text>
+                </svg>
+                <div class="title-section">
+                    <h1>GHI SMART FURNACES</h1>
+                    <p>LOCKER INSTRUMENTACI&Oacute;N</p>
+                </div>
+            </div>
+            <div class="live-indicator">
+                <div class="pulse-dot"></div>
+                <span>En vivo</span>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'estado')">Estado Instrumentos</button>
+            <button class="tab" onclick="openTab(event, 'historial')">Historial Movimientos</button>
+        </div>
+
+        <div id="estado" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Instrumentos</h3>
+                    <div class="number">$totalInstrumentos</div>
+                    <div class="label">Registrados en el sistema</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Disponibles</h3>
+                    <div class="number">$instrumentosDisponibles</div>
+                    <div class="label">Listos para usar</div>
+                </div>
+                <div class="stat-card">
+                    <h3>En Uso</h3>
+                    <div class="number">$instrumentosEnUso</div>
+                    <div class="label">Actualmente asignados</div>
+                </div>
+                <div class="stat-card">
+                    <h3>&Uacute;ltima Actualizaci&oacute;n</h3>
+                    <div class="number" style="font-size: 2em;">$(Get-Date -Format 'HH:mm')</div>
+                    <div class="label">Hora actual</div>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-header"><h2>Estado Actual de Instrumentos</h2></div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Instrumento</th>
+                                <th>N&ordm; Consigna</th>
+                                <th>C&oacute;digo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+"@
+
+foreach ($instrumento in $estadoInstrumentos) {
+    $estadoTexto = if ($instrumento.Estado -eq 'En uso') { "En uso por $($instrumento.UsuarioActual)" } else { "Disponible" }
+    $badgeClass = if ($instrumento.Estado -eq 'En uso') { 'badge-en-uso' } else { 'badge-disponible' }
+    $html += @"
+                            <tr>
+                                <td>$($instrumento.Instrumento)</td>
+                                <td>$($instrumento.NumConsigna)</td>
+                                <td>$($instrumento.CodigoCaja)</td>
+                                <td><span class="badge $badgeClass">$estadoTexto</span></td>
+                            </tr>
+"@
+}
+
+$html += @"
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="historial" class="tab-content">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Movimientos</h3>
+                    <div class="number">$totalMovimientos</div>
+                    <div class="label">Registros totales</div>
+                </div>
+                <div class="stat-card">
+                    <h3>&Uacute;ltima Actualizaci&oacute;n</h3>
+                    <div class="number" style="font-size: 2em;">$(Get-Date -Format 'HH:mm')</div>
+                    <div class="label">Hora actual</div>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-header"><h2>Todos los Movimientos</h2></div>
+                <div class="table-wrapper">
+                    <table id="tablaMovimientos">
+                        <thead>
+                            <tr>
+                                <th>Fecha Apertura</th>
+                                <th>Usuario</th>
+                                <th>Consigna</th>
+                                <th>Descripci&oacute;n</th>
+                                <th>Acci&oacute;n</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+"@
+
+foreach ($movimiento in $ultimosMovimientos) {
+    $badgeClass = if ($movimiento.Accion -like '*Extracci*') { 'badge-ocupada' } elseif ($movimiento.Accion -like '*Devoluci*') { 'badge-libre' } else { 'badge-libre' }
+    $html += @"
+                            <tr>
+                                <td>$($movimiento.FechaHoraApertura)</td>
+                                <td>$($movimiento.Usuario)</td>
+                                <td>$($movimiento.Consigna)</td>
+                                <td>$($movimiento.Descripcion)</td>
+                                <td><span class="badge $badgeClass">$($movimiento.Accion)</span></td>
+                            </tr>
+"@
+}
+
+$html += @"
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <p class="actualizado">Actualizado autom&aacute;ticamente cada minuto | &Uacute;ltima actualizaci&oacute;n: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</p>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
+            var tabs = document.getElementsByClassName("tab");
+            for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove("active"); }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        setTimeout(function() { location.reload(); }, 60000);
+    </script>
+</body>
+</html>
+"@
+
+$utf8WithBOM = New-Object System.Text.UTF8Encoding $true
+[System.IO.File]::WriteAllText($archivoHTML, $html, $utf8WithBOM)
+Write-Host "Dashboard HTML generado: $archivoHTML" -ForegroundColor Green
+Write-Host "Codigos cargados: $($mapaCodigos.Count)" -ForegroundColor Cyan
