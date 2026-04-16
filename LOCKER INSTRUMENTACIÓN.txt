@@ -1,0 +1,13 @@
+LOCKER INSTRUMENTACIÓN
+
+
+
+
+- Hablar con Ignacio y comentarle: el registro que no se resetee en un dia (aumentarlo), y ver como poder cnectra y extraer los datos de la aplicación del locker a un HTML o que creemos nosotros
+
+*Que en el Excel haga una pestaña con los códigos de cada uno 
+*Cuando se recarga el HTML, que no se vea el powershell (se ve durante 1 segundo cada minuto)
+*Es importante que en el Excel aparezcan las descripciones y todo tan detallado como el que hay ahora
+
+
+*BAJA TODOS LOS DIAS A LAS 14:30

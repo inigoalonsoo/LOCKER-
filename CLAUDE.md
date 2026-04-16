@@ -827,3 +827,101 @@ Write-Host "Parche aplicado" -ForegroundColor Green
 Select-String "mara" "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\DashboardLocker.html" |
     Select-Object -First 3 -ExpandProperty Line
 ```
+
+---
+
+## Resumen de Sesion — 2026-03-25
+
+### Problema: Dashboard sin actualizar desde el 24/03 a las 8h
+
+**Sintoma:** El HTML se generaba correctamente en el locker cada minuto (LastWriteTime actualizado), pero el dashboard no se actualizaba en OneDrive web.
+
+**Causa raiz REAL (confirmada):** La cuenta de OneDrive (`fabricacion1@ghifurnaces.com`) cambio de contrasena. El cliente OneDrive del locker perdio la sesion y dejo de sincronizar archivos al cloud — aunque el proceso OneDrive.exe seguia corriendo, estaba desautenticado.
+
+**Señales que apuntan a este problema:**
+- El HTML se actualiza localmente (LastWriteTime reciente en el locker)
+- Pero el archivo en OneDrive web muestra version antigua
+- OneDrive.exe corre pero con PID desde hace dias (no reciente)
+- El icono de OneDrive en la bandeja muestra error de cuenta
+
+**Fix:** Abrir OneDrive en el locker → iniciar sesion con la nueva contrasena → sync se reanuda en segundos.
+
+**Lo que NO era el problema:**
+- Tareas programadas: OK
+- SQL Server: conexion OK (32 instrumentos)
+- Generacion del HTML: OK
+- Auto-login: correcto
+
+### Acciones realizadas:
+
+**1. ActualizarExcelLocker estaba Disabled**
+- Fix: `Enable-ScheduledTask -TaskName "ActualizarExcelLocker"`
+
+**2. Regeneracion manual del dashboard**
+- `cd C:\ACTUM; .\GenerarDashboard.ps1`
+- Resultado: SQL OK, 32 instrumentos, 210 movimientos, HTML generado
+
+**3. Fix preventivo — Tareas robustas ante reinicios**
+Aplicado `-StartWhenAvailable` y reintentos a las 3 tareas criticas:
+```powershell
+$settings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
+    -Hidden `
+    -StartWhenAvailable `
+    -ExecutionTimeLimit (New-TimeSpan -Minutes 5) `
+    -RestartCount 3 `
+    -RestartInterval (New-TimeSpan -Minutes 1)
+
+Set-ScheduledTask -TaskName "MonitoreoLockerTiempoReal" -Settings $settings
+Set-ScheduledTask -TaskName "GenerarDashboardHTML" -Settings $settings
+Set-ScheduledTask -TaskName "GenerarDashboardAdmin" -Settings $settings
+```
+
+**Por que es el fix correcto:** `-StartWhenAvailable` hace que si el PC se reinicia y la tarea "pierde" su ventana horaria, Windows la lanza automaticamente en cuanto el sistema esta listo. Sin esto, la tarea queda en `Ready` pero nunca se dispara hasta el proximo ciclo programado (que puede no llegar si el trigger perdio su referencia).
+
+### Estado del sistema (2026-03-25 08:00):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ Ready | StartWhenAvailable + 3 reintentos |
+| GenerarDashboardHTML | ✅ Ready | StartWhenAvailable + 3 reintentos |
+| GenerarDashboardAdmin | ✅ Ready | StartWhenAvailable + 3 reintentos |
+| ActualizarExcelLocker | ✅ Ready | Reactivada |
+| OneDrive | ✅ Corriendo | Desde 21/03 |
+| SQL | ✅ OK | 32 instrumentos |
+| Dashboard HTML | ✅ Actualizandose cada minuto | Confirmado 7:56:10 |
+
+### Diagnostico rapido (para futuras incidencias):
+```powershell
+# 1. Estado de tareas
+Get-ScheduledTask -TaskName "MonitoreoLockerTiempoReal","GenerarDashboardHTML","ActualizarExcelLocker","GenerarDashboardAdmin" | Select-Object TaskName, State
+
+# 2. Ultima ejecucion y resultado
+Get-ScheduledTaskInfo -TaskName "MonitoreoLockerTiempoReal" | Select-Object LastRunTime, LastTaskResult, NextRunTime
+Get-ScheduledTaskInfo -TaskName "GenerarDashboardHTML" | Select-Object LastRunTime, LastTaskResult, NextRunTime
+
+# 3. OneDrive corriendo?
+Get-Process -Name "OneDrive" -ErrorAction SilentlyContinue | Select-Object Name, StartTime
+
+# 4. Cuando se actualizo el HTML por ultima vez?
+Get-Item "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\DashboardLocker.html" | Select-Object LastWriteTime
+
+# 5. Fix rapido si todo esta parado:
+Enable-ScheduledTask -TaskName "ActualizarExcelLocker"
+cd C:\ACTUM; .\GenerarDashboard.ps1
+
+# 6. CRITICO: Verificar si OneDrive esta sincronizando
+# Si el HTML se actualiza localmente pero NO en OneDrive web:
+# → Probable cambio de contrasena de la cuenta OneDrive
+# → Solucion: abrir OneDrive en el locker e iniciar sesion de nuevo
+# → O restart del PC (arranca OneDrive limpio y pide credenciales)
+```
+
+## ⚠️ CAUSA FRECUENTE DE FALLO: Cambio de contraseña OneDrive
+
+Si el dashboard deja de actualizarse en OneDrive web pero el archivo local SÍ está actualizado:
+1. El cliente OneDrive del locker ha perdido la sesión (cambio de contraseña de cuenta)
+2. Fix: en el locker, click en el icono OneDrive (bandeja sistema) → iniciar sesión con nueva contraseña
+3. En 1-2 minutos el sync se reanuda
+
+> ⚠️ Cada vez que se cambie la contraseña de `fabricacion1@ghifurnaces.com` (o la cuenta OneDrive del locker), hay que volver a autenticar OneDrive en el PC del locker.
