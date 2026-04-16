@@ -698,6 +698,92 @@ El sistema de monitoreo del locker ACTUM está **completamente operativo y autom
 
 **Sistema presentado y aceptado por GHI el 2026-02-25. En producción.**
 
+---
+
+## 🚨 GUÍA RÁPIDA DE ERRORES COMUNES
+
+### Error 1: No sincroniza a OneDrive (la hora no cambia)
+
+**Síntoma:** El HTML local se genera bien pero desde tu PC/web no se actualiza.
+
+**Diagnóstico:**
+```powershell
+# En el locker:
+Get-Item "C:\Users\User\OneDrive...\LockerACTUM\DashboardLocker.html" | Select-Object LastWriteTime
+```
+Si la hora es reciente → el problema es OneDrive.
+
+**Solución:**
+1. Reiniciar OneDrive:
+```powershell
+Stop-Process -Name OneDrive -Force
+Stop-Process -Name "OneDrive.Sync.Service" -Force
+Start-Sleep -Seconds 5
+Start-Process "C:\Program Files\Microsoft OneDrive\OneDrive.exe"
+```
+2. Si sigue sin funcionar, la sesión ha expirado → iniciar sesión manualmente en OneDrive desde el navegador.
+
+---
+
+### Error 2: Tarea programada no se ejecuta
+
+**Síntoma:** El HTML no se genera, la hora no cambia.
+
+**Diagnóstico:**
+```powershell
+Get-ScheduledTaskInfo -TaskName "MonitoreoLockerTiempoReal" | Select-Object LastRunTime, LastTaskResult
+```
+- LastTaskResult = 0 → OK
+- LastTaskResult = otro número → error
+
+**Solución:**
+```powershell
+# Ver tarea
+Get-ScheduledTask -TaskName "MonitoreoLockerTiempoReal" | Select-Object State
+# Si está Disabled:
+Enable-ScheduledTask -TaskName "MonitoreoLockerTiempoReal"
+```
+
+---
+
+### Error 3: Cambio de contraseña del PC
+
+**Síntoma:** OneDrive deja de sincronizar después de cambiar la contraseña del locker.
+
+**Solución:**
+1. Iniciar sesión en el locker con la nueva contraseña
+2. Arrancar OneDrive si no está corriendo
+3. Verificar sincronización
+
+---
+
+###Error 4: HTML con tildes rotos (caracteres raros)
+
+**Síntoma:** En lugar de "Cámara" aparece "C□mara".
+
+**Solución:**
+```powershell
+# Ejecutar el parche:
+powershell -ExecutionPolicy Bypass -File "C:\ACTUM\PatchFuncionTildes.ps1"
+```
+
+---
+
+### Checklist rápido de verificación:
+```powershell
+# 1. Estado tareas
+Get-ScheduledTask | Where-Object {$_.TaskName -like "*Locker*" -or $_.TaskName -like "*Dashboard*"} | Select-Object TaskName, State
+
+# 2. Última ejecución
+Get-ScheduledTaskInfo -TaskName "MonitoreoLockerTiempoReal" | Select-Object LastRunTime, LastTaskResult
+
+# 3. HTML actualizado
+Get-Item "C:\Users\User\OneDrive...\LockerACTUM\DashboardLocker.html" | Select-Object LastWriteTime
+
+# 4. OneDrive corriendo
+Get-Process OneDrive -ErrorAction SilentlyContinue
+```
+
 **Arquitectura de tareas definitiva (NO cambiar a SYSTEM):**
 - `MonitoreoLockerTiempoReal` → **Interactive (User)** — necesita SQL (Integrated Security) y escritura a `C:\Users\User\OneDrive...`
 - `GenerarDashboardHTML` → **DISABLED** — redundante, MonitoreoLockerTiempoReal ya genera HTML
