@@ -1363,6 +1363,20 @@ Las alternativas 2, 3 y 4 quedan documentadas para retomar en el futuro.
 
 ---
 
+## Limitacion conocida: Asignaciones administrativas en ACTUM
+
+**Descubierto 2026-05-20** al verificar consigna 30.
+
+`Consigna.Usuario_Codigo` en SQL puede no coincidir con el ultimo movimiento fisico registrado en la tabla `Eventos`. Esto ocurre cuando alguien asigna un usuario a una consigna directamente desde el software ACTUM EPI Visor (sin que el usuario abra el locker fisicamente). Ese tipo de asignacion NO genera entrada en `Eventos`.
+
+**Consecuencia:** El dashboard puede mostrar un usuario diferente al que ACTUM tiene asignado.
+**Impacto:** Solo afecta a quien se muestra como "En uso por X". El instrumento si aparece como EN USO. No es un bug, es una limitacion estructural.
+**Solucion futura:** Leer `Consigna.Usuario_Codigo` directamente en `GenerarDashboard.ps1` para la pestana Estado, en vez de derivarlo del CSV.
+
+---
+
+---
+
 ## Resumen de Sesion — 2026-05-20 (Bug marcador + Reconstruccion semanal automatica)
 
 ### Problema: Movimiento no registrado en dashboard
