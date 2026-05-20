@@ -56,8 +56,8 @@ Para cambiar el dashboard (diseño, columnas, colores, datos mostrados) **solo s
 
 | Script | ¿Se modifica? | Qué hace |
 |--------|--------------|----------|
-| `GenerarDashboard.ps1` | ✅ **SÍ — el único** | Lee CSV → Genera el HTML del dashboard |
-| `MonitoreoLockerTiempoReal.ps1` | ❌ **NO** | Detecta cambios en el locker → actualiza CSV → llama a GenerarDashboard |
+| `GenerarDashboard.ps1` | ✅ **SÍ** | Lee CSV → Genera el HTML del dashboard |
+| `MonitoreoLockerTiempoReal.ps1` | ✅ **SÍ** | v2.0: Lee tabla Eventos de SQL → actualiza CSV → llama a GenerarDashboard. **Recupera TODO aunque el PC se apague.** |
 | `MoverArchivosOneDrive.ps1` | ❌ **NO** | Mueve archivos al OneDrive |
 | `ExportarLocker.ps1` | ❌ **NO** | Exporta datos de SQL a los EXPORT_*.txt |
 | `ConfigurarTareaOcultaVBS.ps1` | ❌ **NO** | Configura la tarea programada (ya está hecho, no volver a tocar) |
@@ -66,22 +66,28 @@ Para cambiar el dashboard (diseño, columnas, colores, datos mostrados) **solo s
 ## Ficheros autogenerados — NO tocar manualmente
 
 - **`HistorialCompleto.csv`** — Lo escribe `MonitoreoLockerTiempoReal.ps1` cada vez que detecta un movimiento en el locker. Es la fuente de datos del dashboard. **No modificar a mano.**
-- **`EstadoAnterior.json`** — Lo usa `MonitoreoLockerTiempoReal.ps1` para comparar el estado actual con el anterior y detectar cambios. **No modificar a mano.**
+- **`UltimoEventoProcesado.txt`** — Marcador con el timestamp del último evento de la tabla Eventos procesado. Lo usa v2.0 para saber dónde continuar. **No modificar a mano.**
+- **`EstadoAnterior.json`** — Lo usa `MonitoreoLockerTiempoReal.ps1` para comparar el estado actual con el anterior y detectar cambios (backward compatibility). **No modificar a mano.**
 - **`DashboardLocker.html`** — Lo genera `GenerarDashboard.ps1` automáticamente. **No modificar a mano.**
 - **`EXPORT_*.txt`** — Los genera `ExportarLocker.ps1` exportando desde SQL. Se ejecuta manualmente cuando hay que actualizar el mapa de códigos.
 
-## Data Flow
+## Data Flow (v2.0 - Activo desde 2026-04-21)
 
 ```
 SQL Server (Actum_GHI)
-  └─ Consigna JOIN Usuario JOIN Caja
-       └─ MonitoreoLockerTiempoReal.ps1  (every 1 min via Scheduled Task → VBS)
-            ├─ Compares FechaHoraUltimaApertura vs EstadoAnterior.json
-            ├─ On change → appends to HistorialCompleto.csv (delimiter: ;, UTF-8)
-            ├─ Saves new EstadoAnterior.json
+  └─ Tabla Eventos (Evento=10000 = usuario identificado)
+       └─ MonitoreoLockerTiempoReal.ps1 v2.0 (every 1 min via Scheduled Task → VBS)
+            ├─ Lee UltimoEventoProcesado.txt (marcador)
+            ├─ Query: SELECT * FROM Eventos WHERE Evento=10000 AND FechaHora > @marcador
+            ├─ State tracking: determina Extracción/Devolución por estado previo
+            ├─ Appends to HistorialCompleto.csv (delimiter: ;, UTF-8)
+            ├─ Actualiza UltimoEventoProcesado.txt
+            ├─ Health check: OneDrive corriendo?
             └─ SIEMPRE llama a: . "C:\ACTUM\GenerarDashboard.ps1"
-                 └─ Reads CSV + EXPORT_Cajas.txt → builds DashboardLocker.html → OneDrive sync
+                 └─ Reads CSV + SQL (Caja) → builds DashboardLocker.html → OneDrive sync
 ```
+
+**Ventaja v2.0:** CERO pérdida de datos. Aunque el PC se apague 24 horas, al volver a encender recupera TODOS los eventos de la tabla Eventos.
 
 ## State Mapping (ACTUM database values)
 
@@ -215,6 +221,60 @@ Características CONFIRMADAS funcionando en producción:
 | Auto-actualización desde ACTUM EPI Visor | ✅ | SQL directo cada minuto — sin EXPORT manual |
 | Compatible OneDrive web | ✅ | Sin JS, sin CDN externos |
 | Nº Consigna en una línea | ✅ | `white-space: nowrap` en `th` |
+
+---
+
+## MonitoreoLockerTiempoReal.ps1 v2.0 — Sistema basado en Eventos (2026-04-21)
+
+**Cambio arquitectónico mayor:** El script ahora usa la tabla `Eventos` de SQL como fuente de datos, en lugar de comparar estados. Esto garantiza **CERO pérdida de datos**.
+
+### Tabla Eventos (SQL)
+
+| Campo | Descripción |
+|---|---|
+| `Codigo` | GUID único del evento |
+| `FechaHora` | Timestamp exacto del evento |
+| `Evento` | Tipo: 3=puerta cierra, 4=puerta abre, **10000=usuario identificado** |
+| `Consigna_Codigo` | Número de consigna |
+| `Caja_Codigo` | Número de caja/instrumento |
+| `Usuario_Codigo` | Código del usuario (solo en Evento=10000) |
+| `Tratado` | Flag de procesado (no lo usamos) |
+
+**Total eventos:** 168.760 desde 26/10/2024 hasta la actualidad.
+
+### Cómo funciona v2.0
+
+1. **Lee `UltimoEventoProcesado.txt`** → timestamp del último evento procesado
+2. **Query SQL:** `SELECT * FROM Eventos WHERE Evento=10000 AND FechaHora > @ultimo`
+3. **State tracking:** Para cada evento, determina si es Extracción o Devolución según el estado previo de la consigna:
+   - Estado Ocupada (4) → acceso → Libre (2) = **Extracción**
+   - Estado Libre (2) → acceso → Ocupada (4) = **Devolución**
+4. **Añade al CSV** con el mismo formato que v1.0
+5. **Actualiza `UltimoEventoProcesado.txt`**
+
+### Ventajas vs v1.0
+
+| Característica | v1.0 (antiguo) | v2.0 (nuevo) |
+|---|---|---|
+| Fuente de datos | Comparar `FechaHoraUltimaApertura` | **Tabla Eventos** |
+| Pérdida de datos | Sí (si alguien saca+devuelve durante parada) | **No** |
+| Recuperación tras apagado | Solo estado final | **TODOS los eventos** |
+| Health check OneDrive | No | **Sí** |
+| Fallback si SQL falla | No | **Sí** (usa método v1.0) |
+
+### Fichero de marcador
+
+**`UltimoEventoProcesado.txt`** - Contiene el timestamp del último evento procesado (formato: `yyyy-MM-dd HH:mm:ss`)
+
+- En primera ejecución: lee última línea del CSV, resta 10 segundos (ventana de solapamiento)
+- En ejecuciones normales: solo procesa eventos nuevos desde el marcador
+- Se actualiza después de cada ejecución
+
+### Fallback automático
+
+Si la tabla `Eventos` no está disponible o la query falla, el script **automáticamente usa el método v1.0** (comparación de estados) como fallback. Esto garantiza que el sistema nunca se pare completamente.
+
+---
 
 ## DashboardAdmin.html — Panel Interno (creado 2026-02-26)
 
@@ -548,15 +608,23 @@ Get-ScheduledTask -TaskName "NombreTarea" | Select-Object TaskName, State
 | **Auto-actualización de instrumentos** | Lectura SQL directa cada minuto — sin EXPORT manual ni pasos intermedios |
 | **Compatibilidad OneDrive web** | HTML puro con CSS, sin JS, sin CDN externos — no puede romperse |
 | **Deduplicación historial** | Group-Object por fecha+usuario+consigna (sin Accion) — robusto ante cualquier encoding |
-| **Fallback a EXPORT_Cajas.txt** | Si SQL cae, el script usa automáticamente el fichero local |
+| **Tabla Eventos como fuente** | **v2.0**: Recupera TODOS los eventos aunque el PC se apague horas |
+| **Health check OneDrive** | **v2.0**: Auto-restart si el proceso se cae |
 
-### Las 3 dependencias reales del sistema:
+### Las dependencias del sistema (post v2.0):
 
 | Riesgo | Probabilidad | Impacto si falla | ¿Cubierto? |
 |---|---|---|---|
-| **SQL Server apagado** (GHI-TAQUILLAS\SQLEXPRESS) | Baja | Usa EXPORT_Cajas.txt automáticamente | ✅ Sí (fallback) |
-| **PC locker se apaga / cierra sesión** | Media | Las tareas programadas dejan de ejecutarse | ✅ RESUELTO 2026-02-24 (SYSTEM) |
-| **OneDrive sin conexión** | Baja | HTML se actualiza en local pero no en web | ❌ Depende de infraestructura |
+| **SQL Server apagado** (GHI-TAQUILLAS\SQLEXPRESS) | Baja | No se registran eventos nuevos | ⚠️ No hay solución técnica |
+| **PC locker se apaga / cierra sesión** | Media | **v2.0**: Recupera TODO al volver | ✅ **RESUELTO** |
+| **OneDrive sin conexión** | Baja | HTML se actualiza en local pero no en web | ⚠️ Requiere intervención manual |
+| **Expiración contraseña Windows** | Media (cada 50 días) | OneDrive pierde sesión | ⚠️ Requiere login manual (IT) |
+
+### v2.0: Sistema tolerante a fallos
+
+**Antes (v1.0):** Si el PC se apagaba y alguien sacó+devolvió un instrumento, esos movimientos se perdían (solo se veía el estado final).
+
+**Ahora (v2.0):** La tabla `Eventos` registra CADA apertura/cierre con timestamp. Aunque el PC esté apagado 3 días, al volver se recuperan los 3 días completos de eventos.
 
 ### ⚠️ PUNTO MÁS DÉBIL: Tareas programadas como Interactive
 
@@ -611,11 +679,11 @@ Con esto las tareas corren 24/7 como servicio del sistema, sin necesitar sesión
 
 ---
 
-## Resumen Final del Proyecto (estado a 2026-02-24)
+## Resumen Final del Proyecto (estado a 2026-04-21)
 
 El sistema de monitoreo del locker ACTUM está **completamente operativo y automatizado**:
 
-1. **`MonitoreoLockerTiempoReal.ps1`** (cada 1 min) → Lee SQL → Escribe CSV → Genera HTML
+1. **`MonitoreoLockerTiempoReal.ps1` v2.0** (cada 1 min) → Lee tabla Eventos → Escribe CSV → Genera HTML
 2. **`GenerarDashboard.ps1`** (cada 1 min, tarea de respaldo) → Lee SQL (Caja) + CSV → Genera HTML
 3. **`ActualizarExcel.ps1`** (cada 5 min) → Lee CSV → Actualiza Excel de instrumentos
 
@@ -625,16 +693,143 @@ El sistema de monitoreo del locker ACTUM está **completamente operativo y autom
 - ✅ Instrumentos nuevos o eliminados → aparecen en < 1 min
 - ✅ Tildes y caracteres especiales → siempre correctos
 - ✅ Estado del Excel de instrumentos → actualizado cada 5 min
+- ✅ **Recuperación tras apagado** → TODOS los eventos se recuperan al volver (v2.0)
 
-**Estado final confirmado (2026-02-25 — PRODUCCION):**
+**Estado final confirmado (2026-04-21 — PRODUCCION):**
 | Componente | Estado | Notas |
 |---|---|---|
-| MonitoreoLockerTiempoReal | ✅ Interactive (User) via VBS | Oculto, cada 1 min |
-| GenerarDashboardHTML | ✅ ACTIVA — Interactive (User) | Reactivada + cambiada de SYSTEM a User el 2026-03-03 |
+| MonitoreoLockerTiempoReal | ✅ v2.0 Interactive (User) via VBS | Oculto, cada 1 min, basado en tabla Eventos |
+| GenerarDashboardHTML | ✅ ACTIVA — Interactive (User) | Oculto, cada 1 min |
+| GenerarDashboardAdmin | ✅ Interactive (User) via VBS | Oculto, cada 1 min |
 | ActualizarExcel | ✅ SYSTEM | OK |
 | Auto-login PC locker | ✅ Configurado | AutoAdminLogon=1, User, sin contrasena |
 | Watchdog tarea | ✅ Configurado | Reinicia 3 veces si falla |
 | Tildes/Codigos | ✅ CORRECTO | M-001, C-002... OK. Tildes OK |
+| **Tabla Eventos** | ✅ **Activa** | 168.760 eventos desde oct 2024 |
+| **UltimoEventoProcesado.txt** | ✅ **Activo** | Marcador para tracking |
+
+---
+
+## Resumen de Sesión — 2026-04-21 (v2.0 Eventos + v2.1 Dedup + Refresh UX)
+
+### Cambio arquitectónico mayor implementado ✅
+
+**1. MonitoreoLockerTiempoReal.ps1 v2.0**
+- **Sistema basado en tabla Eventos** en lugar de comparación de estados
+- Query: `SELECT * FROM Eventos WHERE Evento IN (10000, 10001) AND FechaHora > @ultimo`
+- **CERO pérdida de datos:** recupera TODO aunque el PC se apague horas
+- **State tracking:** alternancia desde estado actual de SQL (fuente de verdad)
+- **Health check OneDrive:** auto-restart si el proceso se cae
+- **Fallback automático:** si Eventos falla, usa método v1.0
+
+**2. Archivo de marcador**
+- `UltimoEventoProcesado.txt` → timestamp del último evento procesado
+- En primera ejecución: lee CSV, resta 10 segundos (solapamiento)
+- Se actualiza tras cada ejecución
+
+**3. Backup de versión anterior**
+- `MonitoreoLockerTiempoReal_v1_BACKUP.ps1` guardado por si hay problemas
+
+**Primer despliegue exitoso:**
+- 39 eventos recuperados en primera ejecución
+- Dashboard funciona correctamente
+
+### v2.1 — Deduplicación por clusters (tarde 2026-04-21)
+
+**Problema detectado tras el primer despliegue v2.0:**
+- El CSV tenía pares Extracción+Devolución del mismo usuario a 5-15s (artefactos)
+- Faltaban consignas que estaban en uso según SQL (solo 8 aparecían en vez de 12)
+- Causa raíz: ACTUM emite **dos tipos de eventos por interacción**: tipo `10000` y tipo `10001`
+
+**Descubrimiento clave — Tipos de Evento en SQL:**
+
+| Evento | Total | Significado |
+|---|---|---|
+| 1 | 12.329 | ? |
+| 2 | 11.716 | ? |
+| 3 | 140.131 | Puerta cierra |
+| 4 | 2.317 | Puerta abre |
+| 1002 | 1.451 | ? |
+| 3001-3004 | ~385 | ? |
+| 3601-3602 | ~48 | ? |
+| 4001 | 15 | ? |
+| **10000** | **270** | **Identificación usuario (tipo A)** |
+| **10001** | **261** | **Identificación usuario (tipo B)** |
+
+**Ambos eventos 10000 y 10001 son identificaciones válidas.** ACTUM emite 1 de cada para la misma acción física (usuario se identifica, abre, cierra). Antes solo leíamos 10000 → perdíamos ~50% de eventos, en especial los de usuarios SAT.
+
+**Solución implementada:**
+1. Query actualizada a `Evento IN (10000, 10001)`
+2. Deduplicación por clusters:
+   - Cluster = eventos consecutivos con mismo Consigna + mismo Usuario + `<= 60s` de separación
+   - Regla: cluster → conservar solo 1 evento (el más antiguo)
+   - Alternancia desde estado actual de SQL asigna la acción correcta (Extracción/Devolución)
+
+**4. ReconstruirHistorial.ps1 (nuevo script, ejecutar UNA VEZ)**
+- Lee TODA la tabla Eventos (10000+10001) desde oct 2024
+- Aplica dedup por clusters
+- Procesa por consigna desde el estado actual de SQL hacia atrás (alternancia reversed)
+- Reescribe `HistorialCompleto.csv` desde cero con 473 movimientos limpios
+- Actualiza `UltimoEventoProcesado.txt`
+- Útil también en el futuro si se detectan anomalías
+
+**Resultado final del despliegue v2.1 (2026-04-21):**
+| Métrica | Antes | Ahora |
+|---|---|---|
+| Eventos CSV | ~270 (solo 10000) | **473** (10000+10001, deduplicado) |
+| Consignas en uso detectadas | 8 | **12** (coincide con SQL) |
+| Artefactos duplicados | Abundantes | 58 eliminados automáticamente |
+| Pérdida de datos | Si PC apagado | **Cero** |
+| Usuarios SAT registrados | No | **Sí** (eventos 10001) |
+
+### v2.1 UX — Dashboard Refresh + Tab persistente
+
+**Mejoras en GenerarDashboard.ps1:**
+
+**1. Refresh sincronizado al `:00`**
+- Antes: refresh a 60s desde carga (ej: 11:32:13, 11:33:13...)
+- Ahora: refresh al segundo 00 exacto (ej: 11:33:00, 11:34:00...)
+- Implementación: script JS inline calcula `(60 - segundos_actuales) * 1000 - ms` y programa `location.reload()`
+- Fallback: meta refresh `content="75"` (por si JS bloqueado en OneDrive web)
+
+**2. Pestaña persistente al refresh**
+- Antes: cualquier refresh volvía a "Estado Instrumentos" (default)
+- Ahora: persiste via hash URL (`#estado` / `#historial`)
+- Al cambiar tab → `history.replaceState` actualiza el hash
+- Al cargar → lee hash y marca el radio correspondiente
+
+**3. JS ubicado antes de `</body>`** — el script es inline, sin dependencias externas, sin onclick handlers (compatible con OneDrive web)
+
+### Estructura SQL confirmada en esta sesión (2026-04-21)
+
+**Tabla `Eventos`:**
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `Codigo` | uniqueidentifier | GUID |
+| `FechaHora` | datetime | Timestamp evento |
+| `Evento` | bigint | Tipo (ver tabla arriba) |
+| `ElectronicaCU_Codigo` | bigint | |
+| `ElectronicaCU_Rele` | bigint | |
+| `Consigna_Codigo` | bigint | FK a Consigna |
+| `Caja_Codigo` | bigint | FK a Caja |
+| `Herramienta_Codigo` | bigint | |
+| `Usuario_Codigo` | bigint | FK a Usuario (solo en 10000/10001) |
+| `Tratado` | bit | No se usa |
+
+**Tabla `Usuario` — usuarios SAT identificados (`AccesoConsignasRestringidas = True`):**
+- 8 IKER L. LASSO · 59 AITOR U. ULIBARRI · 60 JOSE G. G. GONZALEZ GONZALEZ · 62 IÑIGO A. ALONSO · otros
+
+### Reglas permanentes aprendidas
+
+1. **Filtro SQL correcto para identificaciones:** `Evento IN (10000, 10001)`, NO solo `10000`
+2. **Dedup por clusters** siempre que se procesen eventos nuevos (umbral `<= 60s`, mismo usuario + misma consigna)
+3. **Cluster → conservar 1 evento** (el más antiguo) + alternancia desde SQL
+4. **Estado actual SQL = fuente de verdad** para Disponible/En uso
+5. **El CSV histórico se puede reconstruir en cualquier momento** con `ReconstruirHistorial.ps1` — útil si se detectan anomalías
+
+### Tema pendiente (sesión futura)
+
+- **Contraseña Windows User del locker** — IT estudia si permitir `PasswordNeverExpires` para que OneDrive no pierda sesión cada 50 días. Prueba inicial con `wmic useraccount` se revirtió (espera decisión IT).
 
 ---
 
@@ -1005,9 +1200,229 @@ cd C:\ACTUM; .\GenerarDashboard.ps1
 
 ## ⚠️ CAUSA FRECUENTE DE FALLO: Cambio de contraseña OneDrive
 
-Si el dashboard deja de actualizarse en OneDrive web pero el archivo local SÍ está actualizado:
-1. El cliente OneDrive del locker ha perdido la sesión (cambio de contraseña de cuenta)
-2. Fix: en el locker, click en el icono OneDrive (bandeja sistema) → iniciar sesión con nueva contraseña
+Si el dashboard deja de actualizarse en OneDrive web pero el archivo local SÍ está actualizado (LastWriteTime reciente):
+
+**Diagnóstico confirmado:** archivos en OneDrive web muestran fecha antigua ("el martes a las 2:00") mientras el HTML local se genera cada minuto.
+
+**Fix — dos pasos:**
+1. Click en el icono OneDrive (bandeja sistema) → si pide credenciales, introducirlas
+2. **Si el icono muestra "azul girando" pero sigue sin sincronizar:** ir a **OneDrive → Configuración (engranaje) → pestaña Cuenta → re-introducir credenciales** explicitamente ahí
 3. En 1-2 minutos el sync se reanuda
 
+> ⚠️ El icono "azul girando" NO garantiza que la cuenta corporativa esté autenticada. OneDrive puede girar por otros motivos mientras la cuenta `fabricacion1@ghifurnaces.com` está desconectada. Verificar siempre en la pestaña Cuenta de Configuración.
+
 > ⚠️ Cada vez que se cambie la contraseña de `fabricacion1@ghifurnaces.com` (o la cuenta OneDrive del locker), hay que volver a autenticar OneDrive en el PC del locker.
+
+---
+
+## Resumen de Sesion — 2026-04-30 (Bug marcador formato fecha)
+
+### Problema: Sin movimientos registrados desde el 17/04/2026
+
+**Sintoma:** El CSV terminaba el 17/04/2026 07:48:14 (ALVARO T. TREPIANA). La tarea corria cada minuto (LastTaskResult=0) pero no registraba nada. `UltimoEventoProcesado.txt` no existia en `C:\ACTUM\` (buscamos en la ruta incorrecta).
+
+**Causa raiz — Bug de formato en `MonitoreoLockerTiempoReal.ps1`:**
+- Cuando el script procesaba movimientos nuevos, guardaba el marcador en formato `MM/dd/yyyy HH:mm:ss` (formato del CSV, ej: `04/17/2026 07:48:14`)
+- En la siguiente ejecucion, intentaba leerlo como `yyyy-MM-dd HH:mm:ss` → fallo de parseo
+- Caia al fallback: leia el CSV, calculaba el marcador desde la ultima linea (07:48:04), buscaba en SQL → el dedup cross-batch eliminaba ese evento (ya estaba en el CSV) → 0 movimientos nuevos
+- Sobreescribia el marcador con `(Get-Date)` → desde ese momento el marcador era "ahora"
+- En adelante: siempre buscaba desde "ahora", nunca encontraba eventos pasados
+
+**Nota:** El marcador real esta en `C:\Users\User\OneDrive...\LockerACTUM\UltimoEventoProcesado.txt`, NO en `C:\ACTUM\`. Error de diagnostico inicial al buscar en la ruta equivocada.
+
+**Fix aplicado en `MonitoreoLockerTiempoReal.ps1` (linea 385-387):**
+```powershell
+# ANTES (bug): guardaba en formato MM/dd/yyyy HH:mm:ss
+$ultimoTimestamp = ($nuevosMovimientos | Sort-Object FechaHoraApertura | Select-Object -Last 1).FechaHoraApertura
+[System.IO.File]::WriteAllText($archivoMarcador, $ultimoTimestamp, $utf8NoBOM)
+
+# DESPUES (correcto): siempre formato yyyy-MM-dd HH:mm:ss
+$ultimaFechaObj = [DateTime]::ParseExact(
+    ($nuevosMovimientos | Sort-Object FechaHoraApertura | Select-Object -Last 1).FechaHoraApertura,
+    'MM/dd/yyyy HH:mm:ss', $null)
+[System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+```
+
+**Recuperacion de eventos perdidos:**
+- Se ejecuto `ReconstruirHistorial.ps1` con la tarea pausada (`Disable-ScheduledTask`)
+- Resultado: 537 eventos SQL → 58 artefactos eliminados → 479 movimientos limpios (antes 473)
+- Marcador actualizado a `2026-04-30 09:45:23` en formato correcto
+- 12 consignas "En uso" recuperadas correctamente
+
+**Fix cosmético adicional en `GenerarDashboard.ps1`:**
+- El historial solo mostraba `Usuario` (ej: "ALVARO T.") sin apellidos
+- Fix: `$(("$($movimiento.Usuario) $($movimiento.Apellidos)").Trim())` → ahora muestra nombre completo (ej: "ALVARO T. TREPIANA")
+
+### Regla permanente aprendida:
+> **El marcador `UltimoEventoProcesado.txt` SIEMPRE debe estar en formato `yyyy-MM-dd HH:mm:ss`.**
+> Esta en `C:\Users\User\OneDrive...\LockerACTUM\`, NO en `C:\ACTUM\`.
+> Si el sistema deja de registrar movimientos y la tarea corre sin errores (LastTaskResult=0), comprobar el contenido y formato de ese archivo primero.
+
+---
+
+## Resumen de Sesion — 2026-05-14 (OneDrive sin sesion, sin perdida de datos)
+
+### Problema: Dashboard sin actualizar desde ~06/05/2026
+
+**Sintoma:** El dashboard no se actualizaba en OneDrive web. El HTML local SI se generaba (LastWriteTime 14/05/2026 09:02:16).
+
+**Causa raiz:** La cuenta OneDrive (`fabricacion1@ghifurnaces.com`) cambio de contrasena (~6 mayo). El proceso OneDrive.exe seguia corriendo (desde 09/05/2026 19:10:18) pero sin sesion autenticada → no sincronizaba nada.
+
+**Fix (paso 1):** Click en el icono de OneDrive en la bandeja del sistema → introducir nueva contraseña si aparece aviso.
+
+**Fix (paso 2 — si el paso 1 no basta):** OneDrive puede seguir sin sincronizar aunque el proceso corra y el icono muestre "azul girando". En ese caso hay que ir a **OneDrive → Configuración (engranaje) → pestaña Cuenta → re-introducir credenciales** explicitamente. Esto fue necesario en la segunda incidencia del 14/05.
+
+**Verificacion de datos:**
+- CSV terminaba en 05/06/2026 11:25:52 (ANGEL F. FERNANDEZ, consigna 13)
+- SQL: 0 eventos desde el 6/05 → nadie uso el locker en esos 8 dias
+- Marcador `UltimoEventoProcesado.txt`: `2026-05-14 09:11:06` (formato correcto)
+- **Sin perdida de datos** — las tareas programadas funcionaron correctamente durante toda la interrupcion
+
+**Lo que NO era el problema:**
+- Tareas programadas: OK (LastTaskResult=0, HTML generado cada minuto)
+- SQL Server: OK (0 eventos nuevos, pero conexion activa)
+- Marcador: formato correcto
+
+### Nota diagnostica — Sort-Object con fechas MM/dd/yyyy
+
+`Sort-Object FechaHoraApertura` sobre el CSV ordena **alfabeticamente**, no cronologicamente. "12/..." (diciembre) aparece despues de "05/..." (mayo), lo que puede confundir el diagnostico.
+
+**Para ver los ultimos movimientos reales usar:**
+```powershell
+# Opcion 1: tail del CSV (escrito en orden cronologico)
+Get-Content "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv" | Select-Object -Last 20
+
+# Opcion 2: filtrar por ano
+Import-Csv "...\HistorialCompleto.csv" -Delimiter ";" |
+    Where-Object { $_.FechaHoraApertura -like "*2026*" } |
+    Select-Object -Last 15 | Format-Table -AutoSize
+```
+
+### Estado del sistema (2026-05-14):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ Corriendo | Sin interrupcion durante el fallo de OneDrive |
+| OneDrive | ✅ Autenticado | Re-autenticado manualmente 14/05 |
+| CSV HistorialCompleto | ✅ Completo | Sin perdida de datos (locker no usado 06-14/05) |
+| Marcador UltimoEventoProcesado | ✅ Correcto | `2026-05-14 09:11:06` formato yyyy-MM-dd |
+
+---
+
+## Resumen de Sesion — 2026-05-20 (Investigacion alternativas a OneDrive)
+
+### Contexto
+
+IT confirma que la politica de cambio de contrasena de `fabricacion1@ghifurnaces.com` cada ~50 dias **no se puede modificar**. Se investigo si existe alguna alternativa al cliente OneDrive para sincronizar el dashboard.
+
+### Analisis de red del locker (GHI-TAQUILLAS)
+
+| Parametro | Valor |
+|---|---|
+| IP | 172.16.5.40 |
+| Mascara | 255.255.255.0 |
+| Gateway | 172.16.5.1 |
+| DNS | 8.8.8.8 / 8.8.4.4 (Google — NO corporativo) |
+| Acceso internet | ✅ SI (ping 8.8.8.8 OK, 7ms) |
+| Acceso servidor documental | ❌ NO |
+
+**Por que no llega al servidor documental:**
+- `\\srvdocumental\Ghihornos` → IP real: `192.168.210.250`
+- El locker esta en subred `172.16.5.x`, el servidor en `192.168.210.x` — subredes distintas sin routing entre ellas
+- El DNS del locker es Google (8.8.8.8), no el DNS corporativo → no resuelve nombres `.ghihornos.local`
+
+### Alternativas investigadas
+
+**1. Carpeta de red compartida (`\\srvdocumental\Ghihornos`)** — ❌ DESCARTADA
+- No accesible desde el locker (subredes distintas)
+
+**2. Azure Blob Storage** — ⏳ PENDIENTE (futura)
+- Viable tecnicamente: locker tiene internet, script usa `Invoke-RestMethod` (sin modulos extra)
+- SAS token con expiracion en 2030 — sin dependencia de contrasenas de usuario
+- URL permanente y publica
+- **Descartada por ahora:** GHI no tiene suscripcion Azure disponible
+- **Retomar cuando tengan Azure**
+
+**3. Microsoft Graph API con App Registration** — ⏳ PENDIENTE (futura)
+- Parte de M365 que GHI ya tiene (Azure AD / Microsoft Entra ID) — sin coste adicional
+- IT registra la app una vez (10 min). Autenticacion por certificado: **no caduca nunca**
+- Script sube HTML a SharePoint/OneDrive con ese certificado en vez de con fabricacion1
+- URL para usuarios queda exactamente igual
+- **Pendiente de evaluar con IT**
+
+**4. Servidor web en el propio locker (IIS)** — ⏳ PENDIENTE (futura)
+- Script deja HTML en `C:\inetpub\wwwroot\`, gente accede por `http://172.16.5.40/DashboardLocker.html`
+- Cero sincronizacion, cero cuentas que caduquen
+- **Bloqueante:** no se sabe si los PCs de oficina (192.168.x.x) pueden llegar a 172.16.5.40
+- **Pendiente de verificar conectividad**
+
+### Decision
+
+Se mantiene el sistema actual con OneDrive + fabricacion1. Cuando la contrasena caduca → re-autenticar manualmente en el locker (icono OneDrive → Configuracion → Cuenta).
+
+Las alternativas 2, 3 y 4 quedan documentadas para retomar en el futuro.
+
+---
+
+## Resumen de Sesion — 2026-05-20 (Bug marcador + Reconstruccion semanal automatica)
+
+### Problema: Movimiento no registrado en dashboard
+
+**Sintoma:** Un movimiento real (JOSE G. G. GONZALEZ devolvio consigna 03 a las 12:42:29) aparecia en la tabla SQL `Eventos` pero no en el CSV ni en el dashboard.
+
+**Causa raiz — Bug del marcador en `MonitoreoLockerTiempoReal.ps1`:**
+```powershell
+# ANTES (bug): cuando no habia eventos, se actualizaba a Get-Date
+} else {
+    [System.IO.File]::WriteAllText($archivoMarcador, (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+}
+```
+El marcador avanzaba cada minuto aunque no hubiera actividad. Cuando llego el evento a las 12:42:29, el marcador ya habia pasado esa hora → el evento quedo "en el pasado" y nunca fue procesado.
+
+**Fix aplicado en `MonitoreoLockerTiempoReal.ps1`:**
+- Si no hay eventos en SQL (`$eventosEnSQL = 0`): NO actualizar el marcador — se mantiene en el ultimo evento real
+- Si SQL encontro eventos pero el dedup los elimino todos (`$eventosEnSQL > 0` pero `$nuevosMovimientos = 0`): avanzar marcador al ultimo evento SQL para no reprocesarlos siempre
+
+**Bug secundario sin diagnosticar:**
+Durante la recuperacion (marcador reseteado a 12:42:00), el script encontro 1 evento pero produjo 0 movimientos — sin mensaje de error ni de dedup. Causa exacta desconocida. Ocurrio en 2 de 487 eventos totales (0.4%). No critico pero real.
+
+**Recuperacion de datos:**
+1. Evento manual añadido al CSV via PowerShell
+2. `ReconstruirHistorial.ps1` ejecutado → 487 movimientos limpios (2 mas que antes)
+3. Marcador actualizado a `2026-05-20 12:42:29` (formato correcto)
+
+### Tarea programada semanal: `ReconstruirCSVSemanal`
+
+Creada como seguro definitivo contra cualquier evento perdido:
+- **Cuando:** Cada lunes a las 05:00 AM
+- **Que hace:** Para MonitoreoLocker (75s) → ReconstruirHistorial → GenerarDashboard → reactiva MonitoreoLocker
+- **Archivos:**
+  - `C:\ACTUM\ReconstruirSemanal.ps1` — script principal
+  - `C:\ACTUM\EjecutarReconstruccionOculto.vbs` — wrapper invisible
+
+**Resultado:** Cualquier movimiento perdido durante la semana queda recuperado automaticamente el lunes. Sin intervencion manual.
+
+### Estado de tareas programadas (2026-05-20):
+| Tarea | Frecuencia | Estado |
+|---|---|---|
+| `MonitoreoLockerTiempoReal` | Cada 1 min | ✅ Ready |
+| `GenerarDashboardHTML` | Cada 1 min | ✅ Ready |
+| `GenerarDashboardAdmin` | Cada 1 min | ✅ Ready |
+| `ActualizarExcelLocker` | Cada 5 min | ✅ Ready |
+| `ReconstruirCSVSemanal` | **Lunes 05:00** | ✅ Ready (NextRun: 25/05/2026) |
+
+### Regla permanente: here-strings en PowerShell via TeamViewer/chat
+
+Al pegar comandos con here-string (`@'...'@`) desde el chat, la indentacion hace que `'@` no quede en columna 0 → PowerShell entra en modo de continuacion y el bloque no se ejecuta nunca.
+
+**Solucion:** Usar arrays en lugar de here-strings para crear contenido de archivos:
+```powershell
+# MAL: here-string (se rompe al pegar con indentacion)
+$content = @'
+linea1
+linea2
+'@
+
+# BIEN: array join (funciona siempre)
+$lines = 'linea1', 'linea2'
+$content = $lines -join "`r`n"
+```
