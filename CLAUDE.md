@@ -23,9 +23,15 @@ Automated monitoring system for the ACTUM EPI locker at GHI Hornos Industriales.
 
 ## Two Environments
 
-**Development** (this machine — `ialopez`):
-- Scripts live here: `c:\Users\ialopez\OneDrive - GHI HORNOS INDUSTRIALES S.L\Antigravity\GHI\`
+**Development** (machine `ialopez`):
+- Working folder: `C:\Users\ialopez\OneDrive - GHI HORNOS INDUSTRIALES S.L\TRABAJOS REALIZADOS\LOCKER INSTRUMENTACION\`
 - No SQL Server access — scripts cannot be run end-to-end locally
+- Server documental folder structure (handover package):
+  - `DESARROLLO LOCKER (lo necesario para poder desarrollar el sistema si hace falta)` — source code, scripts, CLAUDE.md
+  - `GITHUB REPOSITORIO` — link/reference to https://github.com/inigoalonsoo/LOCKER-.git
+  - `INFORMACION LOCKER (lo que hay que saber sobre el sistema)` — DOCUMENTACION_LOCKER.html
+  - `MANTENIMIENTO LOCKER (el unico mantenimiento manual que necesita)` — maintenance doc
+  - `DashboardLocker` / `DashboardAdmin` — Windows shortcuts (.url) to the live dashboards
 
 **Production** (locker machine — `GHI-TAQUILLAS`):
 - Scripts deployed to: `C:\ACTUM\`
