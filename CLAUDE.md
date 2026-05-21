@@ -1455,3 +1455,58 @@ linea2
 $lines = 'linea1', 'linea2'
 $content = $lines -join "`r`n"
 ```
+
+---
+
+## Resumen de Sesion — 2026-05-21 (Dedup 60s → 10s + Fix manual consigna 13)
+
+### Problema: Extraccion no registrada en consigna 13
+
+**Sintoma:** Consigna 13 (Analizador particulas / KLOTZ / AMF20707) mostraba "Disponible" en el dashboard pero el instrumento estaba fisicamente extraido por ANGEL F. FERNANDEZ.
+
+**Secuencia real confirmada:**
+
+| Hora | Accion | En CSV |
+|---|---|---|
+| 10:54:12 | ANGEL F. FERNANDEZ Extraccion | OK |
+| 11:19:54 | ANGEL F. FERNANDEZ Devolucion | OK |
+| 11:20:10 | ANGEL F. FERNANDEZ Extraccion | NO — perdida |
+
+**Diagnostico:**
+- SQL `Eventos`: ultimo evento consigna 13 = `05/21/2026 11:20:10`, Evento=10000, Usuario=26 (ANGEL F.)
+- Gap entre ultimo CSV (11:19:54) y evento SQL (11:20:10) = **16 segundos**
+- Con `$ventanaSeg = 60`: 16 < 60 → el dedup cross-batch descartaba el evento como duplicado
+
+**Causa raiz — ventana dedup demasiado amplia:**
+El dedup cross-batch agrupa como "artefacto" cualquier evento del mismo usuario + consigna dentro de `$ventanaSeg` segundos del ultimo evento en CSV. Un gap de 16 segundos era suficiente para descartarlo con ventana de 60s.
+
+**Fix aplicado — `MonitoreoLockerTiempoReal.ps1` linea 130:**
+```powershell
+# ANTES:
+$ventanaSeg = 60
+
+# AHORA:
+$ventanaSeg = 10
+```
+
+Con 10 segundos: los duplicados reales de ACTUM (pares 10000+10001, tipicamente < 2s) siguen eliminandose. Acciones reales con > 10s de separacion ya no se descartan. Fisicamente imposible abrir, sacar/devolver y cerrar un locker en menos de 10 segundos.
+
+**Bug secundario confirmado (2a ocurrencia — igual que 2026-05-20):**
+Con marcador reseteado a 11:20:09 y ventanaSeg=10, el evento de 11:20:10 paso el filtro dedup (sin mensaje [DEDUP]) pero `$nuevosMovimientos` quedo = 0 sin explicacion ni mensaje de error. Misma conducta que el bug documentado el 20/05. Causa exacta desconocida. Ocurrencia estimada < 1% de eventos.
+
+**Para investigar en el futuro:** anadir esta linea justo antes de `if ($nuevosMovimientos.Count -gt 0)` (~linea 370):
+```powershell
+Write-Host "DEBUG: filasLimpias=$($filasLimpias.Count) nuevosMov=$($nuevosMovimientos.Count)" -ForegroundColor Magenta
+```
+
+**Fix manual del CSV (ejecutado en el locker):**
+```powershell
+$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+$linea = "05/21/2026 11:20:10;ANGEL F.;FERNANDEZ;13;Analizador part$([char]237)culas / KLOTZ / AMF20707;Extracci$([char]243)n;Cerrada"
+[System.IO.File]::AppendAllText("C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv", "$linea`r`n", $utf8NoBOM)
+[System.IO.File]::WriteAllText("C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\UltimoEventoProcesado.txt", "2026-05-21 11:20:10", $utf8NoBOM)
+```
+
+**Resultado:** Dashboard regenerado con 494 movimientos. Consigna 13 muestra "En uso por ANGEL F. FERNANDEZ".
+
+**Nota:** El `ReconstruirCSVSemanal` del lunes 25/05/2026 a las 05:00 recuperara automaticamente cualquier evento perdido esta semana.
