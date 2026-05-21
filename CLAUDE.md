@@ -1,4 +1,19 @@
-# CLAUDE.md
+# CLAUDE.md — Sistema Locker Instrumentacion GHI
+
+> **START HERE — Para el desarrollador que retoma este proyecto**
+>
+> Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
+>
+> **Estado a 2026-05-21:** Sistema completamente funcional en produccion. 487+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS.
+>
+> **Las tres cosas mas importantes:**
+> 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
+> 2. No hay acceso directo por red al locker. El unico camino para desplegar es: copiar el script → enviarlo al PC del locker → pegarlo en Notepad via TeamViewer → guardar en `C:\ACTUM\`.
+> 3. Nunca modificar manualmente `HistorialCompleto.csv`, `UltimoEventoProcesado.txt` ni `EstadoAnterior.json`.
+>
+> **Pendiente prioritario:** El usuario mostrado en "En uso por X" puede diferir del asignado en ACTUM cuando la asignacion se hace desde el software sin abrir el locker fisicamente. Solucion: leer `Consigna.Usuario_Codigo` directamente en `GenerarDashboard.ps1` para la pestana Estado.
+
+---
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 

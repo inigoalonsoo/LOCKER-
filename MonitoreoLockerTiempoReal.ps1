@@ -127,7 +127,7 @@ ORDER BY E.FechaHora
         # Cluster par  -> descartar todo (identificacion doble sin accion neta)
         # Cluster impar-> conservar solo el primero (1 interaccion real)
         # =============================================
-        $ventanaSeg = 60
+        $ventanaSeg = 10
 
         # Incluir tambien el ultimo evento del CSV por consigna para dedup cross-batch
         $ultimoEventoPrevio = @{}
