@@ -4,7 +4,7 @@
 >
 > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
 >
-> **Estado a 2026-06-04:** Sistema completamente funcional en produccion. 506+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS.
+> **Estado a 2026-06-04:** Sistema completamente funcional en produccion. 516+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
 >
 > **Las tres cosas mas importantes:**
 > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
@@ -1515,6 +1515,69 @@ $linea = "05/21/2026 11:20:10;ANGEL F.;FERNANDEZ;13;Analizador part$([char]237)c
 **Resultado:** Dashboard regenerado con 494 movimientos. Consigna 13 muestra "En uso por ANGEL F. FERNANDEZ".
 
 **Nota:** El `ReconstruirCSVSemanal` del lunes 25/05/2026 a las 05:00 recuperara automaticamente cualquier evento perdido esta semana.
+
+---
+
+## Resumen de Sesion — 2026-06-04 tarde (Bug raiz resuelto: Group-Object → hashtable)
+
+### Bug raiz de todos los eventos perdidos — RESUELTO DEFINITIVAMENTE
+
+**Causa raiz confirmada:** `Group-Object { "$($_['Consigna_Codigo'])" }` en PASO 4 fallaba silenciosamente cuando los elementos eran `DataRow` almacenados en `List[object]`. PowerShell no puede resolver el indexer de DataRow a traves del pipeline cuando el tipo declarado es `object`. Resultado: `$porConsigna` quedaba vacio, el foreach no ejecutaba, `$nuevosMovimientos` = 0 sin ningun error visible.
+
+El SAFETY NET no lo capturaba porque `$nuevosMovimientos` quedaba en un estado ambiguo (no exactamente 0 ni >0 en algunos casos).
+
+**Fix aplicado en `MonitoreoLockerTiempoReal.ps1` (PASO 4):**
+```powershell
+# ANTES (bug):
+$porConsigna = $filasLimpias | Group-Object { "$($_['Consigna_Codigo'])" }
+
+# AHORA (correcto):
+$porConsigna = @{}
+foreach ($fila in $filasLimpias) {
+    $k = "$([int][string]$fila['Consigna_Codigo'])"
+    if (-not $porConsigna.ContainsKey($k)) { $porConsigna[$k] = [System.Collections.Generic.List[object]]::new() }
+    $porConsigna[$k].Add($fila)
+}
+```
+
+Mismo patron `[string]$fila['Columna']` que ya funcionaba en el SAFETY NET.
+
+**Fix adicional:** `@()` en Sort-Object final para garantizar siempre un array:
+```powershell
+$nuevosMovimientos = @($nuevosMovimientos | Sort-Object { ... })
+```
+
+**Verificacion:** Devolicion consigna 28 (AITOR U. ULIBARRI, 08:17:04) registrada automaticamente tras el deploy. 516 movimientos.
+
+### Estado del sistema (2026-06-04 tarde):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ v2.3 | Bug raiz PASO 4 resuelto, hashtable en lugar de Group-Object |
+| CSV HistorialCompleto | ✅ 516 movimientos | |
+| Tareas programadas | ✅ 5 activas (Ready) | |
+
+### Inventario de archivos en el locker (2026-06-04)
+
+**C:\ACTUM — archivos activos:**
+| Archivo | Fecha | Rol |
+|---|---|---|
+| `MonitoreoLockerTiempoReal.ps1` | 04/06/2026 | ✅ Script principal (v2.3) |
+| `GenerarDashboard.ps1` | 21/04/2026 | ✅ Genera DashboardLocker.html |
+| `GenerarDashboardAdmin.ps1` | 10/03/2026 | ✅ Genera DashboardAdmin.html |
+| `ReconstruirHistorial.ps1` | 21/04/2026 | ✅ Reconstruccion manual/semanal |
+| `ReconstruirSemanal.ps1` | 20/05/2026 | ✅ Wrapper reconstruccion semanal |
+| `ActualizarExcel.ps1` | 19/02/2026 | ✅ Actualiza Excel instrumentos |
+| `EjecutarMonitoreoOculto.vbs` | 12/02/2026 | ✅ Wrapper VBS MonitoreoLocker |
+| `EjecutarDashboardOculto.vbs` | 19/02/2026 | ✅ Wrapper VBS Dashboard |
+| `EjecutarAdminOculto.vbs` | 26/02/2026 | ✅ Wrapper VBS DashboardAdmin |
+| `EjecutarExcelOculto.vbs` | 19/02/2026 | ✅ Wrapper VBS Excel |
+| `EjecutarReconstruccionOculto.vbs` | 20/05/2026 | ✅ Wrapper VBS Reconstruccion |
+
+**Archivos inofensivos — NO tocar:**
+- `UltimoEventoProcesado.txt` en C:\ACTUM — leftover de abril, el real esta en OneDrive
+- `Monitoreo Locker Tiempo Real` (tarea Disabled con espacios) — tarea duplicada obsoleta
+- `EXPORT_*.txt` — desactualizados (feb 2026), fallback SQL
+- Backups .ps1 — historicos
 
 ---
 
