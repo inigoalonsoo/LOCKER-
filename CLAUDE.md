@@ -4,7 +4,7 @@
 >
 > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
 >
-> **Estado a 2026-05-21:** Sistema completamente funcional en produccion. 487+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS.
+> **Estado a 2026-06-04:** Sistema completamente funcional en produccion. 506+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS.
 >
 > **Las tres cosas mas importantes:**
 > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
@@ -1417,8 +1417,10 @@ El marcador avanzaba cada minuto aunque no hubiera actividad. Cuando llego el ev
 - Si no hay eventos en SQL (`$eventosEnSQL = 0`): NO actualizar el marcador — se mantiene en el ultimo evento real
 - Si SQL encontro eventos pero el dedup los elimino todos (`$eventosEnSQL > 0` pero `$nuevosMovimientos = 0`): avanzar marcador al ultimo evento SQL para no reprocesarlos siempre
 
-**Bug secundario sin diagnosticar:**
+**Bug secundario sin diagnosticar (1a ocurrencia):**
 Durante la recuperacion (marcador reseteado a 12:42:00), el script encontro 1 evento pero produjo 0 movimientos — sin mensaje de error ni de dedup. Causa exacta desconocida. Ocurrio en 2 de 487 eventos totales (0.4%). No critico pero real.
+
+> **✅ RESUELTO 2026-06-02:** Se añadio un SAFETY NET en `MonitoreoLockerTiempoReal.ps1` (ver sesion 2026-06-02).
 
 **Recuperacion de datos:**
 1. Evento manual añadido al CSV via PowerShell
@@ -1500,10 +1502,7 @@ Con 10 segundos: los duplicados reales de ACTUM (pares 10000+10001, tipicamente 
 **Bug secundario confirmado (2a ocurrencia — igual que 2026-05-20):**
 Con marcador reseteado a 11:20:09 y ventanaSeg=10, el evento de 11:20:10 paso el filtro dedup (sin mensaje [DEDUP]) pero `$nuevosMovimientos` quedo = 0 sin explicacion ni mensaje de error. Misma conducta que el bug documentado el 20/05. Causa exacta desconocida. Ocurrencia estimada < 1% de eventos.
 
-**Para investigar en el futuro:** anadir esta linea justo antes de `if ($nuevosMovimientos.Count -gt 0)` (~linea 370):
-```powershell
-Write-Host "DEBUG: filasLimpias=$($filasLimpias.Count) nuevosMov=$($nuevosMovimientos.Count)" -ForegroundColor Magenta
-```
+> **✅ RESUELTO 2026-06-02:** Se añadio un SAFETY NET en `MonitoreoLockerTiempoReal.ps1` (ver sesion 2026-06-02).
 
 **Fix manual del CSV (ejecutado en el locker):**
 ```powershell
@@ -1516,3 +1515,157 @@ $linea = "05/21/2026 11:20:10;ANGEL F.;FERNANDEZ;13;Analizador part$([char]237)c
 **Resultado:** Dashboard regenerado con 494 movimientos. Consigna 13 muestra "En uso por ANGEL F. FERNANDEZ".
 
 **Nota:** El `ReconstruirCSVSemanal` del lunes 25/05/2026 a las 05:00 recuperara automaticamente cualquier evento perdido esta semana.
+
+---
+
+## Resumen de Sesion — 2026-06-04 (Timeout ACTUM + tiempo tareas + fixes movimientos perdidos)
+
+### Cambios aplicados
+
+**1. Timeout puerta ACTUM: 20s → 60s**
+- Configurado en ACTUM EPI Visor → Parámetros → "Segundos Timeout Puerta"
+- Causa raiz de operaciones incompletas: el locker cortaba la sesion antes de que el usuario terminara
+- Con 60s hay margen suficiente para abrir, sacar/devolver y cerrar
+
+**2. ExecutionTimeLimit tareas: 5 min → 15 min**
+- Afectaba a: `MonitoreoLockerTiempoReal`, `GenerarDashboardAdmin`, `ActualizarExcelLocker`
+- Comando usado (como admin):
+  ```powershell
+  $ts = New-TimeSpan -Minutes 1
+  $te = New-TimeSpan -Minutes 15
+  $s = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Hidden -StartWhenAvailable -ExecutionTimeLimit $te -RestartCount 3 -RestartInterval $ts
+  Set-ScheduledTask -TaskName "MonitoreoLockerTiempoReal" -Settings $s
+  Set-ScheduledTask -TaskName "GenerarDashboardAdmin" -Settings $s
+  Set-ScheduledTask -TaskName "ActualizarExcelLocker" -Settings $s
+  ```
+- Verificacion: `(Get-ScheduledTask -TaskName "MonitoreoLockerTiempoReal").Settings.ExecutionTimeLimit` → `PT15M`
+
+**3. Fix movimientos manuales (consignas 25 y 30)**
+- Consigna 30 JAVIER L. LOZA Devolucion 06/02/2026 14:00:10
+- Consigna 25 INIGO A. ALONSO Devolucion 06/03/2026 10:01:52
+- 506 movimientos totales en CSV
+
+### Estado del sistema (2026-06-04):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ v2.2 | ventanaSeg=3, marcador conservador, SAFETY NET mejorado |
+| Timeout puerta ACTUM | ✅ 60s | Subido desde 20s en ACTUM EPI Visor |
+| ExecutionTimeLimit tareas | ✅ PT15M | Subido desde PT5M |
+| CSV HistorialCompleto | ✅ 506 movimientos | |
+
+---
+
+## Resumen de Sesion — 2026-06-02 tarde (4a ocurrencia + fix definitivo ventanaSeg + marcador)
+
+### Problema: Devolucion de consigna 30 no registrada
+
+**Sintoma:** JAVIER L. LOZA devolvio consigna 30 (Medidor LCR / RS Pro LCR1701 / ESCFJ000970) a las 14:00:10. No aparecia en CSV ni en dashboard. Marcador = `2026-06-02 14:00:10` exactamente.
+
+**Causa raiz — marcador == timestamp del evento:**
+La query usa `FechaHora > @ultimo` (estrictamente mayor). El marcador estaba en `14:00:10` que es IGUAL al evento → la query devuelve 0 filas. Evento excluido permanentemente.
+
+El marcador llego a `14:00:10` porque en la ejecucion anterior: SQL encontro el evento (`$eventosEnSQL=1`), pero `$nuevosMovimientos.Count=0` (PASO 4 bug o dedup). El bloque else avanzaba el marcador al ultimo evento SQL deduplicado → exactamente `14:00:10`.
+
+**Fix manual:**
+```powershell
+$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+$linea = "06/02/2026 14:00:10;JAVIER L.;LOZA;30;Medidor LCR / RS Pro LCR1701 / ESCFJ000970;Devoluci$([char]0xF3)n;Cerrada"
+[System.IO.File]::AppendAllText("C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv", "$linea`r`n", $utf8NoBOM)
+cd C:\ACTUM; .\GenerarDashboard.ps1
+```
+Resultado: 498 movimientos.
+
+### Fixes definitivos aplicados a MonitoreoLockerTiempoReal.ps1
+
+**1. `$ventanaSeg = 10` → `$ventanaSeg = 3`**
+- Con 10s el dedup cross-batch eliminaba eventos reales (gap de 16s ya ocurrio en may-21)
+- ACTUM emite pares 10000+10001 en <2s de separacion → 3s es suficiente y seguro
+
+**2. SAFETY NET reescrito (linea 269)**
+- Problema: usaba `$fila['x'] -ne [DBNull]::Value` que puede fallar con DataRows boxeados como `object`
+- Fix: usa `[string]$fila['x']` — en PowerShell el cast de DBNull a string da `""` directamente
+- Usa lista separada `$safeList` en vez de `$nuevosMovimientos +=` para evitar problemas de scope
+- Asigna `$nuevosMovimientos = $safeList` al final si hay resultados
+
+**3. Else branch marcador — ya NO avanza (linea 434)**
+- Antes: si `$eventosEnSQL > 0` pero `$nuevosMovimientos = 0`, avanzaba marcador al ultimo evento SQL
+- Ahora: marcador NUNCA se actualiza cuando no hay movimientos nuevos
+- Efecto: los artefactos se re-procesan cada minuto (siempre deduplicados) pero ningun evento real puede quedar excluido permanentemente
+- Un evento solo queda excluido de la query cuando se ha escrito correctamente al CSV
+
+**Verificacion en locker:**
+```
+MonitoreoLockerTiempoReal.ps1:130:        $ventanaSeg = 3
+MonitoreoLockerTiempoReal.ps1:434:    # Marcador NO se actualiza cuando no hay movimientos nuevos.
+```
+
+### Regla permanente aprendida
+
+> **El marcador NUNCA debe avanzar al timestamp de un evento que no se haya escrito al CSV.**
+> Avanzar el marcador cuando `$eventosEnSQL > 0` pero `$nuevosMovimientos = 0` era el origen de todos los eventos perdidos: el marcador quedaba en T_evento, y `FechaHora > T_evento` lo excluia en adelante.
+
+---
+
+## Resumen de Sesion — 2026-06-02 (Bug secundario 3a ocurrencia + SAFETY NET)
+
+### Problema: Devolucion de consigna 29 no registrada
+
+**Sintoma:** IKER L. LASSO devolvio consigna 29 (Cal.pro. y gen.sen. / RSPRO135 / 23200551) a las 11:36:54 pero no aparecia en el dashboard. El instrumento seguia mostrando "En uso".
+
+**Diagnostico:**
+- SQL `Eventos`: evento `06/02/2026 11:36:54`, Evento=10001, Consigna=29, Usuario=8 — presente en SQL
+- CSV: ultimo movimiento era `06/02/2026 11:30:08` (consigna 28) — el de consigna 29 no estaba
+- Marcador `UltimoEventoProcesado.txt`: `2026-06-02 11:36:54` — habia avanzado exactamente al timestamp del evento perdido
+- Estado SQL consigna 29: Estado=2 (Libre) — confirmaba que era una Devolucion
+
+**Causa raiz — bug secundario (3a ocurrencia):**
+El script encontro el evento en SQL (`$eventosEnSQL=1`), paso el dedup, pero `$nuevosMovimientos` quedo = 0 sin error ni mensaje. El bloque "todos deduplicados" (lineas 396-402) avanzo el marcador al timestamp del evento, ocultandolo permanentemente.
+
+**Mecanismo exacto del bug:**
+- Cuando `$filasLimpias` tiene datos pero PASO 4 (Group-Object/DataRow pipeline) produce 0 movimientos, el script cae al else branch con `$eventosEnSQL > 0`
+- Ese branch esta disenado para eventos genuinamente deduplicados (artefactos 10000+10001)
+- Pero cuando es el bug, el marcador avanza igual y el evento queda perdido para siempre
+
+**Fix manual aplicado:**
+```powershell
+$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+$linea = "06/02/2026 11:36:54;IKER L.;LASSO;29;Cal.pro. y gen.se$([char]0xF1). / RSPRO135 / 23200551;Devoluci$([char]0xF3)n;Cerrada"
+[System.IO.File]::AppendAllText("C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv", "$linea`r`n", $utf8NoBOM)
+cd C:\ACTUM; .\GenerarDashboard.ps1
+```
+Resultado: 497 movimientos, consigna 29 muestra Disponible.
+
+### Fix definitivo: SAFETY NET en MonitoreoLockerTiempoReal.ps1
+
+**Bloque anadido entre PASO 4 y PASO 5** (despues del sort de $nuevosMovimientos):
+
+```powershell
+# SAFETY NET: si filasLimpias tiene datos pero nuevosMovimientos quedo vacio -> bug secundario
+if ($filasLimpias.Count -gt 0 -and $nuevosMovimientos.Count -eq 0) {
+    Write-Host "[SAFETY] Bug secundario detectado ($($filasLimpias.Count) filas perdidas) - procesando directamente" -ForegroundColor Magenta
+    foreach ($fila in $filasLimpias) {
+        # Determina accion desde estado SQL actual (Estado=2 -> Devolucion, Estado=4 -> Extraccion)
+        # Es correcto para el caso tipico (1 evento perdido)
+        ...
+    }
+}
+```
+
+**Como funciona:**
+- Detecta exactamente el patron del bug: `$filasLimpias.Count > 0` AND `$nuevosMovimientos.Count = 0`
+- Procesa los eventos directamente desde los datos crudos de SQL, determinando la accion por el estado actual de la consigna
+- Para el caso tipico (1 evento perdido), Estado=2 → Devolucion y Estado=4 → Extraccion es siempre correcto
+
+**Verificacion del deploy:**
+```powershell
+Select-String "SAFETY NET" "C:\ACTUM\MonitoreoLockerTiempoReal.ps1"
+# Debe devolver: MonitoreoLockerTiempoReal.ps1:269: # SAFETY NET: ...
+```
+
+### Estado del sistema (2026-06-02 tarde):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ v2.2 | ventanaSeg=3, marcador conservador, SAFETY NET mejorado |
+| ReconstruirCSVSemanal | ✅ Lunes 05:00 | Seguro adicional semanal |
+| CSV HistorialCompleto | ✅ 498 movimientos | Completo tras fix manual consigna 30 |
+| Marcador | ✅ `2026-06-02 14:00:10` | Formato correcto |

@@ -127,7 +127,7 @@ ORDER BY E.FechaHora
         # Cluster par  -> descartar todo (identificacion doble sin accion neta)
         # Cluster impar-> conservar solo el primero (1 interaccion real)
         # =============================================
-        $ventanaSeg = 10
+        $ventanaSeg = 3
 
         # Incluir tambien el ultimo evento del CSV por consigna para dedup cross-batch
         $ultimoEventoPrevio = @{}
@@ -266,6 +266,45 @@ ORDER BY E.FechaHora
             }
         }
 
+        # SAFETY NET: si filasLimpias tiene datos pero nuevosMovimientos quedo vacio -> bug en PASO 4
+        # Usa [string] para castear columnas y evitar problemas con DBNull o tipos de DataRow
+        if ($filasLimpias.Count -gt 0 -and $nuevosMovimientos.Count -eq 0) {
+            Write-Host "[SAFETY] Bug PASO4 - $($filasLimpias.Count) filas sin procesar - recuperando" -ForegroundColor Magenta
+            $safeList = @()
+            foreach ($fila in $filasLimpias) {
+                try {
+                    $sCodStr  = [string]$fila['Consigna_Codigo']
+                    $sCod     = if ($sCodStr -ne '') { [int]$sCodStr } else { 0 }
+                    $sKey     = "$sCod"
+                    $sEst     = if ($estadoFinalSQL.ContainsKey($sKey)) { $estadoFinalSQL[$sKey] } else { 4 }
+                    $sAcc     = if ($sEst -eq 2) { "Devoluci$([char]243)n" } else { "Extracci$([char]243)n" }
+                    $sFechStr = [string]$fila['FechaHora']
+                    $sFech    = [DateTime]::Parse($sFechStr)
+                    $sNom     = [string]$fila['Nombre']
+                    $sApel    = [string]$fila['Apellidos']
+                    $sCons    = [string]$fila['Consigna']
+                    if (-not $sCons) { $sCons = $sKey }
+                    $sDesc    = [string]$fila['CajaDescripcion']
+                    $safeList += [PSCustomObject]@{
+                        FechaHoraApertura = $sFech.ToString('MM/dd/yyyy HH:mm:ss')
+                        Usuario           = $sNom
+                        Apellidos         = $sApel
+                        Consigna          = $sCons
+                        Descripcion       = $sDesc
+                        Accion            = $sAcc
+                        EstadoPuerta      = "Cerrada"
+                    }
+                    Write-Host "[SAFETY] OK: consigna $sCons $sNom $sApel - $sAcc" -ForegroundColor Green
+                } catch {
+                    Write-Host "[SAFETY] ERROR en fila: $_" -ForegroundColor Red
+                }
+            }
+            if ($safeList.Count -gt 0) {
+                $nuevosMovimientos = $safeList
+                Write-Host "[SAFETY] $($safeList.Count) movimientos recuperados" -ForegroundColor Green
+            }
+        }
+
         # Ordenar cronologicamente ascendente antes de escribir
         $nuevosMovimientos = $nuevosMovimientos | Sort-Object { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) }
     }
@@ -392,17 +431,13 @@ if ($nuevosMovimientos.Count -gt 0) {
 
 } else {
     Write-Host "[CSV] No hay nuevos movimientos" -ForegroundColor Yellow
-    $utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+    # Marcador NO se actualiza cuando no hay movimientos nuevos.
+    # Razon: avanzar el marcador cuando los eventos fueron deduplicados puede saltar
+    # por encima de un evento real si el dedup o PASO4 falla silenciosamente.
+    # Los artefactos se reprocessaran en la siguiente ejecucion y seran deduplicados de nuevo.
     if ($eventosEnSQL -gt 0) {
-        # Habia eventos en SQL pero todos deduplicados -> avanzar marcador al ultimo evento SQL
-        # (evita reprocessar los mismos artefactos en cada ejecucion)
-        $ultimaFilaSQL = $dataTable.Rows | Sort-Object { [DateTime]$_['FechaHora'] } | Select-Object -Last 1
-        $ultimaFechaSQL = [DateTime]$ultimaFilaSQL['FechaHora']
-        [System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaSQL.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
-        Write-Host "[MARCADOR] Avanzado a ultimo evento SQL deduplicado: $($ultimaFechaSQL.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor DarkYellow
+        Write-Host "[MARCADOR] $eventosEnSQL evento(s) deduplicado(s) - marcador sin cambios" -ForegroundColor DarkYellow
     }
-    # Si no habia eventos en SQL (eventosEnSQL=0): NO tocar el marcador
-    # Mantenerlo en el ultimo evento real evita que salte por delante de futuros eventos
 }
 
 # =============================================
