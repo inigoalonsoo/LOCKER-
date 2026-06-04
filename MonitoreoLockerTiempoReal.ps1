@@ -225,11 +225,17 @@ ORDER BY E.FechaHora
             Write-Host "[ESTADO] Error consultando Consigna.Estado: $_" -ForegroundColor Yellow
         }
 
-        # Agrupar filas limpias por consigna
-        $porConsigna = $filasLimpias | Group-Object { "$($_['Consigna_Codigo'])" }
+        # Agrupar filas limpias por consigna usando hashtable (evita Group-Object en pipeline con DataRows)
+        $porConsigna = @{}
+        foreach ($fila in $filasLimpias) {
+            $k = "$([int][string]$fila['Consigna_Codigo'])"
+            if (-not $porConsigna.ContainsKey($k)) {
+                $porConsigna[$k] = [System.Collections.Generic.List[object]]::new()
+            }
+            $porConsigna[$k].Add($fila)
+        }
 
-        foreach ($grupo in $porConsigna) {
-            $cKey = $grupo.Name
+        foreach ($cKey in $porConsigna.Keys) {
             # Estado actual de la consigna (default: 4)
             $estadoSiguiente = 4
             if ($estadoFinalSQL.ContainsKey($cKey)) {
@@ -237,7 +243,7 @@ ORDER BY E.FechaHora
             }
 
             # Ordenar eventos de esta consigna DESC (mas reciente primero)
-            $eventosConsigna = $grupo.Group | Sort-Object @{Expression={[DateTime]$_['FechaHora']}; Descending=$true}
+            $eventosConsigna = $porConsigna[$cKey] | Sort-Object @{Expression={[DateTime][string]$_['FechaHora']}; Descending=$true}
 
             foreach ($row in $eventosConsigna) {
                 if ($estadoSiguiente -eq 4) {
@@ -248,11 +254,12 @@ ORDER BY E.FechaHora
                     $estadoSiguiente = 4
                 }
 
-                $fechaHora = [DateTime]$row['FechaHora']
-                $nombre = if ($row['Nombre']    -ne [DBNull]::Value) { "$($row['Nombre'])" }    else { "" }
-                $apellidos = if ($row['Apellidos'] -ne [DBNull]::Value) { "$($row['Apellidos'])" } else { "" }
-                $consigna = if ($row['Consigna'] -ne [DBNull]::Value) { "$($row['Consigna'])" } else { "$($row['Consigna_Codigo'])" }
-                $descripcion = if ($row['CajaDescripcion'] -ne [DBNull]::Value) { "$($row['CajaDescripcion'])" } else { "" }
+                $fechaHora = [DateTime][string]$row['FechaHora']
+                $nombre    = [string]$row['Nombre']
+                $apellidos = [string]$row['Apellidos']
+                $consigna  = [string]$row['Consigna']
+                if (-not $consigna) { $consigna = $cKey }
+                $descripcion = [string]$row['CajaDescripcion']
 
                 $nuevosMovimientos += [PSCustomObject]@{
                     FechaHoraApertura = $fechaHora.ToString('MM/dd/yyyy HH:mm:ss')
@@ -306,7 +313,8 @@ ORDER BY E.FechaHora
         }
 
         # Ordenar cronologicamente ascendente antes de escribir
-        $nuevosMovimientos = $nuevosMovimientos | Sort-Object { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) }
+        # @() garantiza que siempre sea un array aunque Sort-Object devuelva un escalar
+        $nuevosMovimientos = @($nuevosMovimientos | Sort-Object { [DateTime]::ParseExact($_.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) })
     }
 
     $connection.Close()
