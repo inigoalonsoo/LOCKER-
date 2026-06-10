@@ -1234,6 +1234,28 @@ Si el dashboard deja de actualizarse en OneDrive web pero el archivo local SÍ e
 
 > ⚠️ Cada vez que se cambie la contraseña de `fabricacion1@ghifurnaces.com` (o la cuenta OneDrive del locker), hay que volver a autenticar OneDrive en el PC del locker.
 
+### ⚠️ Estado "Buscando cambios..." atascado tras re-autenticacion
+
+**Sintoma:** Tras introducir la nueva contrasena en OneDrive, el icono queda en "Buscando cambios..." durante mas de 10 minutos y no sube nada al cloud. El explorador de archivos muestra los archivos actualizados localmente pero OneDrive web sigue mostrando la version antigua.
+
+**Causa:** OneDrive se queda colgado en el proceso de reconexion tras el cambio de credenciales.
+
+**Fix — SIN necesidad de PowerShell ni IA (para el compañero en verano):**
+1. Conectarse al locker via TeamViewer
+2. Click derecho en el icono de OneDrive en la bandeja del sistema (esquina inferior derecha)
+3. **Cerrar OneDrive**
+4. Buscar "OneDrive" en el menu inicio y ejecutarlo
+5. Esperar 2 minutos → el dashboard web se actualiza solo
+
+### Plan verano 2026
+
+- Contraseña de `fabricacion1@ghifurnaces.com` cambiada el **10/06/2026**
+- Proxima caducidad: **~22/07/2026** (42 dias)
+- OneDrive re-autenticado con la nueva contrasena el 10/06/2026 → tokens frescos
+- **Responsable en verano:** companero designado por Inigo — ya avisado
+- **Accion requerida el 22/07/2026:** entrar al locker via TeamViewer, meter la nueva contrasena en OneDrive, cerrar y reabrir OneDrive si se queda en "Buscando cambios..."
+- **Comportamiento de tokens OAuth:** cambiar la contrasena NO rompe OneDrive inmediatamente — el cliente sigue funcionando hasta que el refresh token caduca (dias/semanas). Por eso conviene re-autenticar cuanto antes tras el cambio para tener tokens frescos.
+
 ---
 
 ## Resumen de Sesion — 2026-04-30 (Bug marcador formato fecha)
