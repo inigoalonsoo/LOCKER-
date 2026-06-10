@@ -4,7 +4,7 @@
 >
 > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
 >
-> **Estado a 2026-06-04:** Sistema completamente funcional en produccion. 516+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
+> **Estado a 2026-06-10:** Sistema completamente funcional en produccion. 526+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
 >
 > **Las tres cosas mas importantes:**
 > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
@@ -1555,6 +1555,50 @@ $nuevosMovimientos = @($nuevosMovimientos | Sort-Object { ... })
 | MonitoreoLockerTiempoReal | ✅ v2.3 | Bug raiz PASO 4 resuelto, hashtable en lugar de Group-Object |
 | CSV HistorialCompleto | ✅ 516 movimientos | |
 | Tareas programadas | ✅ 5 activas (Ready) | |
+
+---
+
+## Resumen de Sesion — 2026-06-10 (Correccion manual usuario consignas 18 y 22)
+
+### Problema: Consignas 18 y 22 mostraban "En uso por IKER L. LASSO" en vez de SERGIO V. VEGA
+
+**Causa:** El ultimo movimiento registrado en el CSV para ambas consignas era una Extraccion de IKER L. LASSO (16/04/2026). En realidad quien las tenia era SERGIO V. VEGA (asignacion no registrada en Eventos SQL).
+
+**Verificacion previa:**
+- SERGIO V. VEGA confirmado en tabla Usuario: `Codigo=14, CodigoCliente=0014, Nombre=SERGIO V., Apellidos=VEGA`
+- Ultimas entradas CSV consigna 18: Extraccion IKER L. LASSO 04/16/2026 11:52:41
+- Ultimas entradas CSV consigna 22: Extraccion IKER L. LASSO 04/16/2026 12:44:02
+
+**Fix aplicado — 4 lineas manuales anadidas al CSV:**
+```powershell
+$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+$csv = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv"
+$lineas = @(
+    "04/16/2026 11:53:00;IKER L.;LASSO;18;MedidorLaserpuntoderocio / DP510 / 45174428;Devoluci$([char]0xF3)n;Cerrada",
+    "04/16/2026 11:53:30;SERGIO V.;VEGA;18;MedidorLaserpuntoderocio / DP510 / 45174428;Extracci$([char]0xF3)n;Cerrada",
+    "04/16/2026 12:44:30;IKER L.;LASSO;22;An.gases / TESTO 340 / 63862113;Devoluci$([char]0xF3)n;Cerrada",
+    "04/16/2026 12:45:00;SERGIO V.;VEGA;22;An.gases / TESTO 340 / 63862113;Extracci$([char]0xF3)n;Cerrada"
+)
+foreach ($linea in $lineas) { [System.IO.File]::AppendAllText($csv, "$linea`r`n", $utf8NoBOM) }
+cd C:\ACTUM; .\GenerarDashboard.ps1
+```
+
+**Resultado:** 526 movimientos. Dashboard muestra "En uso por SERGIO V. VEGA" en consignas 18 y 22.
+
+### Patron para correccion manual de usuario en una consigna
+
+Cuando el dashboard muestra un usuario incorrecto (asignacion administrativa en ACTUM sin apertura fisica):
+1. Verificar el nombre exacto en SQL: `SELECT Nombre, Apellidos FROM Usuario WHERE Nombre LIKE '%X%'`
+2. Ver ultima entrada del CSV para esa consigna: `Import-Csv ... | Where-Object { $_.Consigna -eq 'N' } | Select-Object -Last 3`
+3. Anadir Devolucion del usuario incorrecto + Extraccion del usuario correcto con timestamps justo despues
+4. Ejecutar `.\GenerarDashboard.ps1`
+
+### Estado del sistema (2026-06-10):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ v2.3 | Sin cambios |
+| CSV HistorialCompleto | ✅ 526 movimientos | +4 correcciones manuales consignas 18 y 22 |
+| Tareas programadas | ✅ 5 activas (Ready) | Sin cambios |
 
 ### Inventario de archivos en el locker (2026-06-04)
 
