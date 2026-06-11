@@ -4,7 +4,7 @@
 >
 > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
 >
-> **Estado a 2026-06-10:** Sistema completamente funcional en produccion. 526+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
+> **Estado a 2026-06-11:** Sistema completamente funcional en produccion. 528+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
 >
 > **Las tres cosas mas importantes:**
 > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
@@ -1621,6 +1621,41 @@ Cuando el dashboard muestra un usuario incorrecto (asignacion administrativa en 
 | MonitoreoLockerTiempoReal | ✅ v2.3 | Sin cambios |
 | CSV HistorialCompleto | ✅ 526 movimientos | +4 correcciones manuales consignas 18 y 22 |
 | Tareas programadas | ✅ 5 activas (Ready) | Sin cambios |
+
+---
+
+## Resumen de Sesion — 2026-06-11 (Quitar auto-refresh dashboard)
+
+### Problema: el dashboard volvía al tab "Estado Instrumentos" cada minuto
+
+**Causa:** `GenerarDashboard.ps1` incluía dos mecanismos de auto-refresh:
+- `<meta http-equiv="refresh" content="75">` — recarga completa cada 75s (fallback)
+- `setTimeout(function(){ location.reload(); }, ms)` — JS que recargaba al :00 exacto
+
+OneDrive web bloquea JS → solo actuaba el meta refresh → recarga completa → tab siempre volvía al default (Estado Instrumentos). El usuario perdía el tab donde estaba cada minuto.
+
+**Fix aplicado en `GenerarDashboard.ps1`:**
+- Eliminado el `<meta http-equiv="refresh">` 
+- Eliminado el `setTimeout location.reload()` del bloque JS
+- Conservado el JS de persistencia de tab via hash URL (inofensivo)
+
+**Por que no rompe nada:** el dashboard se actualiza porque la tarea programada reescribe el archivo HTML cada minuto. El navegador no necesita auto-recargarse — cuando el usuario abre el dashboard ya ve la version mas reciente. Si quiere actualizar pulsa F5.
+
+**Verificacion:**
+```powershell
+Select-String -Pattern "refresh|reload" "C:\ACTUM\GenerarDashboard.ps1"
+# Solo debe aparecer el comentario: "sin auto-reload" — ningun codigo funcional
+```
+
+### Estado del sistema (2026-06-11 — ESTADO FINAL ANTES DE VACACIONES):
+| Componente | Estado | Notas |
+|---|---|---|
+| MonitoreoLockerTiempoReal | ✅ v2.3 | Bug raiz resuelto, sin cambios |
+| GenerarDashboard | ✅ Sin auto-refresh | Tabs ya no se resetean solos |
+| CSV HistorialCompleto | ✅ 528 movimientos | |
+| Tareas programadas | ✅ 5 activas (Ready) | |
+| OneDrive | ✅ Autenticado | Tokens frescos desde 10/06/2026 |
+| Proxima accion manual | ⏳ 22/07/2026 | Companero re-autentica OneDrive |
 
 ### Inventario de archivos en el locker (2026-06-04)
 

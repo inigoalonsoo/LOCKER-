@@ -214,8 +214,7 @@ $ultimosMovimientos = $historial |
 # PASO 3: Generar HTML
 # - Sin Google Fonts (CDN bloqueado en OneDrive web)
 # - Tabs CSS puro sin JavaScript (compatible OneDrive web)
-# - Script JS inline minimo: persiste tab activa via hash URL + reload sincronizado al :00
-# - Meta refresh 75s como fallback (si JS bloqueado)
+# - Script JS inline minimo: persiste tab activa via hash URL (sin auto-reload)
 # =============================================
 $html = @"
 <!DOCTYPE html>
@@ -223,7 +222,6 @@ $html = @"
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="75">
     <title>LOCKER INSTRUMENTACI&Oacute;N - GHI SMART FURNACES</title>
     <style>
         :root {
@@ -681,10 +679,6 @@ $html += @"
             else if (hash === 'estado' && tabE) { tabE.checked = true; }
             if (tabE) { tabE.addEventListener('change', function(){ if(this.checked){ history.replaceState(null,'','#estado'); } }); }
             if (tabH) { tabH.addEventListener('change', function(){ if(this.checked){ history.replaceState(null,'','#historial'); } }); }
-            var n = new Date();
-            var ms = (60 - n.getSeconds()) * 1000 - n.getMilliseconds();
-            if (ms < 2000) { ms += 60000; }
-            setTimeout(function(){ location.reload(); }, ms);
         } catch(e) {}
     })();
     </script>
