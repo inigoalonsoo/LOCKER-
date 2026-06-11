@@ -1639,6 +1639,22 @@ OneDrive web bloquea JS → solo actuaba el meta refresh → recarga completa �
 - Eliminado el `setTimeout location.reload()` del bloque JS
 - Conservado el JS de persistencia de tab via hash URL (inofensivo)
 
+### Fix adicional: formato de fecha dd/MM/yyyy (europeo)
+
+Las fechas en el historial mostraban formato americano `MM/dd/yyyy` (ej: `06/10/2026`) en vez del europeo `dd/MM/yyyy` (ej: `10/06/2026`).
+
+**Causa:** el CSV almacena fechas en formato `MM/dd/yyyy HH:mm:ss` (formato del locker) y se mostraban directamente sin convertir.
+
+**Fix en linea 654 de `GenerarDashboard.ps1`** — solo afecta a la presentacion, el CSV no cambia:
+```powershell
+# ANTES:
+$($movimiento.FechaHoraApertura)
+
+# AHORA:
+$(try { [DateTime]::ParseExact($movimiento.FechaHoraApertura,'MM/dd/yyyy HH:mm:ss',$null).ToString('dd/MM/yyyy HH:mm:ss') } catch { $movimiento.FechaHoraApertura })
+```
+El `catch` garantiza que si alguna fecha tiene formato inesperado, se muestra tal cual sin romper nada.
+
 **Por que no rompe nada:** el dashboard se actualiza porque la tarea programada reescribe el archivo HTML cada minuto. El navegador no necesita auto-recargarse — cuando el usuario abre el dashboard ya ve la version mas reciente. Si quiere actualizar pulsa F5.
 
 **Verificacion:**
@@ -1651,7 +1667,7 @@ Select-String -Pattern "refresh|reload" "C:\ACTUM\GenerarDashboard.ps1"
 | Componente | Estado | Notas |
 |---|---|---|
 | MonitoreoLockerTiempoReal | ✅ v2.3 | Bug raiz resuelto, sin cambios |
-| GenerarDashboard | ✅ Sin auto-refresh | Tabs ya no se resetean solos |
+| GenerarDashboard | ✅ Sin auto-refresh, fechas dd/MM/yyyy | Tabs quietos, formato europeo |
 | CSV HistorialCompleto | ✅ 528 movimientos | |
 | Tareas programadas | ✅ 5 activas (Ready) | |
 | OneDrive | ✅ Autenticado | Tokens frescos desde 10/06/2026 |

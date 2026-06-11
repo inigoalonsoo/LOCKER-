@@ -651,7 +651,7 @@ foreach ($movimiento in $ultimosMovimientos) {
     $accionTexto = if ($movimiento.Accion -like '*Extracci*') { 'Extracci&oacute;n' } elseif ($movimiento.Accion -like '*Devoluci*') { 'Devoluci&oacute;n' } else { $movimiento.Accion }
     $html += @"
                             <tr>
-                                <td>$($movimiento.FechaHoraApertura)</td>
+                                <td>$(try { [DateTime]::ParseExact($movimiento.FechaHoraApertura,'MM/dd/yyyy HH:mm:ss',$null).ToString('dd/MM/yyyy HH:mm:ss') } catch { $movimiento.FechaHoraApertura })</td>
                                 <td>$(("$($movimiento.Usuario) $($movimiento.Apellidos)").Trim())</td>
                                 <td>$($movimiento.Consigna)</td>
                                 <td>$($movimiento.Descripcion)</td>
