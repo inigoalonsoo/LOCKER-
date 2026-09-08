@@ -243,7 +243,14 @@ del arranque (apartado O).
     aun validas: **Microsoft Graph con App Registration + certificado** (no caduca nunca, sin coste, GHI ya
     tiene Entra ID) o **IIS local** en `http://172.16.5.40` (pendiente verificar si las oficinas alcanzan
     esa subred).
-12. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
+12. **ORDENAR ESTE REPO Y GITHUB** (pedido por Inigo el 08/09). Hoy la raiz mezcla codigo activo,
+    documentacion, backups, muestras antiguas, capturas y scripts de un solo uso. Clasificar por
+    carpetas con sentido (p.ej. `scripts/` lo que se despliega · `herramientas/` lo que se lanza a mano ·
+    `docs/` · `historico/` · `muestras/`). **Hacerlo A LA VEZ que la limpieza de `C:\ACTUM`**, para que la
+    estructura del repo y la del locker se parezcan y no haya que traducir mentalmente entre las dos.
+    > **Cuidado:** mover un `.ps1` en el repo NO afecta al locker (alli las rutas son `C:\ACTUM\*.ps1`),
+    > pero si cambia las rutas que aparecen en esta documentacion. Actualizar las referencias.
+13. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
     del script en la carpeta de OneDrive, el locker se la copia y se relanza solo. **Canal de despliegue
     sin TeamViewer que nadie usa.**
 
