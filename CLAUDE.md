@@ -257,8 +257,9 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 | c | **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` | El banner rojo de SharePoint. **Confirmar antes** que el error que ve Inigo es ese y no otro. |
 | d | **`EstadoAnterior.json` se queda vacio** | `$estadoPorConsigna` sin definir (lineas 486-488). No rompe nada: solo afecta al metodo de reserva v1.0. |
 | e | **Quitar `MicrosoftEdgeAutoLaunch` del arranque** | Abre Edge en cada inicio. Ruido en un PC dedicado. Cosmetico. |
-| f | **De raiz: quitarse OneDrive + `fabricacion1`** | Sigue siendo el unico tramo que se rompe solo cada ~50 dias sin dar error. Alternativas del 20/05: **Graph con certificado** o **IIS local**. |
-| g | **Usar el AUTO-UPDATE** de `GenerarDashboard.ps1:6-21` | Canal de despliegue sin TeamViewer que nadie aprovecha. |
+| **f** | **CALIBRACIONES** — tarea **recurrente**, no de un dia | La pestana Calibracion del `DashboardAdmin.html` ya clasifica por **CADUCADO / URGENTE (<30d) / PROXIMO (<90d)** leyendo `Caja.FechaCaducidad` de SQL: **sirve directamente como lista de trabajo**. Los pendientes estan apuntados en el cuaderno GHI y en recordatorios del movil. Ir mandando poco a poco. |
+| g | **De raiz: quitarse OneDrive + `fabricacion1`** | Sigue siendo el unico tramo que se rompe solo cada ~50 dias sin dar error. Alternativas del 20/05: **Graph con certificado** o **IIS local**. |
+| h | **Usar el AUTO-UPDATE** de `GenerarDashboard.ps1:6-21` | Canal de despliegue sin TeamViewer que nadie aprovecha. |
 
 ### 4. Recordatorio operativo
 
