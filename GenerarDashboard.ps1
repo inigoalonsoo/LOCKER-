@@ -21,18 +21,22 @@ if ((Test-Path $scriptOneDrive) -and (Test-Path $scriptLocal)) {
 }
 
 # =============================================
-# WATCHDOG: auto-reactivar tarea si esta desactivada
-# Cada vez que este script se ejecuta, comprueba que GenerarDashboardHTML este activa.
-# Si esta Disabled, intenta reactivarla silenciosamente.
-# Esto previene que el sistema se pare por una desactivacion accidental.
+# WATCHDOG ELIMINADO - 2026-09-08
+# Aqui habia un bloque que intentaba reactivar la tarea GenerarDashboardHTML si la
+# encontraba Disabled. Se elimina por DOS motivos, no uno:
+#
+#  1. NUNCA FUNCIONO. Enable-ScheduledTask exige Administrador y este script debe
+#     correr como User (como SYSTEM falla el SQL con Integrated Security, regla del
+#     03/03). El -ErrorAction SilentlyContinue se tragaba el "Acceso denegado" y el
+#     Write-Host cantaba victoria igual: meses imprimiendo "reactivada
+#     automaticamente" sin reactivar nada.
+#  2. SU OBJETIVO ERA INCORRECTO. GenerarDashboardHTML debe estar DISABLED por
+#     arquitectura: es redundante, MonitoreoLockerTiempoReal ya genera el HTML.
+#     Si el watchdog llegase a funcionar, cada minuto desharia esa decision y
+#     dejaria DOS procesos escribiendo los mismos ficheros de OneDrive a la vez.
+#
+# No sustituir por una version "honesta": no queremos que esa tarea se reactive.
 # =============================================
-try {
-    $tareaHTML = Get-ScheduledTask -TaskName "GenerarDashboardHTML" -ErrorAction SilentlyContinue
-    if ($tareaHTML -and $tareaHTML.State -eq "Disabled") {
-        Enable-ScheduledTask -TaskName "GenerarDashboardHTML" -ErrorAction SilentlyContinue
-        Write-Host "WATCHDOG: GenerarDashboardHTML estaba Disabled - reactivada automaticamente" -ForegroundColor Yellow
-    }
-} catch { }
 
 if (Test-Path $carpetaUser) {
     $carpetaOneDrive = $carpetaUser

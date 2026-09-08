@@ -1,6 +1,20 @@
-# MonitoreoLockerTiempoReal.ps1 v2.0
+# MonitoreoLockerTiempoReal.ps1 v2.4
 # Basado en tabla Eventos de SQL - garantiza CERO perdida de datos
 # Aunque el PC se apague o la tarea se pare, al reiniciar recupera todos los eventos
+#
+# HISTORIAL DE VERSIONES
+#  v2.4  2026-09-07  Incidente bucle de reprocesado. DOS fixes:
+#                    - PASO 5 (marcador): el maximo se calcula por fecha PARSEADA.
+#                      Antes 'Sort-Object FechaHoraApertura' ordenaba por TEXTO y
+#                      sobre MM/dd/yyyy el maximo alfabetico es siempre '12/...',
+#                      dejando el marcador atrapado en diciembre -> reproceso de
+#                      ~9 meses cada minuto -> CSV a 103.495 filas con 171 reales.
+#                    - PASO 1 (fallback): si el marcador es ilegible, se coge el
+#                      MAXIMO de todo el CSV, no la primera linea de las 10 ultimas.
+#  v2.3  2026-06-04  PASO 4: hashtable en lugar de Group-Object sobre DataRows.
+#  v2.2  2026-06-02  ventanaSeg=3, marcador conservador, SAFETY NET.
+#  v2.1  2026-04-21  Evento IN (10000,10001) + dedup por clusters.
+#  v2.0  2026-04-21  Sistema basado en tabla Eventos.
 
 $servidor = "GHI-TAQUILLAS\SQLEXPRESS"
 $baseDatos = "Actum_GHI"
@@ -47,16 +61,28 @@ if (Test-Path $archivoMarcador) {
     }
 }
 
-# Si no hay marcador, usar la fecha del ultimo registro del CSV
+# Si no hay marcador, usar la fecha MAS RECIENTE del CSV
+#
+# FIX 2026-09-07 (incidente bucle de reprocesado):
+# Antes se leian solo las 10 ultimas lineas y se cogia la PRIMERA que casaba el
+# regex. Eso asume que el CSV esta en orden cronologico, y NO lo esta si en algun
+# momento hubo un reproceso (los eventos se appendean agrupados por consigna) o si
+# un apagon corto una escritura. El resultado era una fecha antigua arbitraria,
+# que disparaba un reproceso masivo de meses de eventos.
+# Ahora se recorre TODO el fichero y se coge el MAXIMO real.
 if ($ultimoProcesado -eq $null) {
     $esPrimeraEjecucion = $true
     if (Test-Path $archivoHistorial) {
         try {
-            $csvContent = Get-Content $archivoHistorial -Tail 10 -Encoding UTF8
-            foreach ($linea in $csvContent) {
+            $todasLasLineas = [System.IO.File]::ReadAllLines($archivoHistorial)
+            foreach ($linea in $todasLasLineas) {
                 if ($linea -match '^(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2});') {
-                    $ultimoProcesado = [DateTime]::ParseExact($Matches[1], 'MM/dd/yyyy HH:mm:ss', $null)
-                    break
+                    try {
+                        $fLinea = [DateTime]::ParseExact($Matches[1], 'MM/dd/yyyy HH:mm:ss', $null)
+                        if ($ultimoProcesado -eq $null -or $fLinea -gt $ultimoProcesado) {
+                            $ultimoProcesado = $fLinea
+                        }
+                    } catch { }
                 }
             }
         } catch {
@@ -406,7 +432,7 @@ WHERE C.FechaHoraUltimaApertura IS NOT NULL
         Write-Host "[FALLBACK] Metodo original: $($nuevosMovimientos.Count) cambios" -ForegroundColor Yellow
 
     } catch {
-        Write-Host "[ERROR CRITICO] Falló metodo original: $_" -ForegroundColor Red
+        Write-Host "[ERROR CRITICO] Fallo metodo original: $_" -ForegroundColor Red
         exit 1
     }
 }
@@ -432,10 +458,29 @@ if ($nuevosMovimientos.Count -gt 0) {
     Write-Host "[CSV] Historial actualizado" -ForegroundColor Green
 
     # Actualizar marcador con el ultimo evento procesado (formato yyyy-MM-dd HH:mm:ss)
-    $ultimaFechaObj = [DateTime]::ParseExact(
-        ($nuevosMovimientos | Sort-Object FechaHoraApertura | Select-Object -Last 1).FechaHoraApertura,
-        'MM/dd/yyyy HH:mm:ss', $null)
-    [System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+    #
+    # FIX 2026-09-07 (BUG RAIZ del incidente del bucle de reprocesado):
+    # Antes: 'Sort-Object FechaHoraApertura' ordenaba por TEXTO. Sobre fechas en
+    # formato MM/dd/yyyy el maximo alfabetico siempre es '12/...', asi que el
+    # marcador saltaba a DICIEMBRE y se quedaba atrapado ahi. A partir de ese
+    # momento la query pedia ~9 meses de eventos cada minuto, el CSV crecia sin
+    # control (llego a 103.495 filas con solo 171 movimientos reales) y SQL se
+    # saturaba hasta tumbar el dashboard.
+    # Ahora se calcula el MAXIMO por fecha PARSEADA, sin ordenar por texto.
+    $ultimaFechaObj = $null
+    foreach ($mv in $nuevosMovimientos) {
+        try {
+            $fMov = [DateTime]::ParseExact($mv.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
+            if ($ultimaFechaObj -eq $null -or $fMov -gt $ultimaFechaObj) { $ultimaFechaObj = $fMov }
+        } catch { }
+    }
+
+    if ($ultimaFechaObj -ne $null) {
+        [System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+        Write-Host "[MARCADOR] Actualizado a $($ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor Green
+    } else {
+        Write-Host "[MARCADOR] Ninguna fecha parseable - marcador SIN CAMBIOS (mas seguro que avanzarlo a ciegas)" -ForegroundColor Red
+    }
 
 } else {
     Write-Host "[CSV] No hay nuevos movimientos" -ForegroundColor Yellow
