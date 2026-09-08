@@ -153,6 +153,59 @@ foreach ($row in $filasProcesar) {
 Write-Host "[RECONSTRUCCION] Movimientos procesados: $($movimientos.Count)" -ForegroundColor Cyan
 
 # ----------------------------------------------------------------------
+# 2.5 CORRECCIONES MANUALES  (anadido 2026-09-08)
+#
+# Las correcciones hechas a mano NO existen en la tabla Eventos: una asignacion
+# hecha desde el ACTUM EPI Visor sin abrir el locker fisicamente no genera evento.
+# Por eso, al reconstruir desde Eventos, se perdian. Ahora viven en su propio
+# fichero y se reaplican SIEMPRE, en cada reconstruccion.
+#
+#   CorreccionesManuales.csv   <- fuente de verdad de lo que se corrige a mano
+#   HistorialCompleto.csv      <- regenerable, desechable
+#
+# Formato (mismo delimitador ; y mismas columnas, mas una columna Motivo al final
+# que NO se copia al historial, solo documenta por que se hizo):
+#   FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta;Motivo
+#   La fecha va en MM/dd/yyyy HH:mm:ss, igual que el historial.
+# ----------------------------------------------------------------------
+$archivoCorrecciones = "$carpetaOneDrive\CorreccionesManuales.csv"
+$nCorr = 0
+$nCorrMalas = 0
+
+if (Test-Path $archivoCorrecciones) {
+    try {
+        $correcciones = Import-Csv -Path $archivoCorrecciones -Delimiter ";" -Encoding UTF8
+        foreach ($c in $correcciones) {
+            $fRaw = $null
+            try {
+                $fRaw = [DateTime]::ParseExact($c.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
+            } catch {
+                Write-Host "[CORRECCIONES] Fecha ilegible, se omite: $($c.FechaHoraApertura)" -ForegroundColor Red
+                $nCorrMalas++
+                continue
+            }
+            $movimientos += [PSCustomObject]@{
+                FechaRaw          = $fRaw
+                FechaHoraApertura = $c.FechaHoraApertura
+                Usuario           = $c.Usuario
+                Apellidos         = $c.Apellidos
+                Consigna          = $c.Consigna
+                Descripcion       = $c.Descripcion
+                Accion            = $c.Accion
+                EstadoPuerta      = $c.EstadoPuerta
+            }
+            $nCorr++
+        }
+        Write-Host "[CORRECCIONES] Reaplicadas $nCorr correcciones manuales (omitidas: $nCorrMalas)" -ForegroundColor Cyan
+    } catch {
+        Write-Host "[CORRECCIONES] ERROR leyendo $archivoCorrecciones : $_" -ForegroundColor Red
+        Write-Host "[CORRECCIONES] Se continua SIN aplicarlas - revisar el fichero" -ForegroundColor Red
+    }
+} else {
+    Write-Host "[CORRECCIONES] No hay fichero de correcciones manuales ($archivoCorrecciones)" -ForegroundColor DarkGray
+}
+
+# ----------------------------------------------------------------------
 # 3. Ordenar todo por fecha ascendente y escribir el CSV
 # ----------------------------------------------------------------------
 $movimientosOrdenados = $movimientos | Sort-Object FechaRaw
@@ -189,5 +242,5 @@ Write-Host ""
 Write-Host "[RESUMEN] Consignas 'En uso' segun CSV reconstruido:" -ForegroundColor Yellow
 $enUso | Select-Object Consigna, Usuario, Apellidos, Descripcion | Format-Table -AutoSize
 
-Write-Host "[DONE] Reconstruccion completada" -ForegroundColor Cyan
+Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones manuales reaplicadas)" -ForegroundColor Cyan
 Write-Host "Siguiente paso: ejecutar 'C:\ACTUM\GenerarDashboard.ps1' para regenerar el HTML" -ForegroundColor Yellow
