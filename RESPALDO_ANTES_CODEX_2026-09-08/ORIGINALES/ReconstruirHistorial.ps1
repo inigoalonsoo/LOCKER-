@@ -206,68 +206,6 @@ if (Test-Path $archivoCorrecciones) {
 }
 
 # ----------------------------------------------------------------------
-# 2.6 FILAS HUERFANAS  (anadido 2026-09-08)
-#
-# Una fila "huerfana" es la que esta en el CSV actual pero NO sale ni de SQL ni de
-# CorreccionesManuales.csv. Solo puede haber llegado ahi de una forma: alguien la
-# escribio a mano directamente en HistorialCompleto.csv.
-#
-# Antes se perdian en cada reconstruccion. Ahora se CONSERVAN y se avisa de ellas,
-# para que quien reconstruya vea exactamente que se ha respetado.
-#
-# Origen: la revision de Codex del 08/09 detecto este hueco (la proteccion anterior
-# solo cubria CorreccionesManuales.csv). Se resuelve AQUI, en un script que se lanza
-# a mano y casi nunca, y NO en MonitoreoLockerTiempoReal.ps1, que corre cada minuto.
-#
-# La identidad de un movimiento es FECHA + CONSIGNA + ACCION.
-# ----------------------------------------------------------------------
-$nHuerfanas = 0
-
-if (Test-Path $archivoHistorial) {
-    try {
-        $clavesGeneradas = @{}
-        foreach ($m in $movimientos) {
-            $clavesGeneradas["$($m.FechaHoraApertura)|$([int]$m.Consigna)|$($m.Accion)"] = $true
-        }
-
-        $huerfanas = New-Object System.Collections.Generic.List[object]
-        foreach ($fila in (Import-Csv -Path $archivoHistorial -Delimiter ";" -Encoding UTF8)) {
-            if ([string]::IsNullOrWhiteSpace($fila.FechaHoraApertura)) { continue }
-            try { $fRaw = [DateTime]::ParseExact($fila.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch { continue }
-            $clave = "$($fila.FechaHoraApertura)|$([int]$fila.Consigna)|$($fila.Accion)"
-            if (-not $clavesGeneradas.ContainsKey($clave)) {
-                $huerfanas.Add([PSCustomObject]@{
-                    FechaRaw          = $fRaw
-                    FechaHoraApertura = $fila.FechaHoraApertura
-                    Usuario           = $fila.Usuario
-                    Apellidos         = $fila.Apellidos
-                    Consigna          = $fila.Consigna
-                    Descripcion       = $fila.Descripcion
-                    Accion            = $fila.Accion
-                    EstadoPuerta      = $fila.EstadoPuerta
-                })
-                $clavesGeneradas[$clave] = $true
-            }
-        }
-
-        if ($huerfanas.Count -gt 0) {
-            Write-Host ""
-            Write-Host "[HUERFANAS] $($huerfanas.Count) filas del CSV no vienen de SQL ni de CorreccionesManuales.csv." -ForegroundColor Yellow
-            Write-Host "[HUERFANAS] Se CONSERVAN (se escribieron a mano). Revisar que son las esperadas:" -ForegroundColor Yellow
-            $huerfanas | Select-Object FechaHoraApertura, Usuario, Apellidos, Consigna, Accion | Format-Table -AutoSize
-            foreach ($h in $huerfanas) { $movimientos += $h }
-            $nHuerfanas = $huerfanas.Count
-        } else {
-            Write-Host "[HUERFANAS] Ninguna: todo el CSV actual se explica desde SQL y las correcciones." -ForegroundColor Green
-        }
-    } catch {
-        Write-Host "[HUERFANAS] ERROR analizando el CSV actual: $_" -ForegroundColor Red
-        Write-Host "[HUERFANAS] ABORTADO para no perder nada escrito a mano. El CSV NO se ha tocado." -ForegroundColor Red
-        exit 1
-    }
-}
-
-# ----------------------------------------------------------------------
 # 3. Ordenar todo por fecha ascendente y escribir el CSV
 # ----------------------------------------------------------------------
 $movimientosOrdenados = $movimientos | Sort-Object FechaRaw
@@ -304,5 +242,5 @@ Write-Host ""
 Write-Host "[RESUMEN] Consignas 'En uso' segun CSV reconstruido:" -ForegroundColor Yellow
 $enUso | Select-Object Consigna, Usuario, Apellidos, Descripcion | Format-Table -AutoSize
 
-Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones manuales + $nHuerfanas filas manuales conservadas)" -ForegroundColor Cyan
+Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones manuales reaplicadas)" -ForegroundColor Cyan
 Write-Host "Siguiente paso: ejecutar 'C:\ACTUM\GenerarDashboard.ps1' para regenerar el HTML" -ForegroundColor Yellow

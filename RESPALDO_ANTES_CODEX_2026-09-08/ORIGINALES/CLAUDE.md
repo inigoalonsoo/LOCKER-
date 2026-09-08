@@ -1,303 +1,139 @@
 # CLAUDE.md — Sistema Locker Instrumentacion GHI
 
-## 🛑 REGLA DURA — `MonitoreoLockerTiempoReal.ps1` NO SE TOCA A LA LIGERA
-
-> **Cementada el 2026-09-08 tras la propuesta de Codex.** Aplica a CUALQUIER agente
-> (Claude Code, Codex, GLM…) y a cualquier persona.
-
-`MonitoreoLockerTiempoReal.ps1` es **el unico componente cuyo fallo no se puede recuperar
-despues**. Todo lo demas es regenerable: el CSV se reconstruye desde `Eventos`, el HTML se
-regenera desde el CSV, el Excel desde el CSV. Pero **lo que el monitor no captura no queda
-registrado en ninguna parte**.
-
-Condiciones para modificarlo, TODAS obligatorias:
-
-1. **Probado contra los datos REALES** del locker (el CSV de produccion y SQL), no contra
-   ficheros sinteticos en carpetas temporales.
-2. **Sin dependencias nuevas.** Nada de dot-source de otros scripts: si falta uno, el monitor
-   muere. Hoy es autonomo y debe seguir siendolo.
-3. **FAIL-OPEN, nunca fail-closed.** Ante cualquier duda debe **seguir registrando**. Un
-   monitor que se bloquea a si mismo por precaucion es peor que uno que registra de mas: lo
-   segundo se limpia despues, lo primero pierde datos para siempre. **Y falla en silencio**,
-   porque la tarea corre oculta.
-4. **Sin estado persistente nuevo** que pueda corromperse y bloquearlo.
-5. **Sin escrituras que crezcan sin limite** dentro de `LockerACTUM`: esa carpeta la sincroniza
-   OneDrive y ya la desbordamos una vez.
-6. **Verificado despues del despliegue** releyendo el fichero (lineas, no-ASCII, sintaxis) y
-   comprobando que el CSV sigue creciendo con normalidad.
-
-> **Corolario:** una mejora que solo afecta a la reconstruccion se implementa **en
-> `ReconstruirHistorial.ps1`**, que se lanza a mano y casi nunca. Nunca en el monitor.
-
-## Trabajo con varios agentes (Claude Code · Codex · GLM)
-
-Alternar agentes esta bien y ahorra cuota. Reglas para que no se pisen:
-
-1. **`CLAUDE.md` es el unico traspaso.** Quien haga un cambio o reciba un dato del locker lo
-   registra aqui en el mismo turno, con evidencia y siguiente paso. No marcar como ejecutado lo
-   que solo esta propuesto.
-2. **Git es la memoria real.** Commit por cada cambio logico y push cuando el usuario lo
-   autorice, para que todo movimiento quede visible en
-   `github.com/inigoalonsoo/LOCKER-`.
-3. **Ningun agente despliega en el locker por su cuenta.** El despliegue lo hace siempre la
-   persona, por Notepad/TeamViewer, con la verificacion de lineas + no-ASCII + sintaxis.
-4. **Una propuesta descartada no se borra: se archiva** con el porque, para no volver a
-   discutirla desde cero. Ver `propuesta-codex-2026-09-08/LEEME.md`.
-
-### Episodio 2026-09-08 — propuesta de Codex, evaluada y descartada
-
-Codex propuso un sistema de proteccion con estado persistente, mutex, transacciones con journal
-y copias automaticas, tocando 4 scripts incluido el monitor (v2.5).
-
-**Lo que acerto y se ha aprovechado:**
-- Detecto un **hueco real**: la proteccion anterior solo cubria `CorreccionesManuales.csv`; una
-  edicion directa de `HistorialCompleto.csv` se perdia igual. → Resuelto en el **paso 2.6** de
-  `ReconstruirHistorial.ps1` (filas huerfanas).
-- `CrearCorreccionesManuales.ps1` no debe rehacer el fichero si ya existe. → **Incorporado.**
-- Respaldo verificado previo (67/67) y **cero cambios en produccion**.
-
-**Por que se descarto** (medido leyendo su codigo): backups sin rotacion en **cada movimiento**
-dentro de OneDrive · estado JSON que duplica el historial completo y se reescribe entero cada vez ·
-**fail-closed** que deja el monitor abortando en silencio tras un corte de luz · mutex sin espera
-que mata ejecuciones solapadas · un evento repetido lanza excepcion en vez de deduplicar ·
-`$ErrorActionPreference='Stop'` global · y **nada probado contra datos reales**.
-
-Detalle completo y tabla de fallos: `propuesta-codex-2026-09-08/LEEME.md`.
+> **START HERE — Para el desarrollador que retoma este proyecto**
+>
+> Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
+>
+> **Estado a 2026-09-07: SISTEMA REPARADO Y VERIFICADO. Quedan pendientes de PREVENCION — lee la ultima seccion.**
+>
+> Hubo un incidente grave (bucle de reprocesado que inflo `HistorialCompleto.csv` a 103.494 filas con solo 187 unicas). **Ningun movimiento se perdio**: la ultima identificacion real es del `2026-07-16 13:20:21` y entre el 17/07 y el 07/09 no hubo ninguna (vacaciones).
+>
+> **Resuelto:** causa raiz corregida (`MonitoreoLockerTiempoReal.ps1:436`, `Sort-Object` alfabetico sobre fechas `MM/dd/yyyy` que dejaba el marcador atrapado en diciembre) · **v2.4 desplegada** con hash verificado · CSV reconstruido desde SQL a **528 movimientos** con el historico completo desde 26/10/2024 · 5 tareas corriendo · verificado que la tarea corre cada minuto **sin volver a escribir el CSV**.
+>
+> **⚠️ Lo que NO esta resuelto:** el disparador fueron **7 apagones sucios en 5 semanas**, y el PC estuvo **~19 dias muerto sin que nadie se enterase**. Pendiente: **alerta de sistema caido** y **BIOS que arranque tras corte de corriente**. Ver `## Resumen de Sesion — 2026-09-07`.
+>
+> **Estado a 2026-06-11 (ultimo estado sano conocido):** Sistema completamente funcional en produccion. 528+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
+>
+> **Las tres cosas mas importantes:**
+> 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
+> 2. No hay acceso directo por red al locker. El unico camino para desplegar es: copiar el script → enviarlo al PC del locker → pegarlo en Notepad via TeamViewer → guardar en `C:\ACTUM\`.
+> 3. Nunca modificar manualmente `HistorialCompleto.csv`, `UltimoEventoProcesado.txt` ni `EstadoAnterior.json`.
+>
+> **Pendiente prioritario:** El usuario mostrado en "En uso por X" puede diferir del asignado en ACTUM cuando la asignacion se hace desde el software sin abrir el locker fisicamente. Solucion: leer `Consigna.Usuario_Codigo` directamente en `GenerarDashboard.ps1` para la pestana Estado.
 
 ---
 
-# ⚡ ESTADO ACTUAL Y SIGUIENTE PASO — actualizado 2026-09-08 (fin de sesion)
+# ⚡ ESTADO ACTUAL Y SIGUIENTE PASO — actualizado 2026-09-08
 
 > **BLOQUE DE TRASPASO.** Si retomas el proyecto en otra sesion, otra terminal u otro modelo (Codex, etc.),
-> lee SOLO esto para saber donde estamos y que hacer. El detalle esta en las secciones
-> `AUDITORIA COMPLETA DE C:\ACTUM` (apartados A-O) y `Resumen de Sesion — 2026-09-08`, al final.
+> lee SOLO esto para saber donde estamos. El detalle esta en las secciones `AUDITORIA COMPLETA DE C:\ACTUM`
+> y `Resumen de Sesion — 2026-09-08`, al final del documento.
 
-## Contexto minimo
+## Contexto minimo en 10 lineas
 
-Sistema de monitoreo del locker ACTUM de GHI. PC del locker: **GHI-TAQUILLAS** (IP 172.16.5.40), usuario
-Windows **`User`**, acceso por **TeamViewer**. **Imanolia lo lleva sola: no hay respaldo ni segunda persona.**
+Sistema de monitoreo del locker ACTUM de GHI. El PC del locker es **GHI-TAQUILLAS** (IP 172.16.5.40),
+usuario Windows **`User`**, acceso por **TeamViewer**. Imanolia lo lleva **sola**, no hay respaldo.
 
-Cadena completa:
-
-```
-[Consignas] --RS485--> [Electronica Kerong 172.16.5.41:23] <--TCP--> [ACTUM_EPI_Gestion.exe]
-                                                                              |
-                                                    escribe cada apertura     v
-                              [SQL Express GHI-TAQUILLAS\SQLEXPRESS · BD Actum_GHI · tabla Eventos]
-                                                                              |
-   [Task Scheduler] -> [.vbs ventana oculta] -> [.ps1 en C:\ACTUM\] ----------+
-                                                                              v
-              [C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\]
-                                                                              |
-                    <- NO hay API ni subida: es una CARPETA LOCAL que el      v
-                       cliente OneDrive (sesion fabricacion1@ghifurnaces.com) sincroniza
-                                                          [SharePoint -> el enlace de la gente]
-```
+Cadena: la electronica **Kerong** (172.16.5.41:23) habla con **`ACTUM_EPI_Gestion.exe`**, que escribe cada
+apertura en **SQL Express `GHI-TAQUILLAS\SQLEXPRESS`, BD `Actum_GHI`, tabla `Eventos`**. Nuestros scripts
+(en `C:\ACTUM\`, lanzados por tareas programadas cada minuto via wrappers `.vbs`) leen esa tabla, escriben
+`HistorialCompleto.csv` y generan `DashboardLocker.html` **dentro de la carpeta local**
+`C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\`. **No hay API ni subida**: es el cliente
+OneDrive de Windows, autenticado como `fabricacion1@ghifurnaces.com`, quien la sincroniza a SharePoint.
 
 **El eslabon debil es ese ultimo tramo:** si la contrasena de `fabricacion1` caduca (~cada 50 dias), los
-scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin error en ningun log.
-**Verificado el 08/09 a las 10:24: la web SI recibe. No hay que re-autenticar nada.**
+scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin ningun error en ningun log.
 
-## Situacion al cierre del 08/09/2026
+## Situacion a 08/09/2026
 
-- **El locker esta FUERA DE SERVICIO a proposito.** `ACTUM_EPI_Gestion.exe` **cerrado** por decision de
-  Inigo mientras se arregla todo. **Se reabrira al terminar** (y ahora ya tiene arranque automatico).
+- **El locker esta FUERA DE SERVICIO a proposito.** Inigo tiene `ACTUM_EPI_Gestion.exe` **cerrado** mientras
+  se arregla todo; lo reabrira al terminar. Ultimo evento en SQL: `2026-09-03 12:37:30`.
 - **Ultima identificacion de usuario real: `2026-07-16 13:20:21`.** Nadie usa el locker desde julio.
-- **Sistema sano y verificado:** CSV con 528 movimientos, 529/529 lineas unicas, 0 bytes NULL,
-  0 mojibake, rango completo 26/10/2024 -> 16/07/2026, y **el dashboard coincide con el hardware en 32/32
-  consignas**.
-- **8 cortes de corriente en 5 semanas.** Causa dicha por Inigo: **el cuadro electrico del locker se cae**.
-  El PC **no vuelve solo** (12 h muerto el 07-08/09; 6 dias en agosto). **Esto es lo unico grave sin
-  resolver.**
-- **Repo sincronizado con GitHub:** `github.com/inigoalonsoo/LOCKER-`, rama `master`, ultimo commit
-  `bd8cf4d`. Verificado 1:1 (`rev-list --left-right --count` = `0 0`, working tree limpio).
+- **CSV sano:** 528 movimientos · 53.562 bytes · ratio filas/unicas **1,00** · marcador
+  `2026-07-16 13:20:21`. El bucle de reprocesado del incidente del 07/09 esta **muerto** (v2.4 desplegada).
+- **8 cortes de corriente en 5 semanas.** Causa probable dicha por Inigo: **el cuadro electrico del locker
+  se cae**. El PC **no vuelve solo** tras un corte (12 h muerto el 07-08/09; 6 dias en agosto).
 
-### Hecho y verificado el 08/09 (todo medido sobre el sujeto, no narrado)
+### Hecho y verificado el 08/09
 
 | Accion | Verificacion |
 |---|---|
 | `ReconstruirCSVSemanal` desactivada (borraba las correcciones manuales cada lunes) | `State = Disabled` |
-| Descubierto que esa tarea **nunca funciono** desde el 20/05 (su `.vbs` esta roto) | apartado B |
 | `GenerarDashboardHTML` devuelta a `Disabled` (se encendio sin querer) | `State = Disabled` |
 | Suspension, hibernacion e inicio rapido desactivados | `powercfg /a` |
-| Watchdog mentiroso eliminado de `GenerarDashboard.ps1` | 706 lineas · 0 errores · HTML byte-identico |
+| Watchdog mentiroso eliminado de `GenerarDashboard.ps1` | 0 errores sintaxis · 706 lineas · HTML byte-identico |
 | Copia de conflicto de OneDrive borrada (10,4 MB) | listado vacio |
-| Hardware descartado | SSD `Healthy` · `NoErrorsFound` · 0 WHEA · 7,9 GB RAM · 144 GB libres |
-| Dashboard auditado | **32/32 consignas coinciden con SQL** |
-| OneDrive sincroniza | web con *Ultima actualizacion: 2026-09-08 10:24:08* |
-| Correcciones manuales a prueba de reconstrucciones | 4 guardadas en `CorreccionesManuales.csv` |
-| Arranque automatico de `ACTUM_EPI_Gestion.exe` | `.lnk` creado en `Startup` y verificado leyendolo |
-| Rafagas de `Usuario=0` explicadas | es la electronica al conectar — apartado O |
+| Hardware descartado | SSD `Healthy` · `NoErrorsFound` · 0 WHEA · 7,9 GB RAM |
 | Los 4 `.vbs` activos respaldados en el repo | los 4 `IDENTICO` |
-| Todo commiteado y subido a GitHub | 4 commits · divergencia `0 0` |
-| Ediciones directas del CSV protegidas (paso 2.6, filas huerfanas) | 308 lineas · 0 errores · sin tocar el monitor |
-| Propuesta de Codex evaluada y descartada; monitor revertido a v2.4 | `IDENTICO` byte a byte al desplegado en el locker |
 
----
+## PENDIENTE — por orden
 
-# 🔴 SIGUIENTE PASO INMEDIATO — REINICIO CON CAMBIO DE BIOS
+### Urgente (para volver a poner el locker en servicio)
 
-**Es lo de mas valor que queda.** Hace que el locker vuelva solo tras un corte de luz en vez de quedarse
-horas o dias muerto. **Requiere estar FISICAMENTE delante del PC**: TeamViewer no sirve, porque la BIOS
-aparece antes de que Windows arranque.
+1. [HECHO 08/09 - **32/32 OK, el dashboard dice la verdad**, ver apartado M] ~~Auditar que el dashboard dice la VERDAD.~~ Comparar consigna a consigna el HTML contra
+   `Consigna.Estado` de SQL. **Importante:** la pestana Estado **NO lee SQL**, deriva el estado de la ultima
+   accion del CSV (`GenerarDashboard.ps1:174-181`), asi que si el CSV esta mal, **miente**. Bloque de
+   auditoria preparado (integridad CSV + HTML + comparacion con SQL). Aqui se cierra tambien lo de la
+   **consigna 22 / SERGIO V. VEGA**.
+2. [HECHO 08/09 - **LA WEB RECIBE**. El dashboard en SharePoint mostraba *Ultima actualizacion: 2026-09-08 10:24:08*, en hora. OneDrive.exe corriendo (PID 9364 desde las 07:59:50). **La contrasena de fabricacion1 aguanta, no hubo que re-autenticar**] ~~Comprobar que OneDrive sincroniza.~~ Test de 10 s: mirar la hora de *"Ultima actualizacion"* del
+   dashboard **en la web** y compararla con la del fichero en el locker. Si el local esta fresco y el de la
+   web viejo -> re-autenticar (icono OneDrive -> Configuracion -> pestana **Cuenta**; si se queda en
+   "Buscando cambios...", cerrar y reabrir OneDrive). **La contrasena caducaba ~26/08 y no consta
+   re-autenticada.**
+3. [ARRANQUE AUTOMATICO HECHO 08/09 - acceso directo creado y verificado leyendo el propio .lnk: apunta al exe y el destino existe. Se estrenara en el reinicio de la BIOS] **Reabrir `ACTUM_EPI_Gestion.exe`.** Hoy **no arranca solo**
+   (`Win32_StartupCommand` vacio). Sin esto, cada corte de luz deja el locker sin registrar hasta que
+   alguien lo abra a mano — y **lo que no se graba no se recupera de ningun sitio**.
+4. **BIOS: `Restore on AC Power Loss -> Power On`.** Lo unico que hace que el PC vuelva solo tras un corte.
+   Exige reiniciar con alguien delante.
+5. [HECHO 08/09 - desplegados y verificados: 246 y 76 lineas, 0 no-ASCII, 0 errores de sintaxis; 4 correcciones guardadas con fechas legibles y tildes correctas. `ReconstruirHistorial.ps1` copiado pero NO ejecutado a proposito: el CSV esta sano y no se toca lo que funciona] ~~Desplegar los dos scripts~~ al locker,
+   y ejecutar el segundo una vez. Ver apartado N: hace que las correcciones a mano sobrevivan a las
+   reconstrucciones.
+6. **Prueba funcional real** (tarea A del 07/09): bajar, sacar un instrumento y devolverlo. Predicado:
+   **1 solo movimiento** por accion fisica (ojo al dedup `$ventanaSeg = 3` y a los pares de eventos
+   10000+10001), usuario y accion correctos, marcador avanzado a hoy en formato `yyyy-MM-dd HH:mm:ss`,
+   y reflejado en el dashboard en < 1 min. **El sistema reparado NO esta probado con un movimiento nuevo.**
 
-### Antes de bajar — averiguar la marca (para saber la tecla exacta)
+### No urgente (para cuando se pregunte "que mas se puede mejorar")
 
-```powershell
-Get-CimInstance Win32_ComputerSystem | Select-Object Manufacturer, Model
-Get-CimInstance Win32_BIOS | Select-Object Manufacturer, Name, SMBIOSBIOSVersion, ReleaseDate
-Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-```
-
-### En el locker
-
-1. Reiniciar desde el menu de Windows. **La conexion de TeamViewer se cortara: es normal.**
-2. Nada mas apagarse la pantalla, pulsar **`Supr`** repetidamente (una vez por segundo; si no, probar
-   **`F2`**). **No mantener pulsada** la tecla. Si aparece el logo de Windows, se ha llegado tarde:
-   dejar arrancar y repetir.
-3. Buscar el menu **Power** / **Power Management** / **Advanced** / **ACPI**. La opcion se llama:
-   `Restore on AC Power Loss` · `AC Power Recovery` · `After Power Failure` · `State After Power Loss` ·
-   `AC Back Function`.
-4. Ponerla en **Power On** (a veces *Always On*).
-   > ⚠️ **NO elegir `Last State`.** Esa recuerda como estaba el PC cuando se fue la luz: si el corte lo
-   > pillo apagado, se queda apagado. Es justo el fallo que se quiere eliminar.
-5. **`F10`** -> confirmar **Yes** para guardar y salir.
-6. Observar el arranque: debe entrar solo en Windows (auto-login) y, a los pocos segundos, **abrirse sola
-   la ventana de ACTUM EPI Gestion** (esa es la prueba del acceso directo creado hoy).
-
-**Si pide contrasena de BIOS:** no forzar nada, consultar.
-**Si no aparece la opcion:** fotografiar los menus de energia.
-**Si ACTUM no se abre solo:** abrirla a mano; el `.lnk` esta creado y verificado, seria otra causa.
-
-### Al volver — bloque de verificacion
-
-```powershell
-"=== 1. ARRANCO SOLO EL MOTOR? (la prueba del acceso directo) ==="
-Get-Process | Where-Object { $_.Name -like "*ACTUM*" } | Select-Object Name, Id, StartTime | Format-Table -AutoSize
-
-"=== 2. ARRANCO ONEDRIVE? (StartTime debe ser NUEVO, no 07:59:50) ==="
-Get-Process OneDrive -ErrorAction SilentlyContinue | Select-Object Name, StartTime
-
-"=== 3. LAS TAREAS ==="
-Get-ScheduledTask -TaskName "MonitoreoLockerTiempoReal","GenerarDashboardAdmin","ActualizarExcelLocker" | Select-Object TaskName, State | Format-Table -AutoSize
-
-"=== 4. SE REGENERA EL DASHBOARD? ==="
-Get-Item "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\DashboardLocker.html" | Select-Object Length, LastWriteTime
-
-"=== 5. EL BARRIDO DE LA ELECTRONICA AL CONECTAR ==="
-sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT CONVERT(varchar(19),FechaHora,120) AS Momento, Evento, COUNT(*) AS N FROM Eventos WHERE FechaHora >= '20260908' GROUP BY CONVERT(varchar(19),FechaHora,120), Evento ORDER BY 1"
-```
-
-**Que decide cada punto:** el **1** es la prueba del arranque automatico. El **2** confirma que el PC
-reinicio de verdad. El **5** deberia mostrar otro bloque con la firma conocida **`1`x3 + `3`x32** a la hora
-del arranque (apartado O).
-
----
-
-## DESPUES DEL REINICIO — resto de pendientes, por orden
-
-### Fisicos (hay que bajar al locker)
-
-1. **PRUEBA FUNCIONAL REAL.** Es el unico hueco de verificacion que queda: **el sistema reparado no se ha
-   probado con un movimiento nuevo desde el 16/07**. Con ACTUM abierto: identificarse, **sacar** un
-   instrumento, cerrar, **anotar hora exacta + consigna + instrumento**; esperar **mas de 30 segundos**
-   (hay un dedup de 3 s, no confundir con duplicado); **devolverlo** y anotar la hora.
-   > **Predicado de exito:** por cada accion fisica aparece **1 SOLO movimiento** en el CSV (no 2 — ojo a
-   > los pares de eventos 10000+10001), con el **usuario correcto**, la **accion correcta**, el **marcador
-   > avanzado a hoy** en formato `yyyy-MM-dd HH:mm:ss`, y reflejado en el dashboard en **< 1 min**.
-   > Verificar las tres cosas: CSV, marcador y dashboard.
-2. **CONSIGNA 22.** El dashboard dice **SERGIO V. VEGA** y SQL dice **IKER L. LASSO**. Abrirla y ver si el
-   analizador de gases **TESTO 340** esta dentro. Es lo unico que resuelve el desacuerdo. De paso,
-   comprobar 2-3 consignas mas marcadas *En uso*.
-3. **SAI + cuadro electrico.** La causa de verdad. Un SAI de 650-800 VA (60-100 EUR) absorbe los cortes
-   breves y permite apagado ordenado en los largos. Y avisar a mantenimiento del cuadro: si se cae solo,
-   el locker es solo el sintoma que se ha notado.
-
-### De software (se pueden hacer en remoto)
-
-4. **LIMPIEZA DE `C:\ACTUM`** — dejada expresamente **para el final** por decision de Inigo.
-   Herramienta ya escrita y validada: **`LimpiarACTUM.ps1`** (162 lineas, ASCII puro, 0 errores).
-   - **SIMULA por defecto**: `.\LimpiarACTUM.ps1` muestra el plan sin tocar nada.
-   - Solo con `.\LimpiarACTUM.ps1 -Aplicar` actua.
-   - Aparta a `C:\ACTUM\_ARCHIVO\` unos 98 MB (backups, instaladores, exports de febrero, pruebas,
-     consultas sueltas) **sin borrar**, salvo 3 ficheros inutiles.
-   - **NO mueve ningun script activo** (sus rutas estan cableadas en 4 `.vbs` y 5 tareas) y respeta una
-     lista de intocables donde estan **`EXPORT_Cajas.txt`** (fallback que leen 3 scripts) y
-     **`logo_base64.txt`** (`GenerarDashboard.ps1:52`).
-   - Tras aplicarlo: `.\GenerarDashboard.ps1` para confirmar que el sistema sigue vivo.
-5. **Alerta de sistema caido** — aparcada por decision de Inigo ("estoy atento cada 2 por 3"), no
-   descartada. **El vigilante debe correr FUERA del locker**: uno que corra dentro no puede avisar de que
-   el PC esta muerto, que es justo lo que paso 12 h y 6 dias.
-6. **Leer `Consigna.Usuario_Codigo` para la pestana Estado** (pendiente desde el 20/05). Mas importante de
-   lo que parecia: hoy **toda** la columna Estado se deriva del CSV en vez de la fuente de verdad
-   (apartado L).
-7. **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` (banner rojo de SharePoint por
-   `replaceState`). Confirmar antes que el error que ve Inigo es ese y no otro.
-8. **Renombrar las trampas de datos del repo:** `HistorialCompleto.csv` (18 movimientos, de febrero) y
-   `DashboardLocker.html` (18/02) -> sufijo `_MUESTRA_2026-02`. **Ahora ademas estan publicados en GitHub.**
-9. **Anadir un `.gitattributes`** — no existe, de ahi los avisos `LF sera reemplazado por CRLF`. No rompe
-   nada, pero puede provocar falsos "modificados".
-10. **Calibraciones** (tarea recurrente): la pestana Calibracion del `DashboardAdmin.html` ya clasifica por
-    CADUCADO / URGENTE (<30d) / PROXIMO (<90d) leyendo `Caja.FechaCaducidad`. Sirve de lista de trabajo.
-11. **De raiz: quitarse la dependencia de OneDrive + `fabricacion1`.** Alternativas estudiadas el 20/05 y
+6. **Limpieza de `C:\ACTUM`** — apartado G de la auditoria. 118 ficheros / 98 MB -> ~12 ficheros.
+   Mover a `_ARCHIVO\`, **sin borrar**, salvo 3 excepciones. **NO mover ningun script activo**: sus rutas
+   estan cableadas en 5 `.vbs` y 5 tareas programadas.
+7. **Commitear el repo.** Pendiente de OK de Imanolia: `CLAUDE.md`, `MonitoreoLockerTiempoReal.ps1` (v2.4),
+   `GenerarDashboard.ps1` (sin watchdog), `EjecutarMonitoreoOculto.vbs` + 3 `.vbs` nuevos.
+8. **Alerta de sistema caido** — aparcada por decision de Inigo ("estoy atento cada 2 por 3"), no descartada.
+   El vigilante **debe correr FUERA del locker**: uno que corra dentro no puede avisar de que el PC esta
+   muerto, que es justo lo que paso 12 h y 6 dias.
+9. **Leer `Consigna.Usuario_Codigo` para la pestana Estado** (pendiente desde el 20/05). Mas importante de
+   lo que parecia: hoy **toda** la columna Estado sale del CSV en vez de la fuente de verdad.
+10. **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` (banner rojo de SharePoint por `replaceState`).
+    Confirmar antes que el error que ve Inigo es ese y no otro (tarea D).
+11. **Renombrar las trampas de datos del repo** (`HistorialCompleto.csv` de feb-2026, `DashboardLocker.html`
+    del 18/02) con sufijo `_MUESTRA_2026-02`.
+12. **Auditoria fisica de consignas** (tarea B del 07/09) y **calibraciones** (tarea C, recurrente).
+13. **De raiz: quitarse la dependencia de OneDrive + `fabricacion1`.** Alternativas estudiadas el 20/05 y
     aun validas: **Microsoft Graph con App Registration + certificado** (no caduca nunca, sin coste, GHI ya
     tiene Entra ID) o **IIS local** en `http://172.16.5.40` (pendiente verificar si las oficinas alcanzan
     esa subred).
-12. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
-    del script en la carpeta de OneDrive, el locker se la copia y se relanza solo. **Canal de despliegue
-    sin TeamViewer que nadie usa.**
-
----
-
-## Herramientas disponibles (en el repo y en `C:\ACTUM`)
-
-| Script | Que hace | Estado |
-|---|---|---|
-| `AuditarDashboard.ps1` | Comprueba que el dashboard dice la verdad (CSV + HTML + comparacion con SQL). **Solo lectura** | desplegado |
-| `CrearCorreccionesManuales.ps1` | Crea/rehace `CorreccionesManuales.csv` con copia de seguridad y verificacion | desplegado |
-| `LimpiarACTUM.ps1` | Ordena `C:\ACTUM`. **Simula por defecto** | **solo en el repo** |
-| `ReconstruirHistorial.ps1` | Rescate: rehace el CSV desde `Eventos`. **Paso 2.5** reaplica `CorreccionesManuales.csv` y **paso 2.6** conserva las filas escritas a mano directamente en el CSV | **repo actualizado 08/09; falta desplegar** |
-| `RespaldarLockerAntesCambios.ps1` | Copia scripts y datos del locker antes de un cambio, con verificacion SHA-256 y restauracion del estado de las tareas. De Codex, conservado | **solo en el repo** |
-
-## Como desplegar un script al locker
-
-1. Abrir el `.ps1` en el repo, `Ctrl+A`, `Ctrl+C`.
-2. En el locker: Bloc de notas -> pegar -> guardar en `C:\ACTUM\` con **Tipo: Todos los archivos** y
-   **Codificacion: UTF-8**. (Si no se elige *Todos los archivos*, se guarda como `.ps1.txt`.)
-3. **Verificar SIEMPRE** (esto detecta un pegado truncado, que ya paso en marzo: 688 lineas llegaron 454):
-
-```powershell
-$f = "C:\ACTUM\NOMBRE.ps1"
-$err = $null
-[void][System.Management.Automation.Language.Parser]::ParseFile($f, [ref]$null, [ref]$err)
-$t = [System.IO.File]::ReadAllText($f)
-"sintaxis=$($err.Count)  no-ASCII=$(([regex]::Matches($t,'[^\x00-\x7F]')).Count)  lineas=$(([System.IO.File]::ReadAllLines($f)).Count)"
-```
-
-Debe dar **`sintaxis=0  no-ASCII=0`** y el numero de lineas esperado.
+14. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
+    del script en la carpeta de OneDrive, el locker se la copia y se relanza solo. **Canal de despliegue sin
+    TeamViewer que nadie esta usando.**
 
 ## Reglas que mas duelen si se olvidan
 
-1. **`Sort-Object` sobre fechas `MM/dd/yyyy` ordena ALFABETICAMENTE.** Parsear siempre primero
-   (`Sort-Object { [DateTime]::ParseExact($_.Campo,'MM/dd/yyyy HH:mm:ss',$null) }`). Ha causado dos
-   incidentes graves (30/04 y 07/09).
+1. **`Sort-Object` sobre fechas `MM/dd/yyyy` ordena ALFABETICAMENTE.** Parsear siempre primero. Ha causado
+   dos incidentes graves (30/04 y 07/09).
 2. **Nunca declarar exito sin releer el estado del sujeto.** `rc=0` y un `Write-Host` no son evidencia.
-   Caso del 08/09: `powercfg /hibernate off` "se aplico" y `powercfg /a` demostro que no.
-3. **`Enable-`/`Disable-ScheduledTask` exigen ADMINISTRADOR.** En ventana normal fallan en silencio. Y
-   `Disable-` no corta una ejecucion en marcha: hace falta `Stop-ScheduledTask` ademas.
+   Ejemplo del 08/09: `powercfg /hibernate off` "se aplico" y `powercfg /a` demostro que no.
+3. **`Enable-`/`Disable-ScheduledTask` exigen ADMINISTRADOR.** En ventana normal fallan en silencio.
 4. **Literales de fecha en SQL: SIEMPRE `'YYYYMMDD'`.** El servidor esta en espanol y `'2026-07-16'` se lee
    como ano-dia-mes.
 5. **Un Event ID sin `ProviderName` no significa nada.** `11` y `153` son de disco en `disk`/`storahci` y
    otra cosa distinta en `Kernel-General`/`Kernel-Boot`.
 6. **Ratio filas/unicas del CSV** es el detector barato del bucle: sano ~1,00; el 07/09 era ~600.
-7. **`Get-Content` sin `-Encoding UTF8`** muestra `ExtracciÃ³n` aunque el fichero este perfecto: PowerShell
-   5.1 lee como ANSI. No confundirlo con corrupcion real.
-8. **NUNCA tildes literales dentro de un `.ps1`.** Usar `[char]0xF3` para `o` acentuada, etc. Todos los
-   scripts activos son **ASCII puro**, y por eso el despliegue por copia-pega es viable.
-9. **No usar here-strings al pegar por chat/TeamViewer**: la indentacion los rompe. Usar arrays con
-   `-join`. Ese fallo dejo `EjecutarReconstruccionOculto.vbs` roto **desde el 20/05 sin que nadie lo
-   notara**.
-10. **NO mover los scripts activos de `C:\ACTUM`**: sus rutas estan cableadas en 4 `.vbs` y 5 tareas.
+7. **Desplegar por copia-pega es viable** si el `.ps1` es **ASCII puro** y se verifica (lineas · no-ASCII ·
+   sintaxis · salida byte-identica). Los 5 activos son ASCII puro.
+8. **No usar here-strings al pegar por chat/TeamViewer**: la indentacion los rompe. Usar arrays con `-join`.
+   Ese fallo dejo `EjecutarReconstruccionOculto.vbs` roto **desde el 20/05, sin que nadie lo notara**.
 
 ---
 
@@ -3036,32 +2872,3 @@ seguian siendo de julio y abril. `MonitoreoLockerTiempoReal.ps1` solo procesa `E
 > **Y que las correcciones manuales queden al final del fichero, fuera de orden cronologico, es normal.**
 > Antes de la v2.4 eso disparaba el bucle (el marcador se tomaba de la ultima linea); ahora el marcador se
 > calcula por el **maximo parseado** de todo el fichero, y el dashboard ordena por fecha al renderizar.
-
-## Traspaso Codex — 2026-09-08 — protección de correcciones (LOCAL)
-
-La descripción del apartado N es histórica: ya no se omiten correcciones inválidas ni se continúa sobrescribiendo.
-El historial actual se compara con la última salida registrada; se conservan altas, cambios y borrados como
-operaciones permanentes en `ProteccionHistorial.json`. `CorreccionesManuales.csv` sigue soportado y el
-inicializador existente conserva sus bytes si ya existe. Las ediciones directas del historial prevalecen sobre
-SQL y sobre las correcciones antiguas de la misma clave (fecha al segundo + número de consigna).
-
-El monitor registra sus altas en la referencia de comparación, sin absorber cambios manuales pendientes.
-Historial, marcador SQL y estado se guardan juntos mediante un diario recuperable, backups y reemplazos de
-archivo. Una interrupción bloquea monitor/reconstrucción hasta `-RecuperarTransaccion`; una edición posterior
-al fallo bloquea también la recuperación, para no sobrescribirla. El bloqueo compartido coordina scripts,
-no editores humanos: pausar el monitor al editar; cerrar el editor antes de reanudar.
-
-El marcador se calcula solo desde movimientos automáticos. Si se pierde, el monitor protegido usa el
-marcador automático guardado en el estado, nunca una fecha manual del historial.
-La primera adopción trata ausencias anteriores al marcador como borrados intencionales: revisar la
-previsualización porque no puede distinguir un borrado previo de un fallo histórico de captura.
-
-Validación local y revisión independiente: ver `RESULTS.jsonl`, `tests/resultado.json` y
-`DESPLIEGUE_CORRECCIONES.md`. No se ha ejecutado SQL ni desplegado ni hecho commit/push.
-Pendiente: copia por TeamViewer, verificación de archivos, previsualización sobre datos reales,
-adopción revisada y comprobación de monitor con un movimiento real.
-
-REFUERZO 2026-09-08 — protección de historial — las pruebas deben incluir un movimiento añadido por el
-monitor y borrado por la persona antes de reconstruir. Caso medido: la primera versión local resucitaba
-ese movimiento porque la referencia solo se guardaba al reconstruir; `tests/intermediate.json` registra el
-fallo y `tests/Correcciones.Tests.ps1` contiene su regresión. No confundir mutex entre scripts con bloqueo de Excel.

@@ -1,0 +1,10 @@
+{
+  "baseline_commit": "bd8cf4d4124f5d75bdeaa7130d068ffcc1e86961",
+  "verified_git_blobs": 67,
+  "verified_originals": 4,
+  "zip_crc_errors": 0,
+  "zip_sha256": "53a77fcbe15f1f6853f25df44cdde329cdc04ee4afdc1095b11d38b7f685851b",
+  "zip_bytes": 640849,
+  "restoration_executed": false,
+  "verification_note": "La primera exportacion git archive aplico conversion CRLF y no cumplio identidad byte a byte; ZIP regenerado directamente desde blobs, releido y verificado."
+}

@@ -1,0 +1,52 @@
+﻿[
+    {
+        "name":  "copies-and-verifies",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "refuses-existing-destination",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "refuses-destination-inside-source",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "requires-history-and-marker",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "preserves-binary-and-unicode-data",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "tasks-restored-on-success",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "tasks-restored-on-copy-failure",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "original-disabled-task-stays-disabled",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "unreadable-process-blocks-backup",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "waits-for-cmd-wrapper",
+        "pass":  true,
+        "error":  ""
+    }
+]

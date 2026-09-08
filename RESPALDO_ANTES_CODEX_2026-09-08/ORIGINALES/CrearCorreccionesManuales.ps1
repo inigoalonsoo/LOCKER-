@@ -1,6 +1,6 @@
 # CrearCorreccionesManuales.ps1 - creado 2026-09-08
 #
-# Crea solo si no existe el fichero CorreccionesManuales.csv con las correcciones hechas a mano
+# Crea (o rehace) el fichero CorreccionesManuales.csv con las correcciones hechas a mano
 # que NO existen en la tabla Eventos de SQL.
 #
 # POR QUE EXISTE ESTE FICHERO
@@ -18,7 +18,8 @@
 #
 # COMO ANADIR UNA CORRECCION NUEVA
 # --------------------------------
-# Editar directamente C:\Users\User\OneDrive...\LockerACTUM\CorreccionesManuales.csv.
+# Anadir una linea mas al array $lineas de abajo y volver a ejecutar este script, o bien
+# editar directamente C:\Users\User\OneDrive...\LockerACTUM\CorreccionesManuales.csv.
 # Formato:  FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta;Motivo
 #   - La fecha va en MM/dd/yyyy HH:mm:ss (formato americano, igual que el historial)
 #   - La columna Motivo NO se copia al historial: solo documenta por que se hizo
@@ -30,25 +31,6 @@
 
 $carpeta = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM"
 $destino = "$carpeta\CorreccionesManuales.csv"
-
-# Si el fichero YA EXISTE no se toca: es la fuente de verdad de lo que decide la persona.
-# (mejora aportada por la revision de Codex del 08/09: antes se rehacia y perdia lo anadido a mano)
-if (Test-Path -LiteralPath $destino) {
-    $existentes = @(Import-Csv -Path $destino -Delimiter ";" -Encoding UTF8)
-    $malas = 0
-    foreach ($c in $existentes) {
-        try { [void][DateTime]::ParseExact($c.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null) } catch { $malas++ }
-    }
-    Write-Host ""
-    Write-Host "Ya existe: $($existentes.Count) correcciones. NO se toca ni un byte." -ForegroundColor Yellow
-    $existentes | Select-Object FechaHoraApertura, Usuario, Apellidos, Consigna, Accion | Format-Table -AutoSize
-    if ($malas -eq 0) { Write-Host "Todas las fechas son legibles - OK" -ForegroundColor Green }
-    else              { Write-Host "$malas fechas ILEGIBLES - corregir a mano en el fichero" -ForegroundColor Red }
-    Write-Host ""
-    Write-Host "Para anadir una correccion: editar el CSV directamente (ver cabecera de este script)." -ForegroundColor Cyan
-    Write-Host ""
-    exit
-}
 
 $dev = "Devoluci" + [char]0xF3 + "n"
 $ext = "Extracci" + [char]0xF3 + "n"
@@ -63,6 +45,12 @@ $lineas = @(
     "04/16/2026 12:44:30;IKER L.;LASSO;22;An.gases / TESTO 340 / 63862113;$dev;Cerrada;$motivo22",
     "04/16/2026 12:45:00;SERGIO V.;VEGA;22;An.gases / TESTO 340 / 63862113;$ext;Cerrada;$motivo22"
 )
+
+if (Test-Path $destino) {
+    $copia = "$carpeta\CorreccionesManuales_ANTES_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+    Copy-Item $destino $copia -Force
+    Write-Host "Ya existia. Copia de seguridad en: $copia" -ForegroundColor Yellow
+}
 
 $utf8NoBOM = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText($destino, ($lineas -join "`r`n") + "`r`n", $utf8NoBOM)

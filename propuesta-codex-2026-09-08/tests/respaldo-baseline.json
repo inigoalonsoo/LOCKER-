@@ -1,0 +1,27 @@
+﻿[
+    {
+        "name":  "copies-and-verifies",
+        "pass":  false,
+        "error":  "No existe un respaldo completo con verificacion; BackupHistorial.ps1 solo copia el historial."
+    },
+    {
+        "name":  "refuses-existing-destination",
+        "pass":  false,
+        "error":  "No existe un respaldo completo con verificacion; BackupHistorial.ps1 solo copia el historial."
+    },
+    {
+        "name":  "refuses-destination-inside-source",
+        "pass":  false,
+        "error":  "No existe un respaldo completo con verificacion; BackupHistorial.ps1 solo copia el historial."
+    },
+    {
+        "name":  "requires-history-and-marker",
+        "pass":  false,
+        "error":  "No existe un respaldo completo con verificacion; BackupHistorial.ps1 solo copia el historial."
+    },
+    {
+        "name":  "preserves-binary-and-unicode-data",
+        "pass":  false,
+        "error":  "No existe un respaldo completo con verificacion; BackupHistorial.ps1 solo copia el historial."
+    }
+]

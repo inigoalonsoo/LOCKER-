@@ -1,0 +1,27 @@
+﻿[
+    {
+        "name":  "direct edit survives two rebuilds",
+        "pass":  false,
+        "error":  "Manual user was overwritten"
+    },
+    {
+        "name":  "deletion survives two rebuilds",
+        "pass":  false,
+        "error":  "Deleted movement reappeared"
+    },
+    {
+        "name":  "manual addition survives without advancing SQL marker",
+        "pass":  false,
+        "error":  "Manual addition lost"
+    },
+    {
+        "name":  "invalid correction stops without overwriting history or marker",
+        "pass":  false,
+        "error":  "Malformed corrections did not stop rebuild"
+    },
+    {
+        "name":  "initializer preserves existing corrections byte for byte",
+        "pass":  false,
+        "error":  "Initializer replaced existing corrections"
+    }
+]

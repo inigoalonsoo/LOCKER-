@@ -1,0 +1,22 @@
+[
+  {
+    "File": "ProteccionHistorial.ps1",
+    "Lines": 246,
+    "SHA256Normalized": "c03d94dce0656c8dc69bd0f2e5603fbe8393152b2a5e9390014f772324fe88b8"
+  },
+  {
+    "File": "ReconstruirHistorial.ps1",
+    "Lines": 171,
+    "SHA256Normalized": "e694aa19147b955487b37889588e75d0c23826b860b54f8ca8abf012e9df97aa"
+  },
+  {
+    "File": "CrearCorreccionesManuales.ps1",
+    "Lines": 84,
+    "SHA256Normalized": "c62bb19b404d6b333164905d4f329c5a50c613cd5c6a9475b67ea369b1b6aae1"
+  },
+  {
+    "File": "MonitoreoLockerTiempoReal.ps1",
+    "Lines": 493,
+    "SHA256Normalized": "b31b02360af969bfebdfbe6e1f0f0176ba186dfd1c3d11abf35b6991e5fe1ae7"
+  }
+]

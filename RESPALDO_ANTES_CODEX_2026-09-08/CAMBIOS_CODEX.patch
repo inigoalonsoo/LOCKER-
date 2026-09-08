@@ -1,0 +1,376 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index b751eb5..6f55741 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -1,5 +1,14 @@
+ # CLAUDE.md — Sistema Locker Instrumentacion GHI
+ 
++> **TRASPASO CODEX 08/09/2026 ? CAMBIO LOCAL, TODAVIA NO DESPLEGADO.** La protecci?n anterior
++> no cubr?a ediciones directas ni borrados del historial. Ahora hay 4 scripts que deben viajar juntos:
++> `ProteccionHistorial.ps1`, `ReconstruirHistorial.ps1`, `CrearCorreccionesManuales.ps1` y
++> `MonitoreoLockerTiempoReal.ps1` v2.5. Gu?a: `DESPLIEGUE_CORRECCIONES.md`.
++> `ReconstruirHistorial.ps1` solo previsualiza por defecto; primera adopci?n requiere
++> `-AdoptarHistorialActual` y escritura requiere `-Aplicar`. No ejecutar a ciegas ni reactivar la tarea semanal.
++> El estado de producci?n descrito debajo corresponde a la sesi?n anterior; no se ha accedido al locker desde Codex.
++
++
+ > **START HERE — Para el desarrollador que retoma este proyecto**
+ >
+ > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
+@@ -17,7 +26,7 @@
+ > **Las tres cosas mas importantes:**
+ > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
+ > 2. No hay acceso directo por red al locker. El unico camino para desplegar es: copiar el script → enviarlo al PC del locker → pegarlo en Notepad via TeamViewer → guardar en `C:\ACTUM\`.
+-> 3. Nunca modificar manualmente `HistorialCompleto.csv`, `UltimoEventoProcesado.txt` ni `EstadoAnterior.json`.
++> 3. Tras desplegar y adoptar la protecci?n nueva, se permite editar `HistorialCompleto.csv` con el monitor pausado. No editar `UltimoEventoProcesado.txt`, `EstadoAnterior.json` ni `ProteccionHistorial.json`. Ver `DESPLIEGUE_CORRECCIONES.md`.
+ >
+ > **Pendiente prioritario:** El usuario mostrado en "En uso por X" puede diferir del asignado en ACTUM cuando la asignacion se hace desde el software sin abrir el locker fisicamente. Solucion: leer `Consigna.Usuario_Codigo` directamente en `GenerarDashboard.ps1` para la pestana Estado.
+ 
+@@ -2872,3 +2881,32 @@ seguian siendo de julio y abril. `MonitoreoLockerTiempoReal.ps1` solo procesa `E
+ > **Y que las correcciones manuales queden al final del fichero, fuera de orden cronologico, es normal.**
+ > Antes de la v2.4 eso disparaba el bucle (el marcador se tomaba de la ultima linea); ahora el marcador se
+ > calcula por el **maximo parseado** de todo el fichero, y el dashboard ordena por fecha al renderizar.
++
++## Traspaso Codex ? 2026-09-08 ? protecci?n de correcciones (LOCAL)
++
++La descripci?n del apartado N es hist?rica: ya no se omiten correcciones inv?lidas ni se contin?a sobrescribiendo.
++El historial actual se compara con la ?ltima salida registrada; se conservan altas, cambios y borrados como
++operaciones permanentes en `ProteccionHistorial.json`. `CorreccionesManuales.csv` sigue soportado y el
++inicializador existente conserva sus bytes si ya existe. Las ediciones directas del historial prevalecen sobre
++SQL y sobre las correcciones antiguas de la misma clave (fecha al segundo + n?mero de consigna).
++
++El monitor registra sus altas en la referencia de comparaci?n, sin absorber cambios manuales pendientes.
++Historial, marcador SQL y estado se guardan juntos mediante un diario recuperable, backups y reemplazos de
++archivo. Una interrupci?n bloquea monitor/reconstrucci?n hasta `-RecuperarTransaccion`; una edici?n posterior
++al fallo bloquea tambi?n la recuperaci?n, para no sobrescribirla. El bloqueo compartido coordina scripts,
++no editores humanos: pausar el monitor al editar; cerrar el editor antes de reanudar.
++
++El marcador se calcula solo desde movimientos autom?ticos. Si se pierde, el monitor protegido usa el
++marcador autom?tico guardado en el estado, nunca una fecha manual del historial.
++La primera adopci?n trata ausencias anteriores al marcador como borrados intencionales: revisar la
++previsualizaci?n porque no puede distinguir un borrado previo de un fallo hist?rico de captura.
++
++Validaci?n local y revisi?n independiente: ver `RESULTS.jsonl`, `tests/resultado.json` y
++`DESPLIEGUE_CORRECCIONES.md`. No se ha ejecutado SQL ni desplegado ni hecho commit/push.
++Pendiente: copia por TeamViewer, verificaci?n de archivos, previsualizaci?n sobre datos reales,
++adopci?n revisada y comprobaci?n de monitor con un movimiento real.
++
++REFUERZO 2026-09-08 ? protecci?n de historial ? las pruebas deben incluir un movimiento a?adido por el
++monitor y borrado por la persona antes de reconstruir. Caso medido: la primera versi?n local resucitaba
++ese movimiento porque la referencia solo se guardaba al reconstruir; `tests/intermediate.json` registra el
++fallo y `tests/Correcciones.Tests.ps1` contiene su regresi?n. No confundir mutex entre scripts con bloqueo de Excel.
+diff --git a/CrearCorreccionesManuales.ps1 b/CrearCorreccionesManuales.ps1
+index 3ec0031..f0a701c 100644
+--- a/CrearCorreccionesManuales.ps1
++++ b/CrearCorreccionesManuales.ps1
+@@ -1,6 +1,6 @@
+ # CrearCorreccionesManuales.ps1 - creado 2026-09-08
+ #
+-# Crea (o rehace) el fichero CorreccionesManuales.csv con las correcciones hechas a mano
++# Crea solo si no existe el fichero CorreccionesManuales.csv con las correcciones hechas a mano
+ # que NO existen en la tabla Eventos de SQL.
+ #
+ # POR QUE EXISTE ESTE FICHERO
+@@ -18,8 +18,7 @@
+ #
+ # COMO ANADIR UNA CORRECCION NUEVA
+ # --------------------------------
+-# Anadir una linea mas al array $lineas de abajo y volver a ejecutar este script, o bien
+-# editar directamente C:\Users\User\OneDrive...\LockerACTUM\CorreccionesManuales.csv.
++# Editar directamente C:\Users\User\OneDrive...\LockerACTUM\CorreccionesManuales.csv.
+ # Formato:  FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta;Motivo
+ #   - La fecha va en MM/dd/yyyy HH:mm:ss (formato americano, igual que el historial)
+ #   - La columna Motivo NO se copia al historial: solo documenta por que se hizo
+@@ -29,9 +28,22 @@
+ #
+ # Uso:  cd C:\ACTUM ; .\CrearCorreccionesManuales.ps1
+ 
++. (Join-Path $PSScriptRoot 'ProteccionHistorial.ps1')
++$ErrorActionPreference = 'Stop'
++
+ $carpeta = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM"
+ $destino = "$carpeta\CorreccionesManuales.csv"
+ 
++$lockerMutex = Enter-LockerLock $carpeta
++try {
++Assert-LockerNoPending $carpeta
++if (Test-Path -LiteralPath $destino) {
++    $existentes = @(Read-LockerCsv $destino)
++    [void](Get-LockerMap $existentes)
++    Write-Host "[PROTECCION] Ya existe: $($existentes.Count) correcciones. Se conserva sin cambiar un byte."
++    return
++}
++
+ $dev = "Devoluci" + [char]0xF3 + "n"
+ $ext = "Extracci" + [char]0xF3 + "n"
+ 
+@@ -46,12 +58,6 @@ $lineas = @(
+     "04/16/2026 12:45:00;SERGIO V.;VEGA;22;An.gases / TESTO 340 / 63862113;$ext;Cerrada;$motivo22"
+ )
+ 
+-if (Test-Path $destino) {
+-    $copia = "$carpeta\CorreccionesManuales_ANTES_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+-    Copy-Item $destino $copia -Force
+-    Write-Host "Ya existia. Copia de seguridad en: $copia" -ForegroundColor Yellow
+-}
+-
+ $utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+ [System.IO.File]::WriteAllText($destino, ($lineas -join "`r`n") + "`r`n", $utf8NoBOM)
+ 
+@@ -74,3 +80,5 @@ Write-Host ""
+ Write-Host "A partir de ahora ReconstruirHistorial.ps1 las reaplica en cada reconstruccion." -ForegroundColor Cyan
+ Write-Host "Este fichero NO se regenera solo: es la fuente de verdad de lo que se corrige a mano." -ForegroundColor Cyan
+ Write-Host ""
++
++} finally { Exit-LockerLock $lockerMutex }
+diff --git a/MonitoreoLockerTiempoReal.ps1 b/MonitoreoLockerTiempoReal.ps1
+index 6ec80a1..418d497 100644
+--- a/MonitoreoLockerTiempoReal.ps1
++++ b/MonitoreoLockerTiempoReal.ps1
+@@ -1,8 +1,9 @@
+-# MonitoreoLockerTiempoReal.ps1 v2.4
++# MonitoreoLockerTiempoReal.ps1 v2.5 (local; despliegue pendiente)
+ # Basado en tabla Eventos de SQL - garantiza CERO perdida de datos
+ # Aunque el PC se apague o la tarea se pare, al reiniciar recupera todos los eventos
+ #
+ # HISTORIAL DE VERSIONES
++#  v2.5  2026-09-08  Proteccion de cambios manuales, transaccion y cursor recuperable.
+ #  v2.4  2026-09-07  Incidente bucle de reprocesado. DOS fixes:
+ #                    - PASO 5 (marcador): el maximo se calcula por fecha PARSEADA.
+ #                      Antes 'Sort-Object FechaHoraApertura' ordenaba por TEXTO y
+@@ -24,6 +25,13 @@ $archivoEstadoAnterior = "$carpetaOneDrive\EstadoAnterior.json"
+ $archivoHTML = "$carpetaOneDrive\DashboardLocker.html"
+ $archivoMarcador = "$carpetaOneDrive\UltimoEventoProcesado.txt"
+ 
++# Coordinate with reconstruction: never append during a history transaction.
++$ErrorActionPreference = 'Stop'
++. (Join-Path $PSScriptRoot 'ProteccionHistorial.ps1')
++$lockerMutex = Enter-LockerLock $carpetaOneDrive
++try {
++Assert-LockerNoPending $carpetaOneDrive
++
+ # Crear carpeta si no existe
+ if (-not (Test-Path $carpetaOneDrive)) {
+     New-Item -ItemType Directory -Path $carpetaOneDrive -Force | Out-Null
+@@ -61,6 +69,13 @@ if (Test-Path $archivoMarcador) {
+     }
+ }
+ 
++# A manual future date must never become the SQL cursor after marker loss.
++if ($ultimoProcesado -eq $null -and (Test-Path (Join-Path $carpetaOneDrive 'ProteccionHistorial.json'))) {
++    $proteccion = [IO.File]::ReadAllText((Join-Path $carpetaOneDrive 'ProteccionHistorial.json')) | ConvertFrom-Json
++    if ($proteccion.Version -ne 1) { throw 'Estado de proteccion invalido' }
++    $ultimoProcesado = [datetime]::ParseExact($proteccion.SqlMarker,'yyyy-MM-dd HH:mm:ss',[cultureinfo]::InvariantCulture)
++}
++
+ # Si no hay marcador, usar la fecha MAS RECIENTE del CSV
+ #
+ # FIX 2026-09-07 (incidente bucle de reprocesado):
+@@ -74,16 +89,9 @@ if ($ultimoProcesado -eq $null) {
+     $esPrimeraEjecucion = $true
+     if (Test-Path $archivoHistorial) {
+         try {
+-            $todasLasLineas = [System.IO.File]::ReadAllLines($archivoHistorial)
+-            foreach ($linea in $todasLasLineas) {
+-                if ($linea -match '^(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2});') {
+-                    try {
+-                        $fLinea = [DateTime]::ParseExact($Matches[1], 'MM/dd/yyyy HH:mm:ss', $null)
+-                        if ($ultimoProcesado -eq $null -or $fLinea -gt $ultimoProcesado) {
+-                            $ultimoProcesado = $fLinea
+-                        }
+-                    } catch { }
+-                }
++            foreach ($fila in @(Read-LockerCsv $archivoHistorial)) {
++                $fLinea = [DateTime]::ParseExact($fila.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', [cultureinfo]::InvariantCulture)
++                if ($ultimoProcesado -eq $null -or $fLinea -gt $ultimoProcesado) { $ultimoProcesado = $fLinea }
+             }
+         } catch {
+             $ultimoProcesado = $null
+@@ -443,44 +451,10 @@ WHERE C.FechaHoraUltimaApertura IS NOT NULL
+ if ($nuevosMovimientos.Count -gt 0) {
+     Write-Host "[CSV] Nuevos movimientos: $($nuevosMovimientos.Count)" -ForegroundColor Green
+ 
+-    $existeHistorial = Test-Path $archivoHistorial
+-    $utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+-
+-    if (-not $existeHistorial) {
+-        [System.IO.File]::WriteAllText($archivoHistorial, "FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta`r`n", $utf8NoBOM)
+-    }
+-
+-    foreach ($mov in $nuevosMovimientos) {
+-        $linea = "$($mov.FechaHoraApertura);$($mov.Usuario);$($mov.Apellidos);$($mov.Consigna);$($mov.Descripcion);$($mov.Accion);$($mov.EstadoPuerta)"
+-        [System.IO.File]::AppendAllText($archivoHistorial, "$linea`r`n", $utf8NoBOM)
+-    }
+-
+-    Write-Host "[CSV] Historial actualizado" -ForegroundColor Green
+-
+-    # Actualizar marcador con el ultimo evento procesado (formato yyyy-MM-dd HH:mm:ss)
+-    #
+-    # FIX 2026-09-07 (BUG RAIZ del incidente del bucle de reprocesado):
+-    # Antes: 'Sort-Object FechaHoraApertura' ordenaba por TEXTO. Sobre fechas en
+-    # formato MM/dd/yyyy el maximo alfabetico siempre es '12/...', asi que el
+-    # marcador saltaba a DICIEMBRE y se quedaba atrapado ahi. A partir de ese
+-    # momento la query pedia ~9 meses de eventos cada minuto, el CSV crecia sin
+-    # control (llego a 103.495 filas con solo 171 movimientos reales) y SQL se
+-    # saturaba hasta tumbar el dashboard.
+-    # Ahora se calcula el MAXIMO por fecha PARSEADA, sin ordenar por texto.
+-    $ultimaFechaObj = $null
+-    foreach ($mv in $nuevosMovimientos) {
+-        try {
+-            $fMov = [DateTime]::ParseExact($mv.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
+-            if ($ultimaFechaObj -eq $null -or $fMov -gt $ultimaFechaObj) { $ultimaFechaObj = $fMov }
+-        } catch { }
+-    }
+-
+-    if ($ultimaFechaObj -ne $null) {
+-        [System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+-        Write-Host "[MARCADOR] Actualizado a $($ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor Green
+-    } else {
+-        Write-Host "[MARCADOR] Ninguna fecha parseable - marcador SIN CAMBIOS (mas seguro que avanzarlo a ciegas)" -ForegroundColor Red
+-    }
++    # Save history + cursor + automatic baseline as one recoverable transaction.
++    # Cursor uses only these new automatic movements, never manual future dates.
++    Save-LockerAutomaticMovements -Folder $carpetaOneDrive -Rows @($nuevosMovimientos)
++    Write-Host "[CSV] Historial y marcador verificados" -ForegroundColor Green
+ 
+ } else {
+     Write-Host "[CSV] No hay nuevos movimientos" -ForegroundColor Yellow
+@@ -515,3 +489,5 @@ try {
+ . "C:\ACTUM\GenerarDashboard.ps1"
+ 
+ Write-Host "[DONE] Monitoreo completado: $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Cyan
++
++} finally { Exit-LockerLock $lockerMutex }
+diff --git a/ReconstruirHistorial.ps1 b/ReconstruirHistorial.ps1
+index 35f089d..17cfe37 100644
+--- a/ReconstruirHistorial.ps1
++++ b/ReconstruirHistorial.ps1
+@@ -4,7 +4,11 @@
+ #
+ # Algoritmo: para cada consigna, tomar su estado actual y recorrer sus eventos
+ # del mas reciente al mas antiguo asignando acciones alternadas (Extraccion/Devolucion).
+-# Esto garantiza que el ULTIMO movimiento de cada consigna coincida con la realidad de SQL.
++# Las correcciones manuales tienen prioridad sobre las acciones inferidas desde SQL.
++
++param([switch]$AdoptarHistorialActual, [switch]$Aplicar, [switch]$RecuperarTransaccion)
++$ErrorActionPreference = 'Stop'
++. (Join-Path $PSScriptRoot 'ProteccionHistorial.ps1')
+ 
+ $servidor = "GHI-TAQUILLAS\SQLEXPRESS"
+ $baseDatos = "Actum_GHI"
+@@ -12,6 +16,13 @@ $carpetaOneDrive = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerA
+ $archivoHistorial = "$carpetaOneDrive\HistorialCompleto.csv"
+ $archivoMarcador  = "$carpetaOneDrive\UltimoEventoProcesado.txt"
+ 
++$lockerMutex = Enter-LockerLock $carpetaOneDrive
++try {
++if ($RecuperarTransaccion) {
++    Complete-LockerTransaction $carpetaOneDrive
++    return
++}
++Assert-LockerNoPending $carpetaOneDrive
+ Write-Host "[RECONSTRUCCION] Iniciando..." -ForegroundColor Cyan
+ 
+ # ----------------------------------------------------------------------
+@@ -152,95 +163,9 @@ foreach ($row in $filasProcesar) {
+ 
+ Write-Host "[RECONSTRUCCION] Movimientos procesados: $($movimientos.Count)" -ForegroundColor Cyan
+ 
+-# ----------------------------------------------------------------------
+-# 2.5 CORRECCIONES MANUALES  (anadido 2026-09-08)
+-#
+-# Las correcciones hechas a mano NO existen en la tabla Eventos: una asignacion
+-# hecha desde el ACTUM EPI Visor sin abrir el locker fisicamente no genera evento.
+-# Por eso, al reconstruir desde Eventos, se perdian. Ahora viven en su propio
+-# fichero y se reaplican SIEMPRE, en cada reconstruccion.
+-#
+-#   CorreccionesManuales.csv   <- fuente de verdad de lo que se corrige a mano
+-#   HistorialCompleto.csv      <- regenerable, desechable
+-#
+-# Formato (mismo delimitador ; y mismas columnas, mas una columna Motivo al final
+-# que NO se copia al historial, solo documenta por que se hizo):
+-#   FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta;Motivo
+-#   La fecha va en MM/dd/yyyy HH:mm:ss, igual que el historial.
+-# ----------------------------------------------------------------------
+-$archivoCorrecciones = "$carpetaOneDrive\CorreccionesManuales.csv"
+-$nCorr = 0
+-$nCorrMalas = 0
+-
+-if (Test-Path $archivoCorrecciones) {
+-    try {
+-        $correcciones = Import-Csv -Path $archivoCorrecciones -Delimiter ";" -Encoding UTF8
+-        foreach ($c in $correcciones) {
+-            $fRaw = $null
+-            try {
+-                $fRaw = [DateTime]::ParseExact($c.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
+-            } catch {
+-                Write-Host "[CORRECCIONES] Fecha ilegible, se omite: $($c.FechaHoraApertura)" -ForegroundColor Red
+-                $nCorrMalas++
+-                continue
+-            }
+-            $movimientos += [PSCustomObject]@{
+-                FechaRaw          = $fRaw
+-                FechaHoraApertura = $c.FechaHoraApertura
+-                Usuario           = $c.Usuario
+-                Apellidos         = $c.Apellidos
+-                Consigna          = $c.Consigna
+-                Descripcion       = $c.Descripcion
+-                Accion            = $c.Accion
+-                EstadoPuerta      = $c.EstadoPuerta
+-            }
+-            $nCorr++
+-        }
+-        Write-Host "[CORRECCIONES] Reaplicadas $nCorr correcciones manuales (omitidas: $nCorrMalas)" -ForegroundColor Cyan
+-    } catch {
+-        Write-Host "[CORRECCIONES] ERROR leyendo $archivoCorrecciones : $_" -ForegroundColor Red
+-        Write-Host "[CORRECCIONES] Se continua SIN aplicarlas - revisar el fichero" -ForegroundColor Red
+-    }
+-} else {
+-    Write-Host "[CORRECCIONES] No hay fichero de correcciones manuales ($archivoCorrecciones)" -ForegroundColor DarkGray
+-}
+-
+-# ----------------------------------------------------------------------
+-# 3. Ordenar todo por fecha ascendente y escribir el CSV
+-# ----------------------------------------------------------------------
+-$movimientosOrdenados = $movimientos | Sort-Object FechaRaw
+-
+-$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+-$sb = New-Object System.Text.StringBuilder
+-[void]$sb.AppendLine("FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta")
+-foreach ($mov in $movimientosOrdenados) {
+-    [void]$sb.AppendLine("$($mov.FechaHoraApertura);$($mov.Usuario);$($mov.Apellidos);$($mov.Consigna);$($mov.Descripcion);$($mov.Accion);$($mov.EstadoPuerta)")
+-}
+-[System.IO.File]::WriteAllText($archivoHistorial, $sb.ToString(), $utf8NoBOM)
+-
+-Write-Host "[RECONSTRUCCION] CSV escrito: $archivoHistorial" -ForegroundColor Green
+-
+-# ----------------------------------------------------------------------
+-# 4. Actualizar marcador con la fecha del ultimo evento procesado
+-# ----------------------------------------------------------------------
+-if ($movimientosOrdenados.Count -gt 0) {
+-    $ultimo = ($movimientosOrdenados | Select-Object -Last 1).FechaRaw
+-    [System.IO.File]::WriteAllText($archivoMarcador, $ultimo.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+-    Write-Host "[RECONSTRUCCION] Marcador: $($ultimo.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor Green
+-}
+-
+-# ----------------------------------------------------------------------
+-# 5. Resumen: cuantas consignas quedan marcadas como "En uso" tras reconstruccion
+-# ----------------------------------------------------------------------
+-$ultimoPorConsigna = $movimientosOrdenados |
+-    Group-Object Consigna |
+-    ForEach-Object { $_.Group | Sort-Object FechaRaw -Descending | Select-Object -First 1 }
+-
+-$enUso = $ultimoPorConsigna | Where-Object { $_.Accion -like '*Extracci*' } | Sort-Object { [int]$_.Consigna }
+-
+-Write-Host ""
+-Write-Host "[RESUMEN] Consignas 'En uso' segun CSV reconstruido:" -ForegroundColor Yellow
+-$enUso | Select-Object Consigna, Usuario, Apellidos, Descripcion | Format-Table -AutoSize
+-
+-Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones manuales reaplicadas)" -ForegroundColor Cyan
+-Write-Host "Siguiente paso: ejecutar 'C:\ACTUM\GenerarDashboard.ps1' para regenerar el HTML" -ForegroundColor Yellow
++# Apply validated manual differences and keep SQL cursor independent of manual dates.
++$resultado = Invoke-LockerRebuild -Folder $carpetaOneDrive -AutomaticRows @($movimientos.ToArray()) -AdoptCurrent:$AdoptarHistorialActual -Preview:(-not $Aplicar)
++$resultado | Select-Object Before,After,Upserts,Deleted,Marker,Preview | Format-List
++$resultado.Details | Format-Table -AutoSize
++if (-not $Aplicar) { Write-Host '[PREVISUALIZACION] No se ha escrito ningun dato. Anadir -Aplicar para guardar.' }
++} finally { Exit-LockerLock $lockerMutex }

@@ -1,0 +1,117 @@
+﻿[
+    {
+        "name":  "direct edit survives two rebuilds",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "deletion survives two rebuilds",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "manual addition survives without advancing SQL marker",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "invalid correction stops without overwriting history or marker",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "initializer preserves existing corrections byte for byte",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "delete automatic append after adoption remains deleted",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "later edit and change of date survive",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "new SQL event after cursor is recovered",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "preview creates no files and changes no bytes",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "CSV quotes semicolons accents and multiline survive round trip",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "duplicate event identity blocks rewrite",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "missing correction file after adoption blocks rewrite",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "header-only history preserves intentional delete all",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "empty SQL and corrupt protection state fail closed",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "interruption after ProteccionHistorial.json recovers without loss",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "interruption after HistorialCompleto.csv recovers without loss",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "interruption after UltimoEventoProcesado.txt recovers without loss",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "recovery refuses a new human edit after interruption",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "mutex excludes a second PowerShell process",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "real reconstruction entry point defaults to preview then applies",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "automatic append does not absorb pending manual edits",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "incomplete transaction journal is rejected and retained",
+        "pass":  true,
+        "error":  ""
+    },
+    {
+        "name":  "monitor cannot infer cursor from manual future date after marker loss",
+        "pass":  true,
+        "error":  ""
+    }
+]

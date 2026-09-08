@@ -12,3 +12,6 @@ Thumbs.db
 
 # Módulos PowerShell descargados localmente
 ImportExcel_module/
+
+# Ledger de resultados: fichero de bloqueo temporal
+RESULTS.jsonl.lock

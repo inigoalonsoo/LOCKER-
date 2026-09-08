@@ -1,0 +1,433 @@
+{
+  "created_at": "2026-09-08T11:11:01.206749+02:00",
+  "baseline_commit": "bd8cf4d4124f5d75bdeaa7130d068ffcc1e86961",
+  "baseline_commit_date": "2026-09-08T10:34:01+02:00",
+  "basis": "git status --short vacio al iniciar el trabajo; HEAD no ha cambiado; originales reconstruidos de los blobs de ese commit",
+  "scope": "67 archivos versionados de desarrollo. No incluye .git, archivos ignorados ni datos actuales de produccion.",
+  "line_endings": "Bytes canonicos de Git; core.autocrlf=true puede haber usado CRLF en la copia de trabajo original. Contenido conservado; no se afirma identidad de saltos de linea con el disco anterior.",
+  "changed_existing_files": [
+    "CLAUDE.md",
+    "CrearCorreccionesManuales.ps1",
+    "MonitoreoLockerTiempoReal.ps1",
+    "ReconstruirHistorial.ps1"
+  ],
+  "added_files_at_snapshot": [
+    "DESPLIEGUE_CORRECCIONES.md",
+    "LOCKER_CORRECCIONES_2026-09-08.zip",
+    "ProteccionHistorial.ps1",
+    "RESULTS.jsonl",
+    "RESULTS.jsonl.lock",
+    "SHA256.json",
+    "VerificarEntrega.ps1",
+    "tests/Correcciones.Tests.ps1",
+    "tests/baseline.json",
+    "tests/intermediate.json",
+    "tests/last-run.txt",
+    "tests/resultado.json",
+    "tests/revision.json"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "git_blob": "1a85f54eaba478054c2854dbd75d88ea24a4142c",
+      "bytes": 240,
+      "sha256": "253649ff8c502fd3d0abdf3832ecddf8f8f3540375dd165fc41311773182f3ce"
+    },
+    {
+      "path": "00.Intrumentos_Locker (1).xlsx",
+      "git_blob": "6a72dd29f9784df36b6b1ed425be421e4af33ab4",
+      "bytes": 23874,
+      "sha256": "fbe6dcd2b2933bfaee8bb878b56ce257d104621df936e7517b098f3fe5708600"
+    },
+    {
+      "path": "00.Intrumentos_Locker (1).xlsx.url",
+      "git_blob": "bb083ac2ddd45216db2b2994f990645b0f776d05",
+      "bytes": 147,
+      "sha256": "84a0043fae8363ac06f9bd49ea2140bbae814688002c8286b31cd145ddf584c3"
+    },
+    {
+      "path": "ActualizarExcel.ps1",
+      "git_blob": "a29257afa5afb88a55e05eba92dbde00e8645c32",
+      "bytes": 6871,
+      "sha256": "2f283a773b5cbf1a40e226586dc59e0a444b698fcbf3b03b9b4820de46658b94"
+    },
+    {
+      "path": "Agent.md",
+      "git_blob": "80ac1ec3890d617c0e0d999808c58466ac3e9d08",
+      "bytes": 16233,
+      "sha256": "8e4374b58cd6fa619881a7719d61cb6514e1871306187476e6868927242141cf"
+    },
+    {
+      "path": "AuditarDashboard.ps1",
+      "git_blob": "eaca8e13fdebec047431e6f0be37a31d332456d1",
+      "bytes": 6259,
+      "sha256": "8df4f6b7142010c7b7f832f91ba711ff5d405989f8ff3c9d3d7da9150d770831"
+    },
+    {
+      "path": "BackupHistorial.ps1",
+      "git_blob": "8d74c45aefc4c55fafc0465410bbfb8766ee559d",
+      "bytes": 2317,
+      "sha256": "6951a61c521f624c24b4c0dbc5df07813e4dd136054f7bdb999b8490a195f0de"
+    },
+    {
+      "path": "CLAUDE.md",
+      "git_blob": "b751eb51d01246182dc9acf54e8074999aea3bff",
+      "bytes": 161519,
+      "sha256": "01f0dfecd31b76d88d9a628738fd185cac386785a5c252ccb4c9201d9a5ae3d8"
+    },
+    {
+      "path": "COMANDOS.docx",
+      "git_blob": "d0bcc39b62877b2179097c1ec93281989f0f412e",
+      "bytes": 10641,
+      "sha256": "a6e13ebb8caa47865242faabc9f13ab57191138a7f01641a8cd31d2ef53d8134"
+    },
+    {
+      "path": "ConfigurarMonitoreo.md",
+      "git_blob": "31b473e47af520f56cb948093f2786af08e20c2c",
+      "bytes": 4185,
+      "sha256": "c82143e94aeb2831cffe88d2e3a57249930a685141af98a737f5346a54a7c161"
+    },
+    {
+      "path": "ConfigurarTareaOculta.ps1",
+      "git_blob": "c0bcb6ee872efbdb9709fc512c33805126058d08",
+      "bytes": 2288,
+      "sha256": "fa7b0056a940aba8ee2a42896d3d5471082195d6f375ac6efe03d14e3429129a"
+    },
+    {
+      "path": "ConfigurarTareaOcultaVBS.ps1",
+      "git_blob": "bda053b1d48daa3b044ea155e2977a2f332f8ee1",
+      "bytes": 2218,
+      "sha256": "9fab64e78816497a50210f6b022d0d2045424d17837b0cfe6741aeb2f45f0dbb"
+    },
+    {
+      "path": "CopiarLogo.ps1",
+      "git_blob": "23afb79d2b749e69cbaf49d1773e179ad6ae980a",
+      "bytes": 776,
+      "sha256": "2e3f348bba0a7e6582452783289af7191a670d573eedf1e328b2d0e8d8b8b5b0"
+    },
+    {
+      "path": "CrearCorreccionesManuales.ps1",
+      "git_blob": "3ec00313593d3d7a6cac174fd7d6471d444109e7",
+      "bytes": 4184,
+      "sha256": "f477f9d2053e2abe57cea08a91598d2919f8d8c6311f9e915a663362776f05fe"
+    },
+    {
+      "path": "DashboardAdmin.url",
+      "git_blob": "a09375300e5e10527201d5a1e2b4002bdb50ec89",
+      "bytes": 303,
+      "sha256": "4fb384092dda99ed3924895708b1c0019e9a9a50df5490ee864a50f13640e28e"
+    },
+    {
+      "path": "EjecutarAdminOculto.vbs",
+      "git_blob": "d94ec9c36c1fd4daa517fbe86a168564ae62dcf2",
+      "bytes": 165,
+      "sha256": "ae56279d49994b61ba0d55fa49fef84d9307d11180cdd036f950d88ff8858ae8"
+    },
+    {
+      "path": "EjecutarBackupOculto.vbs",
+      "git_blob": "6df9f06bc9a845fd9103268b43c19a13b2f4d089",
+      "bytes": 160,
+      "sha256": "2558bf1c3c732ee1f0cdd5a7985369c0af2212b627086d92c548d33c4e25984b"
+    },
+    {
+      "path": "EjecutarDashboardOculto.vbs",
+      "git_blob": "e498c8a204f963d9b951098973a68a7eb31bffe4",
+      "bytes": 161,
+      "sha256": "2e1ccf072396958d9d4ba12c7c540cf40c951d85d36a709d5ddab1cadaa61f07"
+    },
+    {
+      "path": "EjecutarExcelOculto.vbs",
+      "git_blob": "57a781dc99693277135cd56f2d9a007a990a9e94",
+      "bytes": 160,
+      "sha256": "22c720f3917d46993720c76cec1b84214598298ad930fdccca63a51c1c67fe11"
+    },
+    {
+      "path": "EjecutarMonitoreoOculto.vbs",
+      "git_blob": "417db0ef28c08ea20e996302adcb49f141c66ac7",
+      "bytes": 189,
+      "sha256": "19eb5fe6684f088b354f8b8f7f93f6c2de36ba2f917e46d457c150a9b6e89dd5"
+    },
+    {
+      "path": "ExportarLocker.ps1",
+      "git_blob": "9c0c17477a78bac51301dbf5e04c5ce33f020258",
+      "bytes": 2520,
+      "sha256": "be70f0fb083bfbadfe3ebcb56de5f04c5c071c005347ab8d1702037a287de575"
+    },
+    {
+      "path": "Finalizing Locker Dashboard System.md",
+      "git_blob": "0881f7e4df961082cdc685ac01757bf3cb71b7bf",
+      "bytes": 1003645,
+      "sha256": "3dec3328f39f2f07689b9ec67fdd9ed9c6f9a314247697700143fbb25f27a22c"
+    },
+    {
+      "path": "GHI-Locker-Dashboard.zip",
+      "git_blob": "5ffa0bd42faec34ea29217610751643d2c613435",
+      "bytes": 45817,
+      "sha256": "185567d2539082239c7fbf324cdf6a90177c8c57332e407a0078806845c5c68b"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/.gitignore",
+      "git_blob": "f94ed3ff4896fecbc705f99b905c0e53ef948706",
+      "bytes": 560,
+      "sha256": "5b7b2934c59dcbba76bc53d1ff1769f0f2340718c1ce9550625e47f07c8a6831"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/CLAUDE.md",
+      "git_blob": "61f703b1519e98ced4186b3d89166f415ddeb416",
+      "bytes": 27925,
+      "sha256": "10e7e1b038a40bde263de2ac9a6e7c8ed5e3cd538456b5ed50728313efa7023f"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/README.md",
+      "git_blob": "ee7fc888e306b6da452319db33606c6d2954649d",
+      "bytes": 8455,
+      "sha256": "fcbdbdfd17aff1db774bd8db3043dd77e99998663e42b76a25211d2fe788584c"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/assets/logo_base64.txt",
+      "git_blob": "e2004f0ecba04ea34316326da871cc02c1c5a30f",
+      "bytes": 5189,
+      "sha256": "e10f38d6f8779f3e56a04dd84a500172911cbd5ca5692a93eb4521c5a3fa5f90"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/scripts/ActualizarExcel.ps1",
+      "git_blob": "a29257afa5afb88a55e05eba92dbde00e8645c32",
+      "bytes": 6871,
+      "sha256": "2f283a773b5cbf1a40e226586dc59e0a444b698fcbf3b03b9b4820de46658b94"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/scripts/GenerarDashboard.ps1",
+      "git_blob": "386136f7054fdf260f3ca7f310c95b65e530f401",
+      "bytes": 22297,
+      "sha256": "d233a87406bc4d35c58704ffdd84789abccaa799de637a72a2027c27c31c8088"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/scripts/MonitoreoLockerTiempoReal.ps1",
+      "git_blob": "34191f2e82aef6dff7767292478bd55d43ff6e00",
+      "bytes": 5527,
+      "sha256": "9eafaafc1af8568f0cf4420d162c4e8a0ecfbc77b32ef375df198307d11f3c54"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/tareas-programadas/ConfigurarTareaOcultaVBS.ps1",
+      "git_blob": "bda053b1d48daa3b044ea155e2977a2f332f8ee1",
+      "bytes": 2218,
+      "sha256": "9fab64e78816497a50210f6b022d0d2045424d17837b0cfe6741aeb2f45f0dbb"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/tareas-programadas/EjecutarAdminOculto.vbs",
+      "git_blob": "b4d131a80da780b891864298d3ec873bf5d54b8e",
+      "bytes": 166,
+      "sha256": "bcd28bf353cb901ddf5f43fb387160762804d2645e780d158692a1686f3f7c5c"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/tareas-programadas/EjecutarDashboardOculto.vbs",
+      "git_blob": "e498c8a204f963d9b951098973a68a7eb31bffe4",
+      "bytes": 161,
+      "sha256": "2e1ccf072396958d9d4ba12c7c540cf40c951d85d36a709d5ddab1cadaa61f07"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/tareas-programadas/EjecutarExcelOculto.vbs",
+      "git_blob": "57a781dc99693277135cd56f2d9a007a990a9e94",
+      "bytes": 160,
+      "sha256": "22c720f3917d46993720c76cec1b84214598298ad930fdccca63a51c1c67fe11"
+    },
+    {
+      "path": "GHI-Locker-Dashboard/tareas-programadas/EjecutarMonitoreoOculto.vbs",
+      "git_blob": "3d3b387068a95a8453d021d32f2017e3aee43ae1",
+      "bytes": 181,
+      "sha256": "e64751cd2f992998e1a2134af96ffef5f01da40c2b82c68bf9077f42385debd1"
+    },
+    {
+      "path": "GenerarDashboard.ps1",
+      "git_blob": "cb4e1ee80ab303a6394fc7031342d5367c088685",
+      "bytes": 28688,
+      "sha256": "567f7d1244b3d975c10a8c6ed08158b868b7ee0b1a5bfbf8aebba7666ea8bad7"
+    },
+    {
+      "path": "GenerarDashboardAdmin.ps1",
+      "git_blob": "f26af0eec6ad2095c6651c12b976429b705a90ff",
+      "bytes": 49530,
+      "sha256": "bf016d69d5624555fe619cd455a0a1fbdc37b926349ba6286deb181699406571"
+    },
+    {
+      "path": "GenerarDashboard_NUEVO.ps1",
+      "git_blob": "dcfd14d1187966b04482a5550d8644fe8dfa8e08",
+      "bytes": 19664,
+      "sha256": "d63e37b707b159962408c2c35a63c4b38b17561338ed069006d2f308f288cf54"
+    },
+    {
+      "path": "GenerarDashboard_PARA_LOCKER.ps1",
+      "git_blob": "442a0f44e32cbedb7376ff0fda41d1e5b0f3c545",
+      "bytes": 21472,
+      "sha256": "7a6394e023c6f900eec53d16433a7807342d9b9f0780e23c5d3417d2677776b3"
+    },
+    {
+      "path": "GenerarDashboard_TILDES.txt",
+      "git_blob": "a9608b1d2844ac6ce0c51a1ffff43aadc8cffcc5",
+      "bytes": 20093,
+      "sha256": "96f6e9b385e965cbb43fb231abda17f36577bf7e6ca2515fa723dc742f85cb90"
+    },
+    {
+      "path": "Guia_Automatizacion.md",
+      "git_blob": "bc7bfab03d278a8ed0ba9ec740f9535ad08db35b",
+      "bytes": 5363,
+      "sha256": "3ac4e4c999a2d5fffc610df62394caf38cda17dd169600128c98c90064260835"
+    },
+    {
+      "path": "INSTRUCCIONES LOCKER.docx.url",
+      "git_blob": "d385c13632cc8c54cfa9a74967e27ad20b361394",
+      "bytes": 142,
+      "sha256": "cb4b84733a343466e7471e9b7f4b8045336af603e873c05dafdffd7b206ea638"
+    },
+    {
+      "path": "InvestigarACTUM.ps1",
+      "git_blob": "5f9c2f800795c6ba7050ac059b3606bbd7fc6f41",
+      "bytes": 6435,
+      "sha256": "cb28a6867759d979aa0b40fc5ce78f6be30e48f95f4f605c4aabdc59fe2e31d0"
+    },
+    {
+      "path": "Invisible Locker Monitoring.md",
+      "git_blob": "f8b952a490eb2beca206a86091a32c0d389f9703",
+      "bytes": 515253,
+      "sha256": "26ec5ca7d4559d1f1c0105c3602c56443e34387bb1b36e41dab1dce3b687fabf"
+    },
+    {
+      "path": "LOCKER - Matenimiento para un futuro (lo mas reciente).docx",
+      "git_blob": "cde95ba4af327c06f7915ddf7feb53db65e53677",
+      "bytes": 12666,
+      "sha256": "a98aa40f1b1937d77dc94a735b637e03e5f19576ffcb5c83569e4ed24b48606f"
+    },
+    {
+      "path": "LOCKER - lo que hay que hacer ahora.docx",
+      "git_blob": "74fda9d8bcf4e6ac732e3adf1c4e1fe9d0a8cbda",
+      "bytes": 19815,
+      "sha256": "db783ba12fcff10c54d02c614c7ea2e1b678ca584bbc0e809563a9028013a3d9"
+    },
+    {
+      "path": "LOCKER INSTRUMENTACIÓN.txt",
+      "git_blob": "06e3a043b0accc56bbd75499b8acd92735ac78d5",
+      "bytes": 520,
+      "sha256": "adf4f4e5c67a0a0aea332acf5604dfc1165a9021b786f23737bf8eae4959fbf3"
+    },
+    {
+      "path": "LimpiarACTUM.ps1",
+      "git_blob": "4aa02ced43cd163ce4c82f7c36b0ea480ef8d451",
+      "bytes": 6851,
+      "sha256": "07d70710f894991bee3356926a1eb08ba93cee93a3ddbd59b75c6afe750b80a3"
+    },
+    {
+      "path": "MonitoreoLockerTiempoReal.ps1",
+      "git_blob": "6ec80a165ca303a2927b578dd011ade86463b460",
+      "bytes": 23689,
+      "sha256": "86e044436cf7a8330855791e6a1ff9ef92f45008268c9251a308ba932b59c6ef"
+    },
+    {
+      "path": "MonitoreoLockerTiempoReal_v1_BACKUP.ps1",
+      "git_blob": "df30a3fe5412edb6becdb6f3fed4420e396fdef9",
+      "bytes": 5537,
+      "sha256": "ad2955349f6caf761f0d6c7f7742ca69ba6af31dace968bf7565a0116cb811d1"
+    },
+    {
+      "path": "MoverArchivosOneDrive.ps1",
+      "git_blob": "52478c1217febed404beee9863400175cdafda56",
+      "bytes": 1455,
+      "sha256": "c721db9eb7cc798a1a592fb6a9f9ce55105e42a6a57d2066bf7d86e549ec2b72"
+    },
+    {
+      "path": "OIP (9).webp",
+      "git_blob": "087c897b71fede2c66ef4a34f007e9658c9fe627",
+      "bytes": 3890,
+      "sha256": "a5a469f1472443e3ab0333a0f9a904fcb8ac38be7cb3be939241a6ff200454bc"
+    },
+    {
+      "path": "PatchFuncionTildes.ps1",
+      "git_blob": "cbd5c49a1e1f005eb48b143ea78afcbf394362ff",
+      "bytes": 2210,
+      "sha256": "83a77b8ccef2475c0c2972df0c9c8bbd54b00b3468aae7ec1fa77a1fad270a8b"
+    },
+    {
+      "path": "README.md",
+      "git_blob": "ee7fc888e306b6da452319db33606c6d2954649d",
+      "bytes": 8455,
+      "sha256": "fcbdbdfd17aff1db774bd8db3043dd77e99998663e42b76a25211d2fe788584c"
+    },
+    {
+      "path": "ReconstruirHistorial.ps1",
+      "git_blob": "35f089dba0353de6e2b2bf676c7384e1b614c38c",
+      "bytes": 11396,
+      "sha256": "db44e334ab325e86a7b2d0e35216a50df63f32a2bc5be9fb8ac05ddfc0835a44"
+    },
+    {
+      "path": "analisis_final_bd.md",
+      "git_blob": "ad69c57eb2c985b96b5a7931da4114702d2af834",
+      "bytes": 4852,
+      "sha256": "22ba9501cdc65b7c2076483323d1a6724e2a9554e6b3673d32796dd57f9579d6"
+    },
+    {
+      "path": "comandos_exploracion_parte2.md",
+      "git_blob": "61e786472b7be61f1b8791ba43542c249b71c7ee",
+      "bytes": 3685,
+      "sha256": "6915c8607e0c5dac63da4892945d7310c4ef14d1af59e97f4cbf2b4da31def00"
+    },
+    {
+      "path": "comandos_investigacion.md",
+      "git_blob": "3bc89bd120a58404ea8644966a551e8e8eee211d",
+      "bytes": 3701,
+      "sha256": "ed531f074f5b74fba9dc604a9d176376c8f6c9dcaf837f8235321527ae43d147"
+    },
+    {
+      "path": "comandos_sql_parte3.md",
+      "git_blob": "932bbf904b1ab336d1748e0602805b34ccf3dd26",
+      "bytes": 3229,
+      "sha256": "821377d6635a95bada952f72cd8e85af6a2407170363287851c576e3c2fc54d9"
+    },
+    {
+      "path": "consulta_sql_final.md",
+      "git_blob": "f2c0422a4ba16a6dd66d5e381586322b917ba3fd",
+      "bytes": 2716,
+      "sha256": "abc81682ee67397b971bb3df406e6d0828172c4549eac40c3ed17771a2eafef2"
+    },
+    {
+      "path": "desktop.ini",
+      "git_blob": "437ce1d9ab59508b9495696579aebc61689cfdc7",
+      "bytes": 82,
+      "sha256": "f4475c9f7d7688d5363f64fc74f6b4727fbfca49a20156fa95db43559818e947"
+    },
+    {
+      "path": "historial_conversacion.md",
+      "git_blob": "a7218fc934726f15a781bc6ceb1283d7c3bca2ab",
+      "bytes": 3797,
+      "sha256": "606de8cdd890eae706925a04d95f404f2dff5ff2cf1c2f7f0773f114170c5715"
+    },
+    {
+      "path": "logo_base64.txt",
+      "git_blob": "e2004f0ecba04ea34316326da871cc02c1c5a30f",
+      "bytes": 5189,
+      "sha256": "e10f38d6f8779f3e56a04dd84a500172911cbd5ca5692a93eb4521c5a3fa5f90"
+    },
+    {
+      "path": "resultados_investigacion.md",
+      "git_blob": "ce7f1bed0bc5d4f923f91df7b987f9fa28722c83",
+      "bytes": 5009,
+      "sha256": "92457b993fc566b6bc5d9d6b01712467462f1207ddd8319ccd9162e9229c7cdf"
+    },
+    {
+      "path": "resultados_parte2_sql.md",
+      "git_blob": "fd3274aec838ea543a7496f585507e81e85a232f",
+      "bytes": 3959,
+      "sha256": "6ccbfa84929bf24ddeb33a133049bb6bc9e02016eaccc9da6a782f418bf50bb5"
+    },
+    {
+      "path": "script_b64.txt",
+      "git_blob": "58b7cb7862f43f492d7405eebffa8b35ccaa375f",
+      "bytes": 25837,
+      "sha256": "ef21d7771a88b7d51c754fcfa6920a0a746c6c1686c30e76a5f489dba886dfdc"
+    },
+    {
+      "path": "task.md",
+      "git_blob": "6a60574e207afbf777d164df84ee58a86ce5706f",
+      "bytes": 1729,
+      "sha256": "3c33c2c41fae1f9289fce5f330fdea78e568622e6d3ba50fccc6d84102ea16f1"
+    }
+  ]
+}
