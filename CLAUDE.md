@@ -104,9 +104,10 @@ porque la causa de las caidas sigue intacta y lo reparado no se ha probado con u
 | Hardware | SSD `Healthy` · `NoErrorsFound` · 0 WHEA · 7,9 GB RAM · 144 GB libres |
 | Orden (4 frentes) | raiz del locker 46->14 · repo 64->5 · GitHub 89 renombrados · datos 7->6 |
 
-### ⚠️ NIVEL 2 — Reparado pero SIN PROBAR en la practica
+### ✅ NIVEL 2 — **CERRADO el 08/09 por la tarde.** Ya probado en la practica (ver apartado P)
 
-Esto funciona en teoria y esta desplegado, pero **nadie lo ha visto funcionar**:
+~~Esto funciona en teoria pero nadie lo ha visto funcionar:~~ **los tres puntos quedaron probados en
+el viaje al locker del 08/09 tarde.** Se conserva la lista para saber que se probo exactamente:
 
 1. **La captura de un movimiento NUEVO.** *Este es el hueco grande.* La ultima identificacion real es del
    **`2026-07-16 13:20:21`**: todo lo verificado se hizo con datos historicos. **Que la v2.4 capture bien
@@ -119,11 +120,12 @@ Esto funciona en teoria y esta desplegado, pero **nadie lo ha visto funcionar**:
 
 ### ❌ NIVEL 3 — SIN REPARAR. Lo que puede volver a tumbar el sistema
 
-1. **LOS CORTES DE CORRIENTE. Nada hecho.** Ocho apagones sucios en cinco semanas, y el ultimo fue el
+1. **LOS CORTES DE CORRIENTE siguen ocurriendo.** *(Ya no dejan el PC muerto — ver punto 2 — pero la causa sigue.)* Ocho apagones sucios en cinco semanas, y el ultimo fue el
    **07/09 a las 19:15**, despues de terminar la reparacion. La BIOS sigue sin configurar, no hay SAI y el
    cuadro electrico sigue cayendose. **Es la causa raiz y sigue exactamente igual que el primer dia.**
-2. **El PC no vuelve solo tras un corte.** Por eso un apagon de 2 segundos se convirtio en 12 horas, y
-   otro en 6 dias. Se arregla con `Restore on AC Power Loss -> Power On`, pendiente.
+2. ~~El PC no vuelve solo tras un corte.~~ **RESUELTO el 08/09.** BIOS en `Power On` + auto-login
+   arreglado + arranque automatico de ACTUM, y **verificado con un reinicio real**: Windows entra solo,
+   OneDrive arranca, las tareas corren y ACTUM se abre. Ver apartado P.
 3. **No hay deteccion de fallo.** Aparcada por decision de Inigo. Si el sistema se cae, **nadie se entera
    hasta que alguien mira**. Es lo que dejo el PC 19 dias muerto en agosto, y ahora ademas **no hay
    respaldo humano**: Imanolia lo lleva sola.
@@ -3253,3 +3255,133 @@ REFUERZO 2026-09-08 — protección de historial — las pruebas deben incluir u
 monitor y borrado por la persona antes de reconstruir. Caso medido: la primera versión local resucitaba
 ese movimiento porque la referencia solo se guardaba al reconstruir; `tests/intermediate.json` registra el
 fallo y `tests/Correcciones.Tests.ps1` contiene su regresión. No confundir mutex entre scripts con bloqueo de Excel.
+
+### P. EL VIAJE AL LOCKER — 08/09/2026 tarde. **NIVEL 2 CERRADO**
+
+Todo lo que estaba "reparado pero sin probar" queda **probado**.
+
+#### P.1 · BIOS configurada ✅
+
+`Restore AC Power Loss` estaba en **`Advanced` -> `Miscellaneous Configuration`** (BIOS AMI Aptio
+2.17.1247). Puesta en **`Power On`**.
+> Anotado para la proxima: NO esta en `Chipset` ni en `ACPI Settings`, que fue donde se busco primero.
+
+#### P.2 · LA PRUEBA FUNCIONAL — **PASADA** ⭐
+
+Extraccion y devolucion reales, consigna 03, usuario IÑIGO A. ALONSO (codigo 62):
+
+```
+09/08/2026 13:43:35;IÑIGO A.;ALONSO;03;Nivel Optico / LeicaNA730Plus / 5718201;Extraccion;Cerrada
+09/08/2026 13:44:43;IÑIGO A.;ALONSO;03;Nivel Optico / LeicaNA730Plus / 5718201;Devolucion;Cerrada
+```
+
+| Predicado declarado antes | Resultado |
+|---|---|
+| **1 solo movimiento por accion fisica** | ✅ exactamente 2 lineas, ni una mas |
+| Usuario correcto | ✅ |
+| Accion correcta (Extraccion / Devolucion) | ✅ |
+| Marcador avanzado a hoy, formato `yyyy-MM-dd HH:mm:ss` | ✅ `2026-09-08 13:44:43` |
+| Reflejado en el dashboard | ✅ 247.309 bytes (530 movimientos) |
+
+**La secuencia completa en SQL**, que ademas aclara la semantica de los eventos:
+```
+13:43:25  evento 4      puerta ABRE      consigna 3
+13:43:35  evento 10000  IDENTIFICACION   consigna 3, usuario 62   <- extraccion
+13:43:39  evento 3      puerta CIERRA    consigna 3
+13:44:33  evento 4      puerta ABRE      consigna 3
+13:44:43  evento 10001  IDENTIFICACION   consigna 3, usuario 62   <- devolucion
+13:44:44  evento 3      puerta CIERRA    consigna 3
+```
+> **Confirma que `10000` y `10001` son ambos identificaciones validas, una por accion.** El filtro
+> `Evento IN (10000, 10001)` de la v2.1 era correcto. Y el dedup de `$ventanaSeg = 3` no estorbo: las dos
+> acciones distaban 68 s.
+
+Tercera confirmacion de la firma de arranque: a las **13:42:29**, `1`x3 + `3`x33 (apartado O).
+
+#### P.3 · HALLAZGO — el evento `1002` valida el dashboard desde otra fuente
+
+Al revisar las consignas se generaron eventos **`1002`**, que **llevan el `Usuario_Codigo` asignado a cada
+consigna**. Cruzados con el dashboard:
+
+| Consigna | `1002` | Dashboard | |
+|---|---|---|---|
+| 19 · 26 · 27 | 62 | IÑIGO A. ALONSO | ✅ |
+| 8 · 21 | 8 | IKER L. LASSO | ✅ |
+| 2 · 15 | 51 | ALVARO T. TREPIANA | ✅ |
+| 32 | 59 | AITOR U. ULIBARRI | ✅ |
+| 13 | 26 | ANGEL F. FERNANDEZ | ✅ |
+| 11 | 10 | IKER C. CAMIN | ✅ |
+| 1 | 45 | ALVARO S. SAEZ | ✅ |
+| 20 | 13 | ASIER R. RIAÑO | ✅ |
+| 24 | 27 | FELIPE C. CAÑARTE | ✅ |
+| **22** | **8 (IKER)** | **SERGIO V. VEGA** | ⚠️ la unica |
+
+**Verificacion independiente y gratuita del dashboard entero.** Util para el futuro: si se quiere auditar
+sin bajar al locker, basta abrir consignas y leer los `1002`.
+
+#### P.4 · Auditoria fisica
+
+- **Consigna 22: VACIA** ✅ coherente con *En uso*. El dashboard acierta en el estado; lo que sigue sin
+  saberse es si el TESTO 340 (nº **63862113**) lo tiene Sergio o Iker. Hay que preguntarles.
+- **Resto de consignas revisadas: todo correcto.**
+- **⚠️ CONSIGNA 5 — el instrumento NO esta.** El sistema la da *Disponible* (SQL `Estado=2`, instrumento
+  `A-003`, sin usuario) y **fisicamente esta vacia**.
+  - `A-003` = *Analizador de Gases / TESTO 340 / **61186226*** — **OJO, no confundir con el de la
+    consigna 22, que es el nº 63862113. Son dos TESTO 340 distintos.**
+  - Ultimo movimiento registrado: **30/04/2026 15:56:55, devolucion de DANIEL M. MARTINEZ**.
+  - Alguien lo saco **sin identificarse** (con llave, o en una apertura manual), o se llevo a calibrar sin
+    registrarlo. **No es un fallo del software:** es la limitacion de las acciones que no generan evento.
+  - **Pendiente: preguntar a Daniel M. Martinez / mirar si esta en calibracion.**
+
+#### P.5 · AUTO-LOGIN ARREGLADO — era un fallo grave escondido
+
+Al reiniciar, Windows **pidio contrasena**. El registro tenia `AutoAdminLogon=1` correctamente, pero:
+
+```
+Ultimo cambio de contrasena:  03/08/2026 12:00:43
+La contrasena expira:         14/09/2026 12:00:43   <- en 6 dias
+```
+
+**La contrasena de `User` se cambio el 3 de agosto y nadie actualizo la copia del arranque automatico.**
+
+> **Por que era grave:** con la BIOS ya en `Power On`, tras un corte el PC se enciende **y se queda en la
+> pantalla de contrasena**. Sin sesion iniciada no arrancan ni ACTUM ni las tareas. **La BIOS sola no
+> servia de nada.** Se habria descubierto en el proximo apagon, es decir, tarde.
+
+**Arreglado en dos pasos:**
+
+1. **Quitada la caducidad.** `User` es una cuenta **LOCAL** del equipo (grupo local *Administradores*,
+   grupo global *Ninguno*), asi que **no depende de la politica de IT** — al contrario que
+   `fabricacion1@ghifurnaces.com`.
+   ```powershell
+   Set-LocalUser -Name "User" -PasswordNeverExpires $true
+   ```
+   **Verificado:** `net user User` -> *"La contrasena expira: **Nunca**"*.
+2. **Regrabada la contrasena del arranque automatico** con `netplwiz`.
+   > La casilla *"Los usuarios deben escribir su nombre y contrasena"* **no aparecia** (Windows la esconde
+   > con Windows Hello). Se hace visible con:
+   > ```powershell
+   > Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name DevicePasswordLessBuildVersion -Value 0
+   > ```
+   > Y si la casilla ya sale desmarcada, Windows no detecta cambio: hay que **marcarla -> Aplicar ->
+   > desmarcarla -> Aceptar** para que pida la contrasena.
+
+#### P.6 · REINICIO DE VERIFICACION — la cadena completa ✅
+
+| Eslabon | Resultado |
+|---|---|
+| Windows entra **solo**, sin contrasena | ✅ arranque 14:32:35 |
+| OneDrive arranca solo | ✅ 14:33:11 |
+| Las 3 tareas | ✅ `Ready` |
+| Dashboard regenerandose | ✅ 247.309 bytes a las 14:36:07 |
+| ACTUM se abre solo | ✅ (Inigo lo vio; luego lo cerro para trabajar por TeamViewer) |
+
+> **Con esto, tras un corte de corriente el locker vuelve solo: BIOS enciende -> Windows entra ->
+> ACTUM arranca -> las tareas registran.** Es lo que convertia un apagon de 2 segundos en 12 horas
+> (o 6 dias) de silencio.
+
+**Efecto secundario menor:** al arrancar se abrio tambien el explorador de archivos. Probablemente es la
+opcion de Windows que reabre las aplicaciones que estaban abiertas al apagar (`RestartApps`), no el
+acceso directo. Inofensivo; comprobar si se repite.
+
+---
