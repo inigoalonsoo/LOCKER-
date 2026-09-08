@@ -239,7 +239,23 @@ del arranque (apartado O).
 4. **EL GRAN ORDEN — los TRES frentes, y se hacen A LA VEZ** (asi lo quiere Inigo, 08/09).
    Dejado expresamente **para el final**: es lo unico que mueve ficheros de sitio.
 
-   **4.a — `C:\ACTUM` en el locker.**
+   **4.a — `C:\ACTUM` en el locker. ✅ HECHO Y VERIFICADO el 08/09 13:14.**
+
+   | | Antes | Despues |
+   |---|---|---|
+   | Ficheros en la raiz | 46 | **14** |
+   | Carpetas | 8 | **3** (`ACTUM_EPI`, `BACKUP_20260907`, `_ARCHIVO`) |
+   | Archivado a `_ARCHIVO\` | — | **35 elementos** (29 ficheros + 6 carpetas), **sin borrar** |
+   | Borrado | — | 3 inutiles: fichero vacio, `.lnk` suelto y el leftover `UltimoEventoProcesado.txt` |
+
+   **Verificacion tras aplicar:** los 13 activos en su sitio · `ACTUM_EPI` intacto ·
+   `.\GenerarDashboard.ps1` -> *SQL OK, 32 instrumentos, 528 movimientos* y HTML de
+   **246.461 bytes, byte-identico** al de antes de limpiar. La limpieza no altero nada.
+
+   > Se aplico **antes** que 4.b/4.c/4.d, aprovechando que el locker estaba parado (ACTUM cerrado).
+   > No habia dependencia tecnica entre los cuatro frentes: lo de "a la vez" era coherencia, no necesidad.
+
+   Herramienta usada:
    Herramienta ya escrita y validada: **`LimpiarACTUM.ps1`** (162 lineas, ASCII puro, 0 errores).
    - **SIMULA por defecto**: `.\LimpiarACTUM.ps1` muestra el plan sin tocar nada.
    - Solo con `.\LimpiarACTUM.ps1 -Aplicar` actua.
