@@ -151,6 +151,8 @@ scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin error en nin
 | Todo commiteado y subido a GitHub | 4 commits · divergencia `0 0` |
 | Ediciones directas del CSV protegidas (paso 2.6, filas huerfanas) | 308 lineas · 0 errores · sin tocar el monitor |
 | Propuesta de Codex evaluada y descartada; monitor revertido a v2.4 | `IDENTICO` byte a byte al desplegado en el locker |
+| **Desplegados en el locker** `ReconstruirHistorial.ps1` (paso 2.6) y `CrearCorreccionesManuales.ps1` | **308 y 88 lineas**, 0 no-ASCII, 0 errores de sintaxis |
+| El inicializador ya NO destruye lo anadido a mano | responde *"Ya existe: 4 correcciones. NO se toca ni un byte"* |
 
 ---
 
@@ -295,7 +297,7 @@ del arranque (apartado O).
 | `AuditarDashboard.ps1` | Comprueba que el dashboard dice la verdad (CSV + HTML + comparacion con SQL). **Solo lectura** | desplegado |
 | `CrearCorreccionesManuales.ps1` | Crea/rehace `CorreccionesManuales.csv` con copia de seguridad y verificacion | desplegado |
 | `LimpiarACTUM.ps1` | Ordena `C:\ACTUM`. **Simula por defecto** | **solo en el repo** |
-| `ReconstruirHistorial.ps1` | Rescate: rehace el CSV desde `Eventos`. **Paso 2.5** reaplica `CorreccionesManuales.csv` y **paso 2.6** conserva las filas escritas a mano directamente en el CSV | **repo actualizado 08/09; falta desplegar** |
+| `ReconstruirHistorial.ps1` | Rescate: rehace el CSV desde `Eventos`. **Paso 2.5** reaplica `CorreccionesManuales.csv` y **paso 2.6** conserva las filas escritas a mano directamente en el CSV | **desplegado 08/09, NO ejecutado** |
 | `RespaldarLockerAntesCambios.ps1` | Copia scripts y datos del locker antes de un cambio, con verificacion SHA-256 y restauracion del estado de las tareas. De Codex, conservado | **solo en el repo** |
 
 ## Como desplegar un script al locker
