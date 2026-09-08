@@ -291,6 +291,22 @@ del arranque (apartado O).
    `git mv` para que el historial siga cada fichero a su nueva ubicacion y no aparezcan como
    borrados + nuevos. Anadir tambien el `.gitattributes` que falta (pendiente 9) en esa misma tanda.
 
+   **4.d — LA CARPETA DE DATOS `LockerACTUM` (OneDrive del locker).** `LimpiarACTUM.ps1` NO la toca:
+   solo actua sobre `C:\ACTUM`. Inventario medido el 08/09 13:07:
+
+   | Fichero | Tamano | Que es |
+   |---|---|---|
+   | `HistorialCompleto.csv` | 52,3 KB | **el historial vivo** (sin escribirse desde el 07/09 14:47) |
+   | `DashboardLocker.html` | 240,7 KB | se regenera cada minuto |
+   | `DashboardAdmin.html` | 122,5 KB | idem |
+   | `CorreccionesManuales.csv` | 1,2 KB | las 4 correcciones manuales |
+   | `UltimoEventoProcesado.txt` | 19 B | el marcador |
+   | `EstadoAnterior.json` | **0 B** | vacio: `$estadoPorConsigna` sin definir (pendiente menor) |
+   | `HistorialCompleto_BACKUP_20260421.csv` | 50,1 KB | **backup de abril, se puede archivar** |
+
+   Regla para esta carpeta: **solo deben vivir aqui los ficheros que el sistema usa o publica.**
+   Todo lo que sea copia o historico se saca, porque **cada byte de aqui lo sincroniza OneDrive**.
+
    > **Por que los tres juntos:** para que la estructura del locker y la del repo se parezcan y no
    > haya que traducir mentalmente entre las dos cada vez que se despliega algo.
 5. **Alerta de sistema caido** — aparcada por decision de Inigo ("estoy atento cada 2 por 3"), no
