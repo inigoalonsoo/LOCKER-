@@ -85,6 +85,67 @@ Detalle completo y tabla de fallos: `propuesta-codex-2026-09-08/LEEME.md`.
 
 ---
 
+## ❓ ¿ESTA REPARADO EL SISTEMA? — respuesta honesta a 2026-09-08
+
+**Resumen en una linea: el SOFTWARE esta reparado y verificado; el SISTEMA todavia NO esta a salvo,
+porque la causa de las caidas sigue intacta y lo reparado no se ha probado con un movimiento real.**
+
+### ✅ NIVEL 1 — Reparado Y verificado sobre el sujeto
+
+| Que | Evidencia medida |
+|---|---|
+| Bucle de reprocesado (bug raiz `Sort-Object` alfabetico) | CSV **sin escribirse desde el 07/09 14:47**, mas de 22 h, mientras el dashboard se regenera cada minuto |
+| Integridad del historial | 529/529 lineas unicas · 0 bytes NULL · 0 mojibake · 0 fechas ilegibles · 264 extracciones / 264 devoluciones |
+| El dashboard dice la verdad | **32/32 consignas** coinciden con `Consigna.Estado` de SQL |
+| La web recibe | *Ultima actualizacion: 2026-09-08 10:24:08* en SharePoint |
+| Watchdog mentiroso | eliminado; HTML byte-identico despues (246.461) |
+| `ReconstruirCSVSemanal` que borraba las correcciones | `Disabled` — y descubierto que **nunca funciono desde mayo** |
+| Suspension / hibernacion / inicio rapido | `powercfg /a`: los tres en "no disponibles" |
+| Hardware | SSD `Healthy` · `NoErrorsFound` · 0 WHEA · 7,9 GB RAM · 144 GB libres |
+| Orden (4 frentes) | raiz del locker 46->14 · repo 64->5 · GitHub 89 renombrados · datos 7->6 |
+
+### ⚠️ NIVEL 2 — Reparado pero SIN PROBAR en la practica
+
+Esto funciona en teoria y esta desplegado, pero **nadie lo ha visto funcionar**:
+
+1. **La captura de un movimiento NUEVO.** *Este es el hueco grande.* La ultima identificacion real es del
+   **`2026-07-16 13:20:21`**: todo lo verificado se hizo con datos historicos. **Que la v2.4 capture bien
+   una extraccion y una devolucion reales NO esta probado desde antes del incidente.**
+2. **El arranque automatico de `ACTUM_EPI_Gestion.exe`.** El acceso directo esta creado y verificado
+   leyendo el `.lnk`, pero **el PC no se ha reiniciado desde entonces**. No se ha visto abrirse solo.
+3. **Los pasos 2.5 y 2.6 de `ReconstruirHistorial.ps1`.** Desplegados y con sintaxis correcta, pero
+   **nunca ejecutados sobre datos reales** — a proposito, porque el CSV esta sano y no se toca lo que
+   funciona.
+
+### ❌ NIVEL 3 — SIN REPARAR. Lo que puede volver a tumbar el sistema
+
+1. **LOS CORTES DE CORRIENTE. Nada hecho.** Ocho apagones sucios en cinco semanas, y el ultimo fue el
+   **07/09 a las 19:15**, despues de terminar la reparacion. La BIOS sigue sin configurar, no hay SAI y el
+   cuadro electrico sigue cayendose. **Es la causa raiz y sigue exactamente igual que el primer dia.**
+2. **El PC no vuelve solo tras un corte.** Por eso un apagon de 2 segundos se convirtio en 12 horas, y
+   otro en 6 dias. Se arregla con `Restore on AC Power Loss -> Power On`, pendiente.
+3. **No hay deteccion de fallo.** Aparcada por decision de Inigo. Si el sistema se cae, **nadie se entera
+   hasta que alguien mira**. Es lo que dejo el PC 19 dias muerto en agosto, y ahora ademas **no hay
+   respaldo humano**: Imanolia lo lleva sola.
+4. **Consigna 22:** el dashboard dice SERGIO V. VEGA y SQL dice IKER L. LASSO. Solo lo resuelve mirar
+   quien tiene fisicamente el analizador TESTO 340.
+5. **La dependencia de OneDrive + `fabricacion1`.** Sigue siendo el unico tramo que se rompe solo, cada
+   ~50 dias, sin dar error en ningun log. Hoy funciona; volvera a caducar.
+
+### La lectura, en corto
+
+Todo lo que rompio el sistema **por software** esta arreglado, medido y documentado. Pero el sistema se
+cayo por una cadena: **corte de corriente -> marcador corrupto -> bucle de reprocesado -> CSV destruido**.
+Se ha roto la cadena por el eslabon del software, que era el que amplificaba el dano. **El primer eslabon
+sigue ahi.**
+
+Y hay una diferencia importante entre los dos tipos de dano:
+- Lo que rompio el bucle **era recuperable**: el historial se reconstruyo entero desde `Eventos`.
+- Lo que se pierde si el motor no corre **no se recupera de ningun sitio**. Por eso el arranque automatico
+  y la BIOS importan mas que cualquier mejora de codigo pendiente.
+
+---
+
 # ⚡ ESTADO ACTUAL Y SIGUIENTE PASO — actualizado 2026-09-08 (fin de sesion)
 
 > **BLOQUE DE TRASPASO.** Si retomas el proyecto en otra sesion, otra terminal u otro modelo (Codex, etc.),
