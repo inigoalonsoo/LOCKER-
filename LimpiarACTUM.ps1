@@ -76,6 +76,9 @@ Write-Host ""
 $nMovidos = 0
 $nBorrados = 0
 $conflictos = @()
+# Windows no distingue mayusculas: '*_BACKUP_*.ps1' y '*_backup_*.ps1' casan lo mismo.
+# Sin esto un fichero se lista (y se cuenta) dos veces.
+$yaPlanificados = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
 
 foreach ($grupo in $plan) {
     $destino = "$archivo\$($grupo.Destino)"
@@ -85,6 +88,7 @@ foreach ($grupo in $plan) {
                 $conflictos += $f.Name
                 continue
             }
+            if (-not $yaPlanificados.Add($f.Name)) { continue }
             Write-Host ("  {0,-45} -> _ARCHIVO\{1}" -f $f.Name, $grupo.Destino)
             if ($Aplicar) {
                 if (-not (Test-Path $destino)) { New-Item -ItemType Directory -Path $destino -Force | Out-Null }

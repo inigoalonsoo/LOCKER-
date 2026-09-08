@@ -249,6 +249,14 @@ del arranque (apartado O).
      lista de intocables donde estan **`EXPORT_Cajas.txt`** (fallback que leen 3 scripts) y
      **`logo_base64.txt`** (`GenerarDashboard.ps1:52`).
    - Tras aplicarlo: `.\GenerarDashboard.ps1` para confirmar que el sistema sigue vivo.
+   - **Simulacion ejecutada en el locker el 08/09** (`sintaxis=0 no-ASCII=0 lineas=162`):
+     raiz con **46 ficheros y 8 carpetas** -> se archivarian **35 elementos** y se borrarian **3**.
+     `EXPORT_Cajas.txt` correctamente avisado como intocable; los 13 activos y `ACTUM_EPI`, verificados
+     en su sitio. Quedaria una raiz de ~11 ficheros y 3 carpetas (`ACTUM_EPI`, `BACKUP_20260907`, `_ARCHIVO`).
+   - **Defecto corregido tras esa simulacion (v de 166 lineas):** los patrones `*_BACKUP_*.ps1` y
+     `*_backup_*.ps1` son el mismo en Windows, que no distingue mayusculas, y tres ficheros salian
+     **listados y contados dos veces** (38 en vez de 35). Anadido un `HashSet` de ya-planificados.
+     **Redesplegar la version de 166 lineas antes de usar `-Aplicar`.**
 
    **4.b — ESTA CARPETA (el repo de desarrollo en OneDrive).** Hoy la raiz mezcla codigo activo,
    documentacion, backups, muestras antiguas, capturas, `.docx`, `.url` y scripts de un solo uso.
