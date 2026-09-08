@@ -1,0 +1,24 @@
+# Normalizacion de finales de linea - anadido 2026-09-08
+#
+# Sin esto Git avisa en cada commit de "LF sera reemplazado por CRLF" y, peor,
+# puede marcar como modificados ficheros que nadie ha tocado.
+# Los .ps1 y .vbs del locker se editan en Windows: se guardan con CRLF en disco
+# y se normalizan a LF dentro del repositorio.
+
+* text=auto
+
+*.ps1  text eol=crlf
+*.vbs  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.md   text eol=lf
+*.csv  text eol=crlf
+*.txt  text eol=crlf
+
+# Binarios: que Git no toque un solo byte
+*.xlsx binary
+*.docx binary
+*.zip  binary
+*.webp binary
+*.png  binary
+*.jpg  binary
