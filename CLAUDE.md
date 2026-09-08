@@ -234,7 +234,10 @@ del arranque (apartado O).
 
 ### De software (se pueden hacer en remoto)
 
-4. **LIMPIEZA DE `C:\ACTUM`** — dejada expresamente **para el final** por decision de Inigo.
+4. **EL GRAN ORDEN — los TRES frentes, y se hacen A LA VEZ** (asi lo quiere Inigo, 08/09).
+   Dejado expresamente **para el final**: es lo unico que mueve ficheros de sitio.
+
+   **4.a — `C:\ACTUM` en el locker.**
    Herramienta ya escrita y validada: **`LimpiarACTUM.ps1`** (162 lineas, ASCII puro, 0 errores).
    - **SIMULA por defecto**: `.\LimpiarACTUM.ps1` muestra el plan sin tocar nada.
    - Solo con `.\LimpiarACTUM.ps1 -Aplicar` actua.
@@ -244,6 +247,22 @@ del arranque (apartado O).
      lista de intocables donde estan **`EXPORT_Cajas.txt`** (fallback que leen 3 scripts) y
      **`logo_base64.txt`** (`GenerarDashboard.ps1:52`).
    - Tras aplicarlo: `.\GenerarDashboard.ps1` para confirmar que el sistema sigue vivo.
+
+   **4.b — ESTA CARPETA (el repo de desarrollo en OneDrive).** Hoy la raiz mezcla codigo activo,
+   documentacion, backups, muestras antiguas, capturas, `.docx`, `.url` y scripts de un solo uso.
+   Clasificar por carpetas con sentido, por ejemplo:
+   `scripts/` lo que se despliega al locker · `herramientas/` lo que se lanza a mano
+   (`AuditarDashboard`, `LimpiarACTUM`, `RespaldarLocker...`) · `docs/` · `historico/` · `muestras/`.
+   > **Cuidado:** mover un `.ps1` aqui **NO afecta al locker** (alli las rutas son absolutas
+   > `C:\ACTUM\*.ps1`), pero **si invalida las rutas citadas en esta documentacion**. Actualizar
+   > las referencias de `CLAUDE.md` en el mismo movimiento.
+
+   **4.c — GITHUB.** Al ser el mismo repo, se ordena solo con 4.b: el commit debe hacerse con
+   `git mv` para que el historial siga cada fichero a su nueva ubicacion y no aparezcan como
+   borrados + nuevos. Anadir tambien el `.gitattributes` que falta (pendiente 9) en esa misma tanda.
+
+   > **Por que los tres juntos:** para que la estructura del locker y la del repo se parezcan y no
+   > haya que traducir mentalmente entre las dos cada vez que se despliega algo.
 5. **Alerta de sistema caido** — aparcada por decision de Inigo ("estoy atento cada 2 por 3"), no
    descartada. **El vigilante debe correr FUERA del locker**: uno que corra dentro no puede avisar de que
    el PC esta muerto, que es justo lo que paso 12 h y 6 dias.
@@ -262,13 +281,7 @@ del arranque (apartado O).
     aun validas: **Microsoft Graph con App Registration + certificado** (no caduca nunca, sin coste, GHI ya
     tiene Entra ID) o **IIS local** en `http://172.16.5.40` (pendiente verificar si las oficinas alcanzan
     esa subred).
-12. **ORDENAR ESTE REPO Y GITHUB** (pedido por Inigo el 08/09). Hoy la raiz mezcla codigo activo,
-    documentacion, backups, muestras antiguas, capturas y scripts de un solo uso. Clasificar por
-    carpetas con sentido (p.ej. `scripts/` lo que se despliega · `herramientas/` lo que se lanza a mano ·
-    `docs/` · `historico/` · `muestras/`). **Hacerlo A LA VEZ que la limpieza de `C:\ACTUM`**, para que la
-    estructura del repo y la del locker se parezcan y no haya que traducir mentalmente entre las dos.
-    > **Cuidado:** mover un `.ps1` en el repo NO afecta al locker (alli las rutas son `C:\ACTUM\*.ps1`),
-    > pero si cambia las rutas que aparecen en esta documentacion. Actualizar las referencias.
+12. *(Ordenar el repo y GitHub: movido al pendiente **4.b / 4.c**, para hacerlo junto con `C:\ACTUM`.)*
 13. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
     del script en la carpeta de OneDrive, el locker se la copia y se relanza solo. **Canal de despliegue
     sin TeamViewer que nadie usa.**
