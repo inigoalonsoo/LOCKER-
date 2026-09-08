@@ -4,7 +4,15 @@
 >
 > Este repositorio contiene el sistema de monitoreo automatico del locker ACTUM EPI de GHI Hornos Industriales. Lee esta seccion antes de tocar nada.
 >
-> **Estado a 2026-06-11:** Sistema completamente funcional en produccion. 528+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
+> **Estado a 2026-09-07: SISTEMA REPARADO Y VERIFICADO. Quedan pendientes de PREVENCION — lee la ultima seccion.**
+>
+> Hubo un incidente grave (bucle de reprocesado que inflo `HistorialCompleto.csv` a 103.494 filas con solo 187 unicas). **Ningun movimiento se perdio**: la ultima identificacion real es del `2026-07-16 13:20:21` y entre el 17/07 y el 07/09 no hubo ninguna (vacaciones).
+>
+> **Resuelto:** causa raiz corregida (`MonitoreoLockerTiempoReal.ps1:436`, `Sort-Object` alfabetico sobre fechas `MM/dd/yyyy` que dejaba el marcador atrapado en diciembre) · **v2.4 desplegada** con hash verificado · CSV reconstruido desde SQL a **528 movimientos** con el historico completo desde 26/10/2024 · 5 tareas corriendo · verificado que la tarea corre cada minuto **sin volver a escribir el CSV**.
+>
+> **⚠️ Lo que NO esta resuelto:** el disparador fueron **7 apagones sucios en 5 semanas**, y el PC estuvo **~19 dias muerto sin que nadie se enterase**. Pendiente: **alerta de sistema caido** y **BIOS que arranque tras corte de corriente**. Ver `## Resumen de Sesion — 2026-09-07`.
+>
+> **Estado a 2026-06-11 (ultimo estado sano conocido):** Sistema completamente funcional en produccion. 528+ movimientos registrados. 5 tareas programadas activas en GHI-TAQUILLAS. Bug raiz de eventos perdidos RESUELTO (Group-Object → hashtable en PASO 4).
 >
 > **Las tres cosas mas importantes:**
 > 1. El unico script que se edita para cambiar el dashboard es `GenerarDashboard.ps1`. Los demas no hace falta tocarlos salvo que cambie la infraestructura.
@@ -12,6 +20,120 @@
 > 3. Nunca modificar manualmente `HistorialCompleto.csv`, `UltimoEventoProcesado.txt` ni `EstadoAnterior.json`.
 >
 > **Pendiente prioritario:** El usuario mostrado en "En uso por X" puede diferir del asignado en ACTUM cuando la asignacion se hace desde el software sin abrir el locker fisicamente. Solucion: leer `Consigna.Usuario_Codigo` directamente en `GenerarDashboard.ps1` para la pestana Estado.
+
+---
+
+# ⚡ ESTADO ACTUAL Y SIGUIENTE PASO — actualizado 2026-09-08
+
+> **BLOQUE DE TRASPASO.** Si retomas el proyecto en otra sesion, otra terminal u otro modelo (Codex, etc.),
+> lee SOLO esto para saber donde estamos. El detalle esta en las secciones `AUDITORIA COMPLETA DE C:\ACTUM`
+> y `Resumen de Sesion — 2026-09-08`, al final del documento.
+
+## Contexto minimo en 10 lineas
+
+Sistema de monitoreo del locker ACTUM de GHI. El PC del locker es **GHI-TAQUILLAS** (IP 172.16.5.40),
+usuario Windows **`User`**, acceso por **TeamViewer**. Imanolia lo lleva **sola**, no hay respaldo.
+
+Cadena: la electronica **Kerong** (172.16.5.41:23) habla con **`ACTUM_EPI_Gestion.exe`**, que escribe cada
+apertura en **SQL Express `GHI-TAQUILLAS\SQLEXPRESS`, BD `Actum_GHI`, tabla `Eventos`**. Nuestros scripts
+(en `C:\ACTUM\`, lanzados por tareas programadas cada minuto via wrappers `.vbs`) leen esa tabla, escriben
+`HistorialCompleto.csv` y generan `DashboardLocker.html` **dentro de la carpeta local**
+`C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\`. **No hay API ni subida**: es el cliente
+OneDrive de Windows, autenticado como `fabricacion1@ghifurnaces.com`, quien la sincroniza a SharePoint.
+
+**El eslabon debil es ese ultimo tramo:** si la contrasena de `fabricacion1` caduca (~cada 50 dias), los
+scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin ningun error en ningun log.
+
+## Situacion a 08/09/2026
+
+- **El locker esta FUERA DE SERVICIO a proposito.** Inigo tiene `ACTUM_EPI_Gestion.exe` **cerrado** mientras
+  se arregla todo; lo reabrira al terminar. Ultimo evento en SQL: `2026-09-03 12:37:30`.
+- **Ultima identificacion de usuario real: `2026-07-16 13:20:21`.** Nadie usa el locker desde julio.
+- **CSV sano:** 528 movimientos · 53.562 bytes · ratio filas/unicas **1,00** · marcador
+  `2026-07-16 13:20:21`. El bucle de reprocesado del incidente del 07/09 esta **muerto** (v2.4 desplegada).
+- **8 cortes de corriente en 5 semanas.** Causa probable dicha por Inigo: **el cuadro electrico del locker
+  se cae**. El PC **no vuelve solo** tras un corte (12 h muerto el 07-08/09; 6 dias en agosto).
+
+### Hecho y verificado el 08/09
+
+| Accion | Verificacion |
+|---|---|
+| `ReconstruirCSVSemanal` desactivada (borraba las correcciones manuales cada lunes) | `State = Disabled` |
+| `GenerarDashboardHTML` devuelta a `Disabled` (se encendio sin querer) | `State = Disabled` |
+| Suspension, hibernacion e inicio rapido desactivados | `powercfg /a` |
+| Watchdog mentiroso eliminado de `GenerarDashboard.ps1` | 0 errores sintaxis · 706 lineas · HTML byte-identico |
+| Copia de conflicto de OneDrive borrada (10,4 MB) | listado vacio |
+| Hardware descartado | SSD `Healthy` · `NoErrorsFound` · 0 WHEA · 7,9 GB RAM |
+| Los 4 `.vbs` activos respaldados en el repo | los 4 `IDENTICO` |
+
+## PENDIENTE — por orden
+
+### Urgente (para volver a poner el locker en servicio)
+
+1. [HECHO 08/09 - **32/32 OK, el dashboard dice la verdad**, ver apartado M] ~~Auditar que el dashboard dice la VERDAD.~~ Comparar consigna a consigna el HTML contra
+   `Consigna.Estado` de SQL. **Importante:** la pestana Estado **NO lee SQL**, deriva el estado de la ultima
+   accion del CSV (`GenerarDashboard.ps1:174-181`), asi que si el CSV esta mal, **miente**. Bloque de
+   auditoria preparado (integridad CSV + HTML + comparacion con SQL). Aqui se cierra tambien lo de la
+   **consigna 22 / SERGIO V. VEGA**.
+2. [HECHO 08/09 - **LA WEB RECIBE**. El dashboard en SharePoint mostraba *Ultima actualizacion: 2026-09-08 10:24:08*, en hora. OneDrive.exe corriendo (PID 9364 desde las 07:59:50). **La contrasena de fabricacion1 aguanta, no hubo que re-autenticar**] ~~Comprobar que OneDrive sincroniza.~~ Test de 10 s: mirar la hora de *"Ultima actualizacion"* del
+   dashboard **en la web** y compararla con la del fichero en el locker. Si el local esta fresco y el de la
+   web viejo -> re-autenticar (icono OneDrive -> Configuracion -> pestana **Cuenta**; si se queda en
+   "Buscando cambios...", cerrar y reabrir OneDrive). **La contrasena caducaba ~26/08 y no consta
+   re-autenticada.**
+3. [ARRANQUE AUTOMATICO HECHO 08/09 - acceso directo creado y verificado leyendo el propio .lnk: apunta al exe y el destino existe. Se estrenara en el reinicio de la BIOS] **Reabrir `ACTUM_EPI_Gestion.exe`.** Hoy **no arranca solo**
+   (`Win32_StartupCommand` vacio). Sin esto, cada corte de luz deja el locker sin registrar hasta que
+   alguien lo abra a mano — y **lo que no se graba no se recupera de ningun sitio**.
+4. **BIOS: `Restore on AC Power Loss -> Power On`.** Lo unico que hace que el PC vuelva solo tras un corte.
+   Exige reiniciar con alguien delante.
+5. [HECHO 08/09 - desplegados y verificados: 246 y 76 lineas, 0 no-ASCII, 0 errores de sintaxis; 4 correcciones guardadas con fechas legibles y tildes correctas. `ReconstruirHistorial.ps1` copiado pero NO ejecutado a proposito: el CSV esta sano y no se toca lo que funciona] ~~Desplegar los dos scripts~~ al locker,
+   y ejecutar el segundo una vez. Ver apartado N: hace que las correcciones a mano sobrevivan a las
+   reconstrucciones.
+6. **Prueba funcional real** (tarea A del 07/09): bajar, sacar un instrumento y devolverlo. Predicado:
+   **1 solo movimiento** por accion fisica (ojo al dedup `$ventanaSeg = 3` y a los pares de eventos
+   10000+10001), usuario y accion correctos, marcador avanzado a hoy en formato `yyyy-MM-dd HH:mm:ss`,
+   y reflejado en el dashboard en < 1 min. **El sistema reparado NO esta probado con un movimiento nuevo.**
+
+### No urgente (para cuando se pregunte "que mas se puede mejorar")
+
+6. **Limpieza de `C:\ACTUM`** — apartado G de la auditoria. 118 ficheros / 98 MB -> ~12 ficheros.
+   Mover a `_ARCHIVO\`, **sin borrar**, salvo 3 excepciones. **NO mover ningun script activo**: sus rutas
+   estan cableadas en 5 `.vbs` y 5 tareas programadas.
+7. **Commitear el repo.** Pendiente de OK de Imanolia: `CLAUDE.md`, `MonitoreoLockerTiempoReal.ps1` (v2.4),
+   `GenerarDashboard.ps1` (sin watchdog), `EjecutarMonitoreoOculto.vbs` + 3 `.vbs` nuevos.
+8. **Alerta de sistema caido** — aparcada por decision de Inigo ("estoy atento cada 2 por 3"), no descartada.
+   El vigilante **debe correr FUERA del locker**: uno que corra dentro no puede avisar de que el PC esta
+   muerto, que es justo lo que paso 12 h y 6 dias.
+9. **Leer `Consigna.Usuario_Codigo` para la pestana Estado** (pendiente desde el 20/05). Mas importante de
+   lo que parecia: hoy **toda** la columna Estado sale del CSV en vez de la fuente de verdad.
+10. **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` (banner rojo de SharePoint por `replaceState`).
+    Confirmar antes que el error que ve Inigo es ese y no otro (tarea D).
+11. **Renombrar las trampas de datos del repo** (`HistorialCompleto.csv` de feb-2026, `DashboardLocker.html`
+    del 18/02) con sufijo `_MUESTRA_2026-02`.
+12. **Auditoria fisica de consignas** (tarea B del 07/09) y **calibraciones** (tarea C, recurrente).
+13. **De raiz: quitarse la dependencia de OneDrive + `fabricacion1`.** Alternativas estudiadas el 20/05 y
+    aun validas: **Microsoft Graph con App Registration + certificado** (no caduca nunca, sin coste, GHI ya
+    tiene Entra ID) o **IIS local** en `http://172.16.5.40` (pendiente verificar si las oficinas alcanzan
+    esa subred).
+14. **Usar el AUTO-UPDATE que ya existe** en `GenerarDashboard.ps1:6-21`: si aparece una version mas nueva
+    del script en la carpeta de OneDrive, el locker se la copia y se relanza solo. **Canal de despliegue sin
+    TeamViewer que nadie esta usando.**
+
+## Reglas que mas duelen si se olvidan
+
+1. **`Sort-Object` sobre fechas `MM/dd/yyyy` ordena ALFABETICAMENTE.** Parsear siempre primero. Ha causado
+   dos incidentes graves (30/04 y 07/09).
+2. **Nunca declarar exito sin releer el estado del sujeto.** `rc=0` y un `Write-Host` no son evidencia.
+   Ejemplo del 08/09: `powercfg /hibernate off` "se aplico" y `powercfg /a` demostro que no.
+3. **`Enable-`/`Disable-ScheduledTask` exigen ADMINISTRADOR.** En ventana normal fallan en silencio.
+4. **Literales de fecha en SQL: SIEMPRE `'YYYYMMDD'`.** El servidor esta en espanol y `'2026-07-16'` se lee
+   como ano-dia-mes.
+5. **Un Event ID sin `ProviderName` no significa nada.** `11` y `153` son de disco en `disk`/`storahci` y
+   otra cosa distinta en `Kernel-General`/`Kernel-Boot`.
+6. **Ratio filas/unicas del CSV** es el detector barato del bucle: sano ~1,00; el 07/09 era ~600.
+7. **Desplegar por copia-pega es viable** si el `.ps1` es **ASCII puro** y se verifica (lineas · no-ASCII ·
+   sintaxis · salida byte-identica). Los 5 activos son ASCII puro.
+8. **No usar here-strings al pegar por chat/TeamViewer**: la indentacion los rompe. Usar arrays con `-join`.
+   Ese fallo dejo `EjecutarReconstruccionOculto.vbs` roto **desde el 20/05, sin que nadie lo notara**.
 
 ---
 
@@ -1240,21 +1362,28 @@ Si el dashboard deja de actualizarse en OneDrive web pero el archivo local SÍ e
 
 **Causa:** OneDrive se queda colgado en el proceso de reconexion tras el cambio de credenciales.
 
-**Fix — SIN necesidad de PowerShell ni IA (para el compañero en verano):**
-1. Conectarse al locker via TeamViewer
+**Fix — SIN necesidad de PowerShell ni IA:**
+1. Conectarse al locker (TeamViewer o en persona)
 2. Click derecho en el icono de OneDrive en la bandeja del sistema (esquina inferior derecha)
 3. **Cerrar OneDrive**
 4. Buscar "OneDrive" en el menu inicio y ejecutarlo
 5. Esperar 2 minutos → el dashboard web se actualiza solo
 
-### Plan verano 2026
+### Contrasena de `fabricacion1` — quien se encarga
 
-- Contraseña de `fabricacion1@ghifurnaces.com` cambiada el **10/06/2026**
-- Proxima caducidad: **~22/07/2026** (42 dias)
-- OneDrive re-autenticado con la nueva contrasena el 10/06/2026 → tokens frescos
-- **Responsable en verano:** companero designado por Inigo — ya avisado
-- **Accion requerida el 22/07/2026:** entrar al locker via TeamViewer, meter la nueva contrasena en OneDrive, cerrar y reabrir OneDrive si se queda en "Buscando cambios..."
-- **Comportamiento de tokens OAuth:** cambiar la contrasena NO rompe OneDrive inmediatamente — el cliente sigue funcionando hasta que el refresh token caduca (dias/semanas). Por eso conviene re-autenticar cuanto antes tras el cambio para tener tokens frescos.
+> **ACTUALIZADO 2026-09-08: no hay respaldo. Imanolia lo hace sola.**
+> El companero que cubria el locker durante el verano de 2026 ya no esta. No hay segunda persona con
+> TeamViewer ni punto de contacto alternativo. Toda intervencion en el locker la hace ella directamente.
+> **Consecuencia operativa:** si nadie mira, nadie se entera — es el mismo agujero que dejo el PC 19 dias
+> muerto en agosto. Refuerza el argumento de la alerta de sistema caido (pendiente 8).
+
+- Contrasena cambiada el **10/06/2026**, con OneDrive re-autenticado ese mismo dia (tokens frescos)
+- Caducidades siguientes: ~22/07/2026 y ~26/08/2026 — **la de agosto no consta re-autenticada**
+- **Accion cuando caduca:** entrar al locker, meter la contrasena nueva en OneDrive
+  (icono → Configuracion → pestana **Cuenta**), y cerrar/reabrir OneDrive si se queda en "Buscando cambios..."
+- **Comportamiento de tokens OAuth:** cambiar la contrasena NO rompe OneDrive inmediatamente — el cliente
+  sigue funcionando hasta que el refresh token caduca (dias/semanas). Por eso conviene re-autenticar cuanto
+  antes tras el cambio, para tener tokens frescos.
 
 ---
 
@@ -1671,7 +1800,7 @@ Select-String -Pattern "refresh|reload" "C:\ACTUM\GenerarDashboard.ps1"
 | CSV HistorialCompleto | ✅ 528 movimientos | |
 | Tareas programadas | ✅ 5 activas (Ready) | |
 | OneDrive | ✅ Autenticado | Tokens frescos desde 10/06/2026 |
-| Proxima accion manual | ⏳ 22/07/2026 | Companero re-autentica OneDrive |
+| Proxima accion manual | ⏳ | Re-autenticar OneDrive al caducar la contrasena (lo hace Imanolia) |
 
 ### Inventario de archivos en el locker (2026-06-04)
 
@@ -1849,3 +1978,897 @@ Select-String "SAFETY NET" "C:\ACTUM\MonitoreoLockerTiempoReal.ps1"
 | ReconstruirCSVSemanal | ✅ Lunes 05:00 | Seguro adicional semanal |
 | CSV HistorialCompleto | ✅ 498 movimientos | Completo tras fix manual consigna 30 |
 | Marcador | ✅ `2026-06-02 14:00:10` | Formato correcto |
+
+---
+
+## Resumen de Sesion — 2026-09-07 (INCIDENTE bucle de reprocesado — RESUELTO)
+
+> **Estado al cierre: SISTEMA REPARADO Y VERIFICADO EN PRODUCCION.** 528 movimientos, 5 tareas corriendo, cero movimientos perdidos. Quedan pendientes de PREVENCION (ver al final) — se retoman el 2026-09-08.
+
+### Sintoma reportado
+
+Dashboard congelado desde la noche del 12-13/08/2026. Toda la carpeta `LockerACTUM` de OneDrive parada. El 15/07 se habia verificado funcionando y se cambio la contrasena sin problema.
+
+### VEREDICTO: NO SE PERDIO NINGUN MOVIMIENTO
+
+**La ultima identificacion de usuario en toda la base de datos es `2026-07-16 13:20:21` (IKER L. LASSO, consigna 08).** Entre el 17/07 y el 07/09 hay **cero** identificaciones: agosto, vacaciones. No se perdieron — no los hubo.
+
+Que el CSV se parase en el 16/07 **no era un truncamiento**: es la fecha correcta y coincide exactamente con SQL.
+
+| Tipo de evento | N desde 01/07 | Ultimo |
+|---|---|---|
+| **10000** (identificacion) | 5 | **2026-07-16 13:20:21** |
+| **10001** (identificacion) | 4 | **2026-07-14 13:07:06** |
+| 3 (puerta cierra) | 382 | 2026-09-03 12:37:20 |
+| 4 (puerta abre) | 25 | 2026-09-03 12:37:19 |
+
+Tabla `Eventos`: **170.797 registros**, del 26/10/2024 al 03/09/2026. Histórico completo e intacto.
+
+### Lo que si estaba destruido: el CSV
+
+| Medida | 11/06 (sano) | 07/09 (al parar) | 07/09 (reparado) |
+|---|---|---|---|
+| Bytes | ~51 KB | **10.473.947** | **53.562** |
+| Filas de datos | 528 | **103.494** | **528** |
+| Lineas UNICAS (byte-exacto) | 528 | **187** | **528** |
+| Histórico | completo | desde jun-2025, con huecos | **completo desde 26/10/2024** |
+| Tildes | correctas | `IÃ‘IGO`, `DevoluciÃ³n` | **correctas** |
+
+### CAUSA RAIZ — `MonitoreoLockerTiempoReal.ps1:436`
+
+```powershell
+# BUG: Sort-Object sin parsear -> orden ALFABETICO sobre MM/dd/yyyy
+$ultimaFechaObj = [DateTime]::ParseExact(
+    ($nuevosMovimientos | Sort-Object FechaHoraApertura | Select-Object -Last 1).FechaHoraApertura,
+    'MM/dd/yyyy HH:mm:ss', $null)
+```
+
+Sobre `MM/dd/yyyy` el maximo **alfabetico** siempre es `12/...` -> **diciembre**. El marcador quedaba atrapado ahi.
+
+**Confirmacion empirica en vivo:** el marcador se midio dos veces con 2h de diferencia y se vio reptar **dentro de diciembre de 2025**:
+```
+11:02  ->  2025-12-16 15:09:44
+13:22  ->  2025-12-21 13:52:52
+```
+Prediccion falsable derivada: sin arreglarlo se habria estancado en un `12/31/xxxx` para siempre.
+
+**La linea 317 del MISMO script ya lo hacia bien.** Se corrigio el sort para escribir el CSV y se dejo el roto para el marcador. Es la trampa que este documento avisaba el 2026-05-14 y que nunca se aplico a esa linea.
+
+### Cadena completa (apagon = disparador, linea 436 = amplificador)
+
+1. **Corte de corriente** durante el `WriteAllText` del marcador -> fichero vacio o partido
+2. **Lineas 51-64** (fallback): leia `-Tail 10` del CSV y cogia **la primera linea que casaba, no la mas reciente** -> fecha antigua arbitraria
+3. La query devuelve meses de eventos. **Linea 152** los procesa **agrupados por consigna, no cronologicamente** -> se appendean desordenados -> **la cola del CSV deja de ser cronologica**
+4. **Linea 436** recalcula el marcador con sort alfabetico -> aterriza en diciembre 2025
+5. **Bucle:** cada minuto reprocesa ~9 meses. Como la tarea muere a los 15 min de `ExecutionTimeLimit`, **nunca llega a las consignas del final** -> el historial se congela mientras el fichero engorda
+6. SQL saturado -> `GenerarDashboard.ps1` empieza a fallar -> dashboard a **0/0/0** y HTML a 15 KB
+
+**Prueba fisica de los apagones DENTRO del CSV:** 4 lineas compuestas integramente por **bytes NULL (`0x00`)**. Firma clasica de escritura interrumpida por corte de corriente.
+
+### Cortes de corriente — 7 apagados sucios en 5 semanas
+
+| Fecha | Evento |
+|---|---|
+| 03/08 11:23 y 11:59 | 6008 x2 el mismo dia |
+| 04/08 05:51 | 6008 |
+| 11/08 13:14 | **42 + 107** — el PC se SUSPENDIO y desperto |
+| 11/08 13:16 | 6008 |
+| **~12-13/08** | Se cae sucio y **nadie lo enciende -> ~19 dias muerto** |
+| 31/08 11:40 | 6005 (alguien lo enciende; aqui se registra el 6008 del 12-13/08) |
+| 31/08 12:07 | 1074 + 6006 + 6005 (reinicio ordenado) |
+| 07/09 09:33 | 41 + 6008 + 6005 (encendido manual) |
+| **07/09 13:15** | **41 + 6008 — septimo apagon, EN MEDIO del diagnostico** |
+
+Lo que se vivio como "se apago el monitor y lo encendi" fue el PC cayendose de golpe. **No hubo evento 42 ese dia: no se durmio, es corriente.**
+
+**El fallo caro no fue el apagon — fueron los 19 dias sin que nadie se enterase.**
+
+### Ráfagas de eventos con Usuario=0: NO son fallos
+
+Los picos (15/07: 180 · 03/08: 74 · 04/08: 36 · 11/08: 113 · 03/09: 38) son **aperturas manuales con llave y boton**, que abren y cierran todas las consignas a la vez. Por eso salen con `Usuario_Codigo = 0` y todas en el mismo segundo. **No son movimientos de usuario ni indican averia.** (Confirmado por Inigo, 2026-09-07.)
+
+### SQL Server esta en ESPANOL — literales de fecha
+
+`SELECT @@LANGUAGE` devuelve `Español` -> `DATEFORMAT dmy`. Con 4 digitos delante SQL asume ano primero y **el resto lo lee dia-mes**:
+
+| Literal | Se interpreta como | Efecto |
+|---|---|---|
+| `'2026-07-01'` | ano 2026, dia 07, mes 01 = **7 de enero** | filtra mal en silencio |
+| `'2026-07-16 23:59:59'` | mes **16** | error "valor fuera de intervalo" |
+
+> **REGLA: usar SIEMPRE `'YYYYMMDD'` (`'20260701'`), neutral al idioma.** Para mostrar, `CONVERT(varchar, FechaHora, 120)`.
+
+### EL WATCHDOG MIENTE — `GenerarDashboard.ps1:24-35`
+
+```powershell
+$tareaHTML = Get-ScheduledTask -TaskName "GenerarDashboardHTML" -ErrorAction SilentlyContinue
+if ($tareaHTML -and $tareaHTML.State -eq "Disabled") {
+    Enable-ScheduledTask -TaskName "GenerarDashboardHTML" -ErrorAction SilentlyContinue
+    Write-Host "WATCHDOG: GenerarDashboardHTML estaba Disabled - reactivada automaticamente"
+}
+```
+
+**Nunca ha funcionado.** Dos problemas encadenados:
+
+1. **`Enable-ScheduledTask` exige Administrador**, y el proyecto obliga a que este script corra como `User` (regla del 03/03: como SYSTEM falla el SQL con Integrated Security). El `Enable` no puede funcionar en la configuracion correcta.
+2. **`-ErrorAction SilentlyContinue` se come el "Acceso denegado"** y el `Write-Host` canta victoria sin comprobar. El 07/09 imprimio "reactivada automaticamente" y la tarea siguio en `Disabled` (verificado con `Get-ScheduledTask` justo despues).
+
+> **Esto resuelve la contradiccion del documento:** una seccion decia "el watchdog la reactiva" y otra "GenerarDashboardHTML debe estar DISABLED por redundante". En la practica el watchdog no reactivaba nada.
+
+**Antipatron que ha causado los problemas de este proyecto: declarar exito sin medir el resultado.** Fix pendiente: releer el estado tras el intento y reportar lo que realmente paso.
+
+### Error JavaScript en OneDrive web (cosmetico)
+
+```
+Uncaught SecurityError: Failed to execute 'replaceState' on 'History' ...
+origin 'null' and URL 'about:srcdoc'. (about:srcdoc:1473:95 / 1474:95)
+```
+
+Origen: `GenerarDashboard.ps1:680-681` (persistencia de pestana via hash URL, v2.1 UX del 21/04). SharePoint incrusta el HTML en un iframe `about:srcdoc` con origin `null`, donde `replaceState` con URL esta prohibido. Las lineas 680-681 del `.ps1` caen en las **1473-1474 del HTML generado**.
+
+**No rompe los tabs** (radio buttons CSS puro), solo genera el banner rojo *"No se cargo parte del contenido"*.
+
+> Este documento declaro ese JS "inofensivo" el 2026-06-11. **No lo es.** Fix: borrar el bloque `<script>` de las lineas 672-684.
+
+### Tamano del DashboardLocker.html: no hay cifra "sana" fija
+
+`GenerarDashboard.ps1` **no limita filas** (lineas 207-211): renderiza todos los movimientos tras agrupar por fecha+usuario+consigna. El tamano es **proporcional a los movimientos**:
+
+| | Filas renderizadas | HTML |
+|---|---|---|
+| CSV corrupto | 103.494 filas -> **187 grupos** | 88.692 bytes |
+| Reparado | 528 movimientos -> **528 grupos** | **246.461 bytes** |
+
+`528/187 = 2,82` y `246.461/88.692 = 2,78`. El HTML era pequeno porque el `Group-Object` colapsaba las duplicadas.
+
+> **No usar "~87 KB" como referencia de salud: esa medida se tomo en plena averia.** La referencia correcta es `<tr>` ~= movimientos + instrumentos + 2 cabeceras.
+
+### Contadores de verificacion del HTML
+
+- `<tr>` = **562** = 528 historial + 32 instrumentos + 2 cabeceras
+- `badge-en-uso` en crudo = **17**, porque el CSS define la clase 2 veces (lineas 427 y 515). Para contar badges reales usar el patron **`badge badge-en-uso`** -> **15**
+
+### Copia de conflicto de OneDrive
+
+`HistorialCompleto-GHI-TAQUILLAS.csv` (10.404.324 bytes) junto al original. Copia que OneDrive crea cuando el mismo fichero cambia en dos sitios. Analizada: **las mismas 187 lineas unicas**, no aporta nada. **PENDIENTE de borrar.**
+
+### REPARACION EJECUTADA Y VERIFICADA
+
+| # | Accion | Verificacion medida |
+|---|---|---|
+| 1 | Causa raiz localizada **leyendo el codigo** | Linea 436, no inferida |
+| 2 | **5 tareas desactivadas** | Las 5 en `Disabled` + `Stop-ScheduledTask` |
+| 3 | **CSV congelado** | `103.495` = `103.495` en dos lecturas a 90 s |
+| 4 | **Copia forense** en `C:\ACTUM\BACKUP_20260907\` | `103.495` = `103.495` filas origen vs copia |
+| 5 | **Parche de 1 linea del bug raiz** (Plan B) | `PARCHE APLICADO` · 0 errores · lineas 317 y 436 parseando |
+| 6 | **Auditoria de todo el repo** | 17 `Sort-Object` sobre fechas: **solo la 436 estaba rota** |
+| 7 | **v2.4 desplegada por copia-pega** | **SHA256 identico** `112CE8A0…` · 517 lineas · 24.206 bytes · 0 errores · here-strings 2/2 |
+| 8 | **Reconstruccion de PRUEBA** (fichero aparte) | 588 eventos -> 62 artefactos -> **526 movimientos** · unicos **526/526 = 1:1** · CSV real intacto en 10.473.947 bytes |
+| 9 | **Sustitucion** | 53.381 bytes · marcador `2026-07-16 13:20:21` |
+| 10 | **Consigna 22 -> SERGIO V. VEGA** reaplicada | **528** movimientos · 53.562 bytes |
+| 11 | **Dashboards regenerados** | Locker 246.461 · Admin 125.404 · `En uso por SERGIO V. VEGA` · contador **528** (era 100.771) |
+| 12 | **5 tareas reactivadas** | Las 5 en `Ready` |
+| 13 | **PRUEBA DE FUEGO** | Tarea corriendo cada minuto durante 13 min (`LastRunTime 15:00:00`, `LastTaskResult 0`) y el CSV **sin escribirse desde las 14:47:06**. El bucle esta muerto. |
+
+**v2.4 en produccion y en el repo, identicas:**
+```
+Lineas : 517      Bytes : 24.206
+SHA256 : 112CE8A009E773E6888D66001FCA704089C558C41700CCC32AA9F3A497BF46A9
+ASCII puro (0 caracteres no-ASCII) · here-strings 2 aperturas / 2 cierres
+```
+
+Backups de rollback en el locker: `MonitoreoLockerTiempoReal_ANTES_20260907.ps1` (v2.3 original) y `_POSTB_20260907.ps1` (v2.3 + parche B, 21.565 bytes).
+
+### PENDIENTE — se retoma el 2026-09-08, por orden de valor
+
+**El coste real del incidente no fue el apagon: fueron los 19 dias sin que nadie se enterase. Eso sigue sin resolver.**
+
+- [ ] **1. ALERTA DE SISTEMA CAIDO** ← lo mas importante. Aviso automatico si el dashboard lleva >3 h sin actualizarse. Sin esto, el proximo fallo vuelve a pasar semanas desapercibido.
+- [ ] **2. BIOS: `Restore on AC Power Loss -> Power On`.** 7 apagones en 5 semanas y cuando cae no vuelve solo. Requiere reiniciar el PC para entrar en la BIOS. Revisar tambien la suspension (evento 42 del 11/08 prueba que estaba activa).
+- [ ] **3. Higiene rapida:**
+  - Borrar `HistorialCompleto-GHI-TAQUILLAS.csv` (copia de conflicto, 10 MB inutiles)
+  - Watchdog de `GenerarDashboard.ps1:24-35`: que verifique y diga la verdad
+  - Borrar el `<script>` de `GenerarDashboard.ps1:672-684` (banner rojo de SharePoint)
+- [ ] **4. Contrasena de `fabricacion1`** (caducaba ~26/08)
+- [ ] **5. Menor:** `$estadoPorConsigna` sin definir (lineas 486-488, `EstadoAnterior.json` queda en `{}`) · revisar `$ventanaSeg = 3` (duplicados con la MISMA accion a 9-10 s en el historial antiguo) · `GHI-Locker-Dashboard/scripts/` tiene copias antiguas que difieren de la raiz
+
+### TAREAS DE SEGUIMIENTO DEL LOCKER (apuntadas por Inigo, 2026-09-07)
+
+Lista para retomar el tema del locker con calma — no solo el software:
+
+- [ ] **A. PRUEBA FUNCIONAL de extraccion y devolucion.** Bajar al locker, identificarse, sacar un instrumento y devolverlo, y comprobar que el sistema lo detecta bien y en el orden correcto.
+  > **Este es el hueco real de la verificacion.** Todo lo comprobado el 07/09 se hizo con datos **historicos**, porque desde el `2026-07-16 13:20:21` no hubo ningun movimiento nuevo. Que el sistema **capture correctamente un movimiento nuevo** no esta probado desde antes del incidente.
+  >
+  > **Predicado de exito:** por cada accion fisica aparece **1 solo movimiento** en el CSV (no 2 — ojo al dedup de `$ventanaSeg = 3` y a los pares de eventos 10000+10001), con el **usuario correcto**, la **accion correcta** (Extraccion / Devolucion segun corresponda), el **marcador avanza a la fecha de hoy** en formato `yyyy-MM-dd HH:mm:ss`, y el dashboard lo refleja en menos de 1 minuto. Verificar las tres cosas: CSV, marcador y dashboard.
+
+- [ ] **B. AUDITORIA FISICA de las consignas.** Bajar al locker con el dashboard delante y comprobar una por una: que lo que el dashboard dice que hay en cada consigna **esta realmente ahi**, y que las marcadas como **Disponible estan vacias**. Aqui se cierra de verdad el asunto de la **consigna 22** (SERGIO VEGA vs lo que dice SQL) y cualquier otra asignacion administrativa desfasada. Referencia: las 15 consignas que el sistema da como "En uso" a 2026-09-07 son `01 02 08 09 11 13 15 19 20 21 22 24 26 27 32`.
+
+- [ ] **C. CALIBRACIONES — ir mandando poco a poco.** Los pendientes estan apuntados en el **cuaderno GHI** y en **recordatorios del movil**. La pestana Calibracion del `DashboardAdmin.html` ya clasifica por CADUCADO / URGENTE (<30d) / PROXIMO (<90d) leyendo `Caja.FechaCaducidad` de SQL, asi que sirve directamente como lista de trabajo. **Tarea recurrente, no de un dia.**
+
+- [ ] **D. EL ERROR QUE SALE AL ABRIR EL DASHBOARD — identificarlo de verdad.** Muy probablemente sea el banner rojo de SharePoint por `replaceState` (documentado en esta misma seccion), que se arregla borrando el `<script>` de `GenerarDashboard.ps1:672-684`. **Pero hay que confirmarlo, no darlo por hecho:** capturar el mensaje exacto cuando aparezca (`F12` -> Consola, o "Mostrar detalles" en el propio banner) por si fuera otro distinto.
+
+### DECISION PENDIENTE — `ReconstruirCSVSemanal` borrara la correccion de la consigna 22
+
+**El lunes 14/09 a las 05:00** esa tarea reconstruye el CSV desde SQL y **la consigna 22 volvera a salir a nombre de IKER L. LASSO**, porque las lineas de SERGIO VEGA se escriben a mano y **no existen en la tabla `Eventos`**.
+
+Tres opciones sobre la mesa (sin decidir a 2026-09-07):
+1. **Dejarlo** y reaplicar la correccion cuando pase
+2. **Desactivar** la reconstruccion semanal — ya no hace falta como red de seguridad, el bug raiz esta arreglado
+3. **Arreglarlo en origen:** asignar la consigna 22 a SERGIO en el ACTUM EPI Visor **y** implementar la mejora pendiente de leer `Consigna.Usuario_Codigo` para la pestana Estado. La unica que aguanta sola, pero mas trabajo
+
+Decision de Inigo (2026-09-07): **la consigna 22 se deja a nombre de SERGIO V. VEGA**, y despues verificara fisicamente que consignas tiene quien.
+
+Comando para reaplicar:
+```powershell
+$utf8NoBOM = New-Object System.Text.UTF8Encoding $false
+$csv = "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\HistorialCompleto.csv"
+$lineas = @(
+    "04/16/2026 12:44:30;IKER L.;LASSO;22;An.gases / TESTO 340 / 63862113;Devoluci$([char]0xF3)n;Cerrada",
+    "04/16/2026 12:45:00;SERGIO V.;VEGA;22;An.gases / TESTO 340 / 63862113;Extracci$([char]0xF3)n;Cerrada"
+)
+foreach ($l in $lineas) { [System.IO.File]::AppendAllText($csv, "$l`r`n", $utf8NoBOM) }
+cd C:\ACTUM; .\GenerarDashboard.ps1
+```
+> Anadir lineas antiguas al final deja el CSV desordenado. **Antes del fix eso era lo que disparaba el bucle**; con v2.4 el marcador se calcula por el **maximo real** de todo el fichero, asi que ya es seguro.
+
+### Reglas permanentes aprendidas
+
+> **1. `Sort-Object` sobre fechas en texto `MM/dd/yyyy` ordena ALFABETICAMENTE.** Todo orden cronologico debe parsear primero: `Sort-Object { [DateTime]::ParseExact($_.Campo,'MM/dd/yyyy HH:mm:ss',$null) }`. Ha causado DOS incidentes graves (30/04 y 07/09). Auditado el repo entero el 07/09: los 17 usos restantes son correctos.
+
+> **2. Un marcador jamas debe derivarse de la "ultima linea" de un fichero que no esta garantizado en orden cronologico.** Si hay que derivarlo, coger el **maximo parseado**, nunca la posicion.
+
+> **3. Ratio filas/unicas es el detector barato de este fallo.** Sano ~= 1:1; el 07/09 era **~600:1**. Deberia ser un chequeo automatico. Medir con `LC_ALL=C sort -u` o `HashSet`: `sort -u` a secas usa collation de la localizacion y **falsea el conteo** en ficheros con encoding mixto (dio 166 donde habia 187).
+
+> **4. Las dos pestanas del dashboard tienen fuentes distintas y fallan por separado.** Estado lee SQL (fiable aunque el CSV este destruido); Historial lee el CSV. Que el dashboard "se vea bien" NO prueba que el sistema este sano — **hay que mirar el contador de movimientos**. El 07/09 a las 10:57 se veia perfecto y a las 11:21 estaba a ceros.
+
+> **5. El sistema no tiene deteccion de fallo.** Estuvo 19 dias muerto sin que nadie lo supiera. Cualquier arreglo que no incluya una alerta deja el mismo agujero abierto.
+
+> **6. PowerShell: `$array += ...` dentro de un bucle sobre decenas de miles de filas es O(n^2)** y cuelga la consola. Usar `[System.Collections.Generic.List[T]]::new()` + `.Add()`.
+
+> **7. Literales de fecha en SQL: SIEMPRE `'YYYYMMDD'`.** El servidor esta en espanol y `'2026-07-16'` se lee como ano-dia-mes.
+
+> **8. `Enable-` y `Disable-ScheduledTask` exigen PowerShell como ADMINISTRADOR.** En ventana normal fallan con `Acceso denegado` (HRESULT 0x80070005). Y **`Disable-ScheduledTask` NO corta la ejecucion en marcha**: hace falta `Stop-ScheduledTask` ademas, o la instancia viva sigue hasta 15 min.
+
+> **9. Bytes NULL (`0x00`) en un fichero de datos = escritura interrumpida por corte de corriente.** Buscarlos confirma que hubo apagon durante una escritura.
+
+> **10. Nunca declarar exito sin releer el estado del sujeto.** El watchdog lleva meses imprimiendo "reactivada automaticamente" sin reactivar nada. Todo `Enable`/`Set`/`Copy` debe seguirse de un `Get` que lo confirme.
+
+> **11. Desplegar por copia-pega SI es viable, con dos condiciones:** que el `.ps1` sea **ASCII puro** (ninguna codificacion puede romperlo) y **verificar SHA256 + numero de lineas + contador de here-strings (aperturas/cierres)**. Asi se desplego la v2.4 con hash identico. El fallo del 2026-03-03 (688 lineas llegaron como 454) se habria detectado al instante.
+
+---
+
+## Resumen de Sesion — 2026-09-08 (Prevencion: que no se caiga)
+
+> Foco elegido por Inigo: **aparcar la alerta de caida** ("yo estoy atento cada 2 por 3") y dedicar la sesion
+> a que el sistema NO se caiga. La alerta queda pendiente, sin fecha.
+
+### 1. `ReconstruirCSVSemanal` DESACTIVADA (decision cerrada)
+
+Se desactiva por peticion expresa: **reescribia el CSV entero desde SQL cada lunes 05:00 y borraba las
+correcciones manuales** (SERGIO V. VEGA en consignas 18 y 22, y las de 13/25/29/30). Esas lineas se escriben
+a mano precisamente porque **no existen en la tabla `Eventos`** — cualquier reconstruccion se las lleva por
+definicion, no por fallo.
+
+Ya no cumplia funcion: se creo el 2026-05-20 como red contra el bug de eventos perdidos, cerrado el
+**04/06** (v2.3, hashtable en PASO 4) y el **07/09** (v2.4, `Sort-Object` alfabetico en `:436`).
+
+```powershell
+Disable-ScheduledTask -TaskName "ReconstruirCSVSemanal"   # requiere ADMIN
+Get-ScheduledTask -TaskName "ReconstruirCSVSemanal" | Select-Object TaskName, State
+```
+**Verificado sobre el sujeto: `State = Disabled`.**
+
+`ReconstruirHistorial.ps1` sigue en `C:\ACTUM\` y se lanza **a mano** cuando haga falta. Es una herramienta
+de rescate, no algo que se dispare solo sobre datos buenos.
+
+> Esto **cierra la DECISION PENDIENTE** del 07/09 sobre la consigna 22: se eligio la opcion 2 (desactivar).
+
+### 2. Estado del sistema tras la reparacion — SANO (ver correccion en el punto 5)
+
+| Comprobacion | Valor medido 08/09 | Lectura |
+|---|---|---|
+| Consigna 22 | `04/16/2026 12:45:00 SERGIO V. VEGA Extraccion` | intacta, NO hubo que reaplicar |
+| Consigna 18 | `07/06/2026 08:51:08 SERGIO V. VEGA Devolucion` | devuelta de verdad el 6 de julio |
+| Ratio filas/unicas | **529 / 529 = 1,00** | sano (el 07/09 era ~600:1) |
+| Bytes CSV | **53.562** | **byte-identico al cierre del 07/09** |
+| Marcador | `2026-07-16 13:20:21` | formato correcto, NO diciembre |
+
+**El CSV byte-identico es la evidencia de que el bucle esta muerto.** OJO: son ~7 h de funcionamiento real,
+no 24 h de calendario — el PC estuvo apagado 12 h esa noche (ver punto 5).
+
+`ReconstruirCSVSemanal` **no corrio el 08/09**: su `LastRunTime` era `07/09/2026 5:00:00` con
+`LastTaskResult 267014` (`0x41306` = *tarea finalizada por el usuario*), que son los `Stop-ScheduledTask`
+de la propia reparacion. Nunca llego a reescribir nada.
+
+> Nota de metodo: en esta sesion se dio por hecho que el 08/09 era lunes y que la reconstruccion ya habria
+> corrido. **Era martes.** El dato del `LastRunTime` lo desmintio. Comprobar el dia real antes de razonar
+> sobre tareas semanales.
+
+### 3. Suspension e hibernacion DESACTIVADAS (ataca el evento 42 del 11/08)
+
+```powershell
+powercfg /change standby-timeout-ac 0
+powercfg /change hibernate-timeout-ac 0
+powercfg /change disk-timeout-ac 0
+powercfg /hibernate off
+```
+**Verificado:** `Indice de configuracion de corriente alterna actual: 0x00000000` en `STANDBYIDLE` y en
+`HIBERNATEIDLE`. El PC enchufado ya no se duerme solo.
+
+`/hibernate off` desactiva ademas el *inicio rapido* de Windows -> todos los arranques son limpios.
+Reversible con `/hibernate on`.
+
+Los indices de corriente continua seguian en `0x384` (15 min) y `0x2a30` (3 h): irrelevante en un sobremesa
+sin bateria, pero se igualan a 0 por si algun dia le ponen un SAI que Windows vea como bateria.
+
+### 4. Hibernacion e inicio rapido DESACTIVADOS (verificado)
+
+`powercfg /hibernate off` **no se habia aplicado** en el primer intento: los timeouts quedaron a 0 pero
+`powercfg /a` seguia listando *Hibernar*, *Suspension hibrida* e *Inicio rapido* como **disponibles**.
+Se relanzo y se reverifico:
+
+```
+No disponibles: Hibernar ("No se habilito la hibernacion") · Suspension hibrida · Inicio rapido
+Disponible:     Modo de espera (S3)  <- con timeout a 0, no se activa solo
+```
+> Caso de libro de la regla 10: `hibernate-timeout 0` y `/hibernate off` son cosas DISTINTAS.
+> Solo `powercfg /a` lo demuestra.
+
+### 5. DIAGNOSTICO DEL PC — el disco esta sano, lo que falla es la CORRIENTE
+
+Medido el 08/09 sobre el locker:
+
+| Sujeto | Valor medido | Veredicto |
+|---|---|---|
+| Disco | KINGSTON SA400S37240G SSD · `Healthy`/`OK` · Wear 0 · 43 C · 14.447 h | **sano** |
+| Espacio C: | 144,3 GB libres / 78,7 usados | **sobrado** |
+| WHEA (CPU/RAM/bus) | **0 eventos en 60 dias** | **sin fallo de hardware registrado** |
+| Errores disco log 30d | 4x`11` · 14x`98` · 6x`153` | **FALSA ALARMA — no son de disco (ver abajo)** |
+
+**OCTAVO APAGON — 07/09 19:15:42**, despues de cerrar la sesion de reparacion:
+```
+08/09 7:59:07  6008  El cierre anterior a las 19:15:42 del 07/09/2026 resulto inesperado
+```
+**12 horas muerto** hasta que alguien lo encendio a mano a las 7:59.
+
+Historial completo de caidas (log de 30 dias):
+
+| Cierre sucio | Volvio a arrancar | Tiempo muerto |
+|---|---|---|
+| 11/08 13:11:24 | 11/08 13:15:55 | 4 min |
+| **25/08 12:37:39** | **31/08 11:40:14** | **6 DIAS** |
+| 07/09 9:27:35 | 07/09 9:33:00 | 6 min |
+| 07/09 12:53:05 | 07/09 13:15:34 | 22 min |
+| **07/09 19:15:42** | **08/09 7:59:00** | **12 HORAS** |
+
+Sin patron horario. El 11/08 ademas hubo `42`+`107` (se durmio y se reanudo) — ya corregido en el punto 3-4.
+
+**Los IDs `11` y `153` NO son de disco.** Se filtro por numero de evento sin mirar el `ProviderName`, y esos
+numeros significan cosas distintas segun quien los emita:
+
+| ID | Proveedor real | Que es | Veredicto |
+|---|---|---|---|
+| `11` | `Kernel-General` | Transaccion TxR del registro sobre `HarddiskVolumeShadowCopy`, resultado `0xC00000A2` (*medio protegido contra escritura*) — lo esperado sobre una instantanea, que es de solo lectura | **ruido benigno** |
+| `153` | `Kernel-Boot` | "La seguridad basada en virtualizacion es disabled". Sus horas (`7:59:00`, `13:15:32`, `9:32:58`, `12:07:41`, `11:40:13`) **son exactamente los arranques** | **informativo de boot** |
+
+> **REGLA: un Event ID sin `ProviderName` no significa nada.** `11` y `153` son de disco en `disk`/`storahci`
+> y son otra cosa completamente distinta en `Kernel-General`/`Kernel-Boot`. Filtrar por numero suelto produce
+> falsos positivos. Filtrar SIEMPRE por `ProviderName` + `Id`.
+
+**Cuadro final: SSD `Healthy`, cero WHEA, cero errores de E/S reales, 144 GB libres.**
+
+> **VEREDICTO: el PC no esta enfermo, lo estan apagando.** El dano no lo hace el corte (2 segundos), lo hace
+> que **cada corte lo deja muerto hasta que alguien pasa por alli**. Por eso la BIOS
+> (`Restore on AC Power Loss -> Power On`) es la accion de mayor valor de toda la lista pendiente: convierte
+> 12 horas de silencio en un minuto. Un SAI atacaria la causa en vez del sintoma.
+
+> **CORRECCION de metodo (punto 2 de esta sesion):** se afirmo que el CSV byte-identico probaba 24 h sin bucle.
+> **Falso: el PC estuvo apagado 12 de esas horas.** La evidencia real son ~7 h de funcionamiento
+> (07/09 14:47->19:15 y 08/09 7:59->ahora). Sigue siendo buena senal, pero la mitad de fuerte.
+> Comprobar SIEMPRE el uptime antes de convertir tiempo-de-calendario en tiempo-de-observacion.
+
+### 6. WATCHDOG ELIMINADO de `GenerarDashboard.ps1` (desplegado y verificado)
+
+Se **elimina**, no se arregla. Tenia DOS defectos, y el segundo es el que decide:
+
+1. **Nunca funciono.** `Enable-ScheduledTask` exige Administrador y el script debe correr como `User`
+   (como SYSTEM falla el SQL, regla del 03/03). El `-ErrorAction SilentlyContinue` se tragaba el
+   "Acceso denegado" y el `Write-Host` cantaba victoria igual.
+2. **Su objetivo era INCORRECTO.** Intentaba reactivar `GenerarDashboardHTML`, que por arquitectura debe
+   estar `Disabled` (redundante: `MonitoreoLockerTiempoReal` ya genera el HTML). Si funcionase, cada minuto
+   desharia esa decision y dejaria DOS procesos escribiendo los mismos ficheros de OneDrive a la vez
+   — origen probable de la copia de conflicto `HistorialCompleto-GHI-TAQUILLAS.csv`.
+
+> **No sustituir por una version "honesta": no queremos que esa tarea se reactive.**
+
+**Demostracion empirica del bug, del mismo dia:** el bloque original, pegado en una ventana de
+**Administrador**, SI reactivo la tarea (`GenerarDashboardHTML -> Ready`). Mismo codigo, dos resultados
+segun la cuenta — y el mismo mensaje de exito en ambos. Se volvio a dejar en `Disabled`.
+
+Parche quirurgico (busca el bloque por contenido, con guarda que aborta sin tocar nada si no encaja),
+backup previo en `C:\ACTUM\GenerarDashboard_ANTES_20260908.ps1`.
+
+| Verificacion | Esperado | Medido en el locker |
+|---|---|---|
+| Bloque detectado | lineas 23-35 | **23-35, guarda `True`** |
+| Codigo `Enable-ScheduledTask` restante | vacio | **vacio** |
+| Errores de sintaxis | 0 | **0** |
+| Lineas | 706 | **706** (identico al repo) |
+| No-ASCII | 0 | **0** |
+| Dashboard regenerado | 528 mov · ~246 KB | **528 mov · 32 instr · 246.461 bytes** |
+
+> **El HTML salio con 246.461 bytes, byte-identico al de la reparacion del 07/09.** Salida sin cambios =
+> el parche quito el watchdog sin alterar el dashboard. Ese es el predicado fuerte, mejor que "no dio error".
+
+> **Nota:** NO se puede comparar SHA256 entre repo y locker — el repo usa LF y el locker CRLF. La
+> verificacion va por propiedades (lineas · no-ASCII · sintaxis · salida byte-identica), no por huella.
+
+> **Correccion:** se predijo `707` lineas y salieron `706`. El error era del calculo (se sumaba la linea
+> vacia final); `ReadAllLines` sobre el repo da **706**. El fichero estaba bien.
+
+### PENDIENTE tras esta sesion (reordenado por el diagnostico del punto 5)
+
+- [ ] **1. BIOS: `Restore on AC Power Loss -> Power On`** <- AHORA ES LO PRIMERO. Es lo unico que convierte
+      12 horas de silencio en un minuto. 8 apagones en 5 semanas y el PC nunca vuelve solo.
+- [ ] **2. Corriente: averiguar la causa.** Como esta enchufado (regleta con interruptor? linea compartida con
+      maquinaria? otros equipos que caigan a la vez?). **Un SAI ataca la causa en vez del sintoma** y con este
+      historial se paga solo.
+- [x] **3. Errores de disco `11`/`153` — DESCARTADO 08/09.** Falsa alarma: son `Kernel-General` (TxR sobre
+      shadow copy) y `Kernel-Boot` (VBS disabled en cada arranque), no incidencias de disco. Queda solo
+      confirmar el `Repair-Volume -DriveLetter C -Scan` (debe dar `NoErrorsFound`).
+- [x] **4. Watchdog — ELIMINADO y verificado el 08/09** (ver punto 6).
+- [ ] **5. Borrar el `<script>`** de `GenerarDashboard.ps1:672-684` (banner rojo de SharePoint por `replaceState`).
+- [ ] **6. Borrar** `HistorialCompleto-GHI-TAQUILLAS.csv` (copia de conflicto, ~10 MB inutiles).
+- [ ] **7. Contrasena de `fabricacion1`** (caducaba ~26/08).
+- [ ] **8. Alerta de sistema caido** — aparcada por decision de Inigo, no descartada. El octavo apagon (12 h
+      muertas sin que nadie se enterase) es exactamente el argumento a favor de retomarla.
+- [ ] **9. Commitear v2.4 + CLAUDE.md** (ambos siguen sin commitear en el repo de desarrollo).
+- [ ] **10. Tareas fisicas A-D** del 07/09. La **A** (prueba funcional real de extraccion y devolucion) sigue
+      siendo el hueco de verificacion: el marcador sigue clavado en `2026-07-16 13:20:21` porque **nadie ha usado
+      el locker desde entonces**, asi que el sistema reparado NO esta probado con un movimiento nuevo.
+
+---
+
+## AUDITORIA COMPLETA DE `C:\ACTUM` — 2026-09-08
+
+> Sujeto: copia integra de `C:\ACTUM` del locker descargada el 08/09 a las 09:05, mas la carpeta
+> `LockerACTUM` de OneDrive (descargada el 07/09 14:08, es decir **en plena averia**: su CSV son los
+> 10.473.947 bytes de antes de reparar). **118 ficheros · 98 MB.**
+
+### A. LA CADENA COMPLETA, DE LA PUERTA AL NAVEGADOR
+
+```
+[Consignas fisicas] --RS485--> [Electronica Kerong  BU 172.16.5.41:23]
+        |                                   ^
+        |                                   | TCP (telnet/23)
+        v                                   |
+[ACTUM_EPI_Gestion.exe]  <-- software del FABRICANTE, corriendo siempre
+        |   escribe cada apertura/identificacion
+        v
+[SQL Server Express  GHI-TAQUILLAS\SQLEXPRESS  ·  BD Actum_GHI  ·  tabla Eventos]
+        |
+        |   <-- AQUI EMPIEZA LO NUESTRO
+        v
+[Task Scheduler] --> [.vbs (ventana oculta)] --> [.ps1]
+        |
+        v
+[C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\]
+   HistorialCompleto.csv · UltimoEventoProcesado.txt · DashboardLocker.html · DashboardAdmin.html
+        |
+        |   <-- NO hay API, NO hay subida, NO hay codigo de red.
+        |       Es una CARPETA LOCAL NORMAL que el cliente OneDrive de Windows sincroniza,
+        |       porque en el usuario `User` hay iniciada la sesion de fabricacion1@ghifurnaces.com
+        v
+[SharePoint / OneDrive de fabricacion1] --> el enlace que abre la gente en el navegador
+```
+
+> **Como se "conecta a OneDrive": no se conecta.** Los scripts escriben ficheros en una carpeta del disco
+> como quien guarda en Documentos. Lo unico que la hace especial es que **OneDrive.exe la esta vigilando**
+> con la cuenta `fabricacion1` autenticada. Si esa sesion caduca, los scripts siguen funcionando
+> perfectamente y **nadie ve nada nuevo en la web**. Esa es la causa mas frecuente de averia del sistema
+> (25/03, 06/05, 14/05) y por eso no aparece en ningun log: no es un error, es una ausencia.
+
+**Los 3 programas del fabricante** (`C:\ACTUM\ACTUM_EPI\`):
+
+| Programa | Para que sirve |
+|---|---|
+| `ACTUM_EPI_Gestion.exe` | El motor. Habla con la electronica Kerong y escribe en SQL. **Si se para, no se registra nada.** |
+| `ACTUM_EPI_Visor.exe` | Consulta de estado (el "ACTUM EPI Visor" que se abre para mirar consignas) |
+| `ACTUM_EPI_Parametros.exe` | Configuracion (aqui se cambio el timeout de puerta el 04/06) |
+
+**Las 5 tareas programadas** (todas: Task Scheduler -> `wscript.exe` -> `.vbs` -> `powershell.exe -File`):
+
+| Tarea | Cada | Script | Estado |
+|---|---|---|---|
+| `MonitoreoLockerTiempoReal` | 1 min | `MonitoreoLockerTiempoReal.ps1` v2.4 | activa · **es la unica imprescindible** |
+| `GenerarDashboardAdmin` | 1 min | `GenerarDashboardAdmin.ps1` | activa |
+| `ActualizarExcelLocker` | 5 min | `ActualizarExcel.ps1` | activa |
+| `GenerarDashboardHTML` | 1 min | `GenerarDashboard.ps1` | Disabled (redundante) |
+| `ReconstruirCSVSemanal` | lunes 05:00 | `ReconstruirSemanal.ps1` | Disabled el 08/09 |
+
+`GenerarDashboard.ps1` **no necesita tarea propia**: `MonitoreoLockerTiempoReal.ps1` lo invoca con dot-sourcing
+al final de cada pasada.
+
+### B. HALLAZGO — `ReconstruirCSVSemanal` NUNCA FUNCIONO (desde el 20/05/2026)
+
+`EjecutarReconstruccionOculto.vbs` (164 bytes) esta **partido en dos lineas**, con un `LF` suelto en mitad de
+la cadena literal y la segunda linea indentada con dos espacios:
+
+```
+CreateObject("WScript.Shell").Run "powershell.exe ... -File
+  ""C:\ACTUM\ReconstruirSemanal.ps1""", 0, False
+```
+
+En VBScript eso es **constante de cadena sin terminar**. Los otros cuatro `.vbs` son de UNA linea y con
+`CRLF`; este es el unico con `LF` — firma de un pegado roto, exactamente el fallo que este documento
+advierte sobre here-strings indentados.
+
+**Triangulacion independiente:** si hubiera corrido alguna vez, el lunes siguiente al 10/06 habria borrado
+las lineas manuales de SERGIO V. VEGA. Siguen ahi tres meses despues. **Nunca se ejecuto.**
+
+**Y estaba roto por partida doble:** `ReconstruirSemanal.ps1` usa `Disable-ScheduledTask` /
+`Enable-ScheduledTask`, que **exigen Administrador**, y la tarea corre como `User`. Aunque el VBS fuese
+correcto, habria fallado igual.
+
+> Consecuencia: la "red de seguridad semanal" documentada el 20/05 **nunca existio**. El sistema lleva
+> desde junio funcionando sin ella — y sin perder nada, porque el bug raiz se cerro el 04/06.
+> Su `LastTaskResult 267014` encaja: `wscript` abria un cuadro de error invisible y la tarea se quedaba
+> colgada hasta el `ExecutionTimeLimit`.
+
+### C. HALLAZGO — LOS LOGS DE ACTUM EXISTEN Y NADIE LOS MIRA
+
+`C:\ACTUM\ACTUM_EPI\Gestion\` guarda dos series de logs del fabricante. **Son diagnostico gratis.**
+
+**`Desconexiones_AAAAMMDD.txt`** — perdida de comunicacion con la electronica Kerong:
+
+| Dia | Ciclos desconexion/conexion |
+|---|---|
+| 15/07 · 19/07 · 04/08 · 03/09 | 1 |
+| 03/08 | 3 |
+| **11/08** | **7 en 35 minutos** (14:22 a 14:57) |
+
+**`Error_AAAAMMDD.txt`** — solo se crean los dias con errores. Volumen medido:
+
+| Dia | Errores | Dia | Errores |
+|---|---|---|---|
+| 09/07/25 · 10/09/25 · 12/11/25 | 35-40 | 15/07/26 | 32 |
+| 12/08/25 | 111 | 19/07/26 | 190 |
+| 10/03 · 15/04 · 13/05 | 34-56 | **03/08/26** | **1.604** |
+| | | **11/08/26** | **872** |
+
+Un dia normal son 30-50 errores. El **03/08 (1.604)** y el **11/08 (872)** se salen de la escala, y son los
+**unicos dos dias con `System.OutOfMemoryException`** en todo el historial.
+
+Errores dominantes esos dias:
+- `System.OutOfMemoryException` en `classeKerong`
+- `Memoria de sistema insuficiente en el grupo de recursos de servidor internal` — **SQL Express sin RAM**
+- `No hay ningun proceso en el otro extremo de la canalizacion` — **SQL Server se cayo**
+- `ExecuteNonQuery requiere una Connection abierta` (688 veces el 03/08)
+- `Error generico en GDI+` — agotamiento de handles
+
+> **[RESUELTO el 08/09 - ver apartado O: es la ELECTRONICA al conectar, confirmado con firma identica]**
+> ~~Hipotesis a verificar:~~ las rafagas de eventos con `Usuario_Codigo = 0`
+> (03/08: 74 · 11/08: 113) se atribuyeron el 07/09 a **aperturas manuales con llave y boton**. Los logs
+> ofrecen una explicacion alternativa: cuando la electronica Kerong **reconecta**, ACTUM re-lee el estado de
+> todas las consignas y emite eventos de puerta en bloque. El 11/08 hubo 7 reconexiones y 113 eventos.
+> **No se descarta ninguna de las dos** — hace falta comprobar si las horas de los eventos `Usuario=0`
+> coinciden con las horas de `CONEXION` del log. Es una consulta de 2 minutos.
+
+> **Pendiente de medir: cuanta RAM tiene el PC.** SQL Server Express tiene un tope propio de ~1 GB de buffer;
+> si el equipo va justo de memoria, los `OutOfMemory` tienen explicacion estructural y volveran.
+
+### D. LO QUE SOBRA — 98 MB, 118 FICHEROS, TODO EN EL MISMO CAJON
+
+`C:\ACTUM` mezcla en la raiz: codigo en produccion, backups, datos de prueba, exports muertos, salidas de
+consultas fallidas, instaladores y binarios del fabricante. Inventario de lo prescindible:
+
+| Que | Tamano | Por que sobra |
+|---|---|---|
+| `Backup\*.bak` (2 ficheros de 2025) | **41 MB** | Backups SQL previos a una actualizacion de **febrero 2025** |
+| `Instalador\` | **20 MB** | Instaladores `.msi`, ZNetCom, TestKerong. Utiles UNA vez |
+| `Act2502\` `Act250212\` `Act250219\` | **10 MB** | Tres copias fechadas de los `.exe` del fabricante |
+| `BACKUP_20260907\` | 11 MB | Copia forense de la averia. **Conservar hasta cerrar el incidente** |
+| 4 backups de `MonitoreoLockerTiempoReal*.ps1` | 58 KB | `_v1_BACKUP`, `_BACKUP_20260421`, `_ANTES_20260907`, `_POSTB_20260907` |
+| 3 backups de `GenerarDashboard*.ps1` | 70 KB | `_backup_20260218`, `_BACKUP_20260421`, `_ANTES_20260908` |
+| `PRUEBA_HistorialCompleto.csv` + `PRUEBA_UltimoEventoProcesado.txt` | 53 KB | Restos del ensayo de reconstruccion del 07/09 |
+| `ReconstruirHistorial_PRUEBA.ps1` | 9 KB | Idem |
+| `UltimoEventoProcesado.txt` (en `C:\ACTUM`) | 24 B | **Leftover del 17/04 con BOM.** El real vive en OneDrive. **Trampa de diagnostico** — ya hizo perder tiempo el 30/04 |
+| `Nuevo documento de texto.txt` | 0 B | Vacio |
+| `tablas.txt` + `lista_tablas.txt` | 564 B | La misma lista, dos veces |
+| `relaciones.txt` · `estructura_movimientos.txt` | 298 B | Salidas de consultas que devolvieron **0 filas** |
+| `ejemplo_movimientos.txt` | 126 B | Un **mensaje de error de SQL** guardado como fichero |
+| `EXPORT_*.txt` (8 ficheros) | 80 KB | De **febrero 2026** y con **encoding roto** (`C?mara Termogr?fica`) |
+| `MoverArchivosOneDrive.ps1` | 1,5 KB | Migracion puntual de OneDrive personal a corporativo. **Ya hecha** |
+| `ExportarLocker.ps1` | 2,3 KB | Escribe a `C:\Users\<user>\OneDrive\ReportesLocker` — ruta **personal que no existe**. Genera CSV pese a decir Excel |
+| `Documentos - Acceso directo.lnk` | 1 KB | Acceso directo suelto |
+
+### E. RIESGOS DETECTADOS (mas alla del desorden)
+
+1. **Credenciales en texto plano.** `ACTUM_EPI\*\Par.txt` contiene servidor, base de datos, usuario **`sa`**
+   y su contrasena en claro. Ademas los `.exe.config` llevan `User ID=sa;Password=actact` apuntando a
+   **`ACTUM-JOSEP\SQLEXPRESS`** — el PC del fabricante. Esos `.config` estan obsoletos (el programa lee
+   `Par.txt`), pero la credencial sigue ahi escrita. **No es accion nuestra: es del fabricante.** Anotado
+   por si algun dia hay auditoria de IT.
+2. **`GenerarDashboard.ps1` tiene un AUTO-UPDATE** (lineas 6-21): si aparece un `GenerarDashboard.ps1` mas
+   nuevo en la carpeta de OneDrive, **lo copia a `C:\ACTUM` y lo ejecuta**. Dos caras:
+   - **A favor:** es un canal de despliegue SIN TeamViewer que existe y **no se esta usando** (hoy no hay
+     ningun `.ps1` en `LockerACTUM`). Subiendo el fichero por SharePoint, el locker se actualiza solo.
+   - **En contra:** ejecuta lo que aparezca ahi. Si OneDrive sincroniza el fichero a medias, se ejecuta un
+     script truncado. Y cualquiera con acceso a esa carpeta ejecuta codigo en el locker.
+3. **El leftover `UltimoEventoProcesado.txt` de `C:\ACTUM`** no lo lee nadie hoy, pero esta a un cambio de
+   ruta de convertirse en un marcador de abril. Borrarlo.
+4. **El repo de desarrollo NO es espejo del locker.** Medido: `MonitoreoLockerTiempoReal.ps1` y
+   `GenerarDashboard.ps1` son **identicos** (confirma que el parche del watchdog se desplego bien), pero
+   `ActualizarExcel.ps1`, `ExportarLocker.ps1`, `MoverArchivosOneDrive.ps1` y `ConfigurarTareaOcultaVBS.ps1`
+   **difieren**, y `GenerarDashboardAdmin.ps1` difiere solo en espacios finales.
+
+### F. LO QUE ESTA BIEN DISENADO (no tocar)
+
+- **La fuente de verdad es la tabla `Eventos` de SQL**, no un estado derivado. Permite reconstruir el
+  historico entero desde octubre de 2024. Es la decision de arquitectura mas acertada del proyecto.
+- **HTML estatico, sin JS funcional y sin CDN externos.** Es lo que lo hace visible en SharePoint web.
+- **Todos los `.ps1` son ASCII puro** (medido: 0 caracteres no-ASCII en los cinco activos). Por eso el
+  despliegue por copia-pega es viable.
+- **El patron `.vbs` + `Run(..., 0, False)`** para ocultar la ventana funciona y esta bien documentado.
+- **Un solo script imprescindible** (`MonitoreoLockerTiempoReal.ps1`) que invoca al resto por dot-sourcing.
+
+### G. PROPUESTA — ORDEN SIN MOVER NADA QUE ESTE VIVO
+
+> **Regla que manda aqui:** las rutas `C:\ACTUM\*.ps1` estan **cableadas en 5 ficheros `.vbs` y en 5 tareas
+> programadas**. Mover un script activo obliga a reconfigurar todo eso, con riesgo real de dejar el sistema
+> parado. **Los scripts activos NO se mueven.** Solo se aparta lo muerto.
+
+```
+C:\ACTUM\
+├── ACTUM_EPI\                 <- del fabricante. NO TOCAR
+├── MonitoreoLockerTiempoReal.ps1
+├── GenerarDashboard.ps1            los 5 activos se quedan
+├── GenerarDashboardAdmin.ps1       EXACTAMENTE donde estan
+├── ActualizarExcel.ps1
+├── ReconstruirHistorial.ps1        (rescate manual)
+├── Ejecutar*.vbs  (los 4 buenos)
+├── BACKUP_20260907\           <- conservar hasta cerrar el incidente
+└── _ARCHIVO\                  <- NUEVA. Todo lo demas, sin borrar nada
+    ├── backups_scripts\       (7 .ps1 historicos)
+    ├── pruebas\               (PRUEBA_*, ReconstruirHistorial_PRUEBA.ps1)
+    ├── exports_2026-02\       (EXPORT_*.txt, encoding roto)
+    ├── obsoleto\              (MoverArchivosOneDrive.ps1, ExportarLocker.ps1,
+    │                           ReconstruirSemanal.ps1 + su .vbs roto)
+    ├── consultas_sueltas\     (tablas, lista_tablas, relaciones, estructura_*, ejemplo_*)
+    └── instaladores\          (Instalador\, Act2502\, Act250212\, Act250219\, Backup\, Consignas\)
+```
+
+**Mover, no borrar** — salvo tres excepciones que si conviene eliminar:
+`Nuevo documento de texto.txt` (0 bytes) · `UltimoEventoProcesado.txt` de `C:\ACTUM` (trampa de
+diagnostico) · `Documentos - Acceso directo.lnk`.
+
+**Ganancia medida:** la raiz pasa de **118 ficheros / 98 MB** a **~12 ficheros / ~17 MB** (contando
+`ACTUM_EPI`), sin tocar una sola ruta de las que el sistema usa.
+
+### H. VEREDICTO DE DISENO
+
+**La arquitectura es correcta; lo que esta mal es la HIGIENE y la FRAGILIDAD DEL ULTIMO TRAMO.**
+
+Lo que de verdad merece cambiarse de raiz, por orden:
+
+1. **La dependencia de OneDrive + `fabricacion1`.** Es el unico tramo de toda la cadena que se rompe solo,
+   cada ~50 dias, sin dar error. Todo lo demas (SQL, tareas, scripts) es robusto. Alternativas ya estudiadas
+   el 20/05 y aun validas: **Microsoft Graph con App Registration y certificado** (no caduca nunca, sin
+   coste, GHI ya tiene Entra ID) o **IIS local** sirviendo el HTML en `http://172.16.5.40` (cero cuentas,
+   pendiente de verificar si las oficinas alcanzan esa subred).
+2. **La falta de deteccion de fallo.** Sin respaldo humano, un fallo silencioso dura semanas. Ya paso.
+3. **La higiene de `C:\ACTUM`** (apartado G).
+4. **Usar el auto-update** que ya existe, para no depender de tener a alguien delante del PC.
+
+### I. EL REPO DE DESARROLLO vs EL LOCKER — comparado el 08/09
+
+Sujetos: `C:\ACTUM` del locker (descarga del 08/09 09:05) contra
+`...\MIS PROYECTOS\LOCKER INSTRUMENTACION\`.
+
+**Los 5 scripts activos estan alineados:**
+
+| Fichero | Veredicto |
+|---|---|
+| `MonitoreoLockerTiempoReal.ps1` | **IDENTICO** byte a byte (v2.4) |
+| `GenerarDashboard.ps1` | **IDENTICO** byte a byte (ya sin watchdog) |
+| `ReconstruirHistorial.ps1` | **IDENTICO** |
+| `GenerarDashboardAdmin.ps1` | equivalente — difiere solo en espacios finales de linea |
+| `ActualizarExcel.ps1` | equivalente — solo espacios |
+
+> Que los dos primeros salgan identicos es **verificacion independiente de los dos despliegues** de estos
+> dias (v2.4 el 07/09 y watchdog el 08/09): no es que el parche dijera que fue bien, es que el fichero de
+> produccion y el del repo son el mismo.
+
+**Corregido el 08/09 — los `.vbs` no estaban respaldados:**
+`EjecutarDashboardOculto.vbs`, `EjecutarAdminOculto.vbs` y `EjecutarExcelOculto.vbs` existian **solo en el
+locker**; y `EjecutarMonitoreoOculto.vbs` del repo estaba **anticuado** (le faltaban `-NoProfile` y
+`-WindowStyle Hidden`, que si tiene el de produccion). Copiados los 4 desde el locker: **verificado
+IDENTICO** en los cuatro.
+
+**`EjecutarReconstruccionOculto.vbs` NO se ha llevado al repo a proposito** — esta roto (apartado B) y su
+tarea desactivada. Que no vuelva por la puerta de atras.
+
+**Diferencia real que queda (sin importancia):** `ExportarLocker.ps1` difiere en 60 lineas entre ambos.
+Es el script obsoleto que escribe a una ruta de OneDrive personal inexistente; va a `_ARCHIVO`.
+
+### J. TRAMPAS DE DATOS EN EL REPO (no son produccion, pero lo parecen)
+
+| Fichero en el repo | Que es realmente |
+|---|---|
+| `HistorialCompleto.csv` | **18 movimientos**, de 07/11/2025 a **17/02/2026**. Foto de hace 7 meses |
+| `DashboardLocker.html` | Generado el **18/02/2026** |
+| `Downloads\LockerACTUM\` (la descarga del 07/09 14:08) | CSV de **10.473.947 bytes** = la foto **EN PLENA AVERIA**, NO el estado actual |
+
+Ninguno se usa. El sistema real vive en `C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\`
+**del locker**. Pero se llaman igual que los de produccion: quien abra la carpeta dentro de unos meses puede
+tomarlos por buenos. **Renombrar con sufijo `_MUESTRA_2026-02` o mover a una subcarpeta.**
+
+### K. HALLAZGO — `ACTUM_EPI_Gestion.exe` NO ARRANCA SOLO
+
+Medido el 08/09: `Get-CimInstance Win32_StartupCommand` filtrado por ACTUM devuelve **vacio**, y la carpeta
+`Startup` del usuario tampoco lo tiene. **El motor del locker no se levanta con el PC.**
+
+Contexto: el 08/09 el proceso no estaba corriendo y el ultimo evento en SQL era del **03/09 12:37:30** —
+pero eso era **intencionado**: Inigo lo tenia cerrado a proposito mientras el sistema estaba averiado, y lo
+reabrira cuando este todo arreglado. **No era una averia desatendida.**
+
+> **Pero el riesgo estructural es real y sigue abierto:** con `ACTUM_EPI_Gestion.exe` abierto en uso normal,
+> un corte de luz lo cierra, y **al volver el PC nadie lo reabre**. De poco sirve que la BIOS encienda el
+> equipo si el programa que registra los movimientos se queda sin abrir. Y a diferencia del CSV,
+> **lo que no se graba no se recupera**: no esta en ninguna parte.
+>
+> Cuando se reabra la aplicacion, dejarlo con arranque automatico (acceso directo en la carpeta `Startup`
+> del usuario `User`, o clave `Run` del registro).
+
+`Error_20260903.txt` guarda como murio la ultima vez, por si se repite:
+```
+14:05:10  Sin conexion / Modulo: modulGestio / Funcion: Main / Error: Error generico en GDI+
+```
+`Funcion: Main` = el hilo principal. Ahi se cerro el programa.
+
+### L. CORRECCION IMPORTANTE — la pestana Estado NO lee el estado de SQL
+
+La **regla 4** del incidente del 07/09 decia: *"Estado lee SQL (fiable aunque el CSV este destruido)"*.
+**Es FALSO.** Leido en `GenerarDashboard.ps1:174-181`:
+
+```powershell
+$estado = if ($mov.Accion -like '*Extracci*') { 'En uso' } elseif ($mov.Accion -like '*Devoluci*') { 'Disponible' }
+```
+
+El estado y el usuario salen de **la ultima accion del CSV**, no de `Consigna.Estado`. De SQL solo se toma
+la descripcion y el codigo del instrumento (`mapaCajas`). **Si el CSV esta mal, la pestana Estado miente.**
+
+Consecuencias practicas:
+- Un instrumento **sin ningun movimiento en el CSV no aparece** en el dashboard.
+- El unico modo de saber si el dashboard dice la verdad es **compararlo contra `Consigna.Estado` de SQL**.
+- Es tambien la razon de fondo de la limitacion conocida de las asignaciones administrativas.
+
+> **La mejora pendiente desde el 20/05 (leer `Consigna.Usuario_Codigo` para la pestana Estado) es mas
+> importante de lo que parecia:** no es un detalle de quien figura como usuario, es que **toda la columna
+> Estado se deriva de un fichero de texto en vez de la fuente de verdad.**
+
+### M. AUDITORIA DEL DASHBOARD — 08/09/2026 · EL DASHBOARD DICE LA VERDAD
+
+Ejecutado `AuditarDashboard.ps1` (creado ese dia, solo lectura, tambien en el repo).
+
+**1. CSV — SANO**
+
+| Medida | Valor | Predicado |
+|---|---|---|
+| Lineas / unicas | **529 / 529** | ratio **1,00** (el 07/09 era ~600) |
+| Duplicadas exactas | **0** | |
+| Bytes NULL | **0** | ninguna escritura cortada por apagon |
+| Mojibake / caracter de reemplazo | **0 / 0** | encoding intacto |
+| Movimientos | **528** | fechas ilegibles: **0** |
+| Rango real | **26/10/2024 17:50:27 -> 16/07/2026 13:20:21** | historico completo |
+| Consigna 100 (sistema) | **0** | |
+| Acciones | **Extraccion=264 · Devolucion=264** | alternancia coherente de punta a punta |
+
+**2. HTML — CORRECTO**
+
+- **562 `<tr>` = 528 movimientos + 32 instrumentos + 2 cabeceras.** Cuadra al digito.
+- **15 En uso + 17 Disponible = 32.**
+- **No-ASCII: 0** — la red de seguridad de encoding funciona.
+- 246.461 bytes, regenerado a las 09:42:09 (las tareas corren).
+
+**3. DASHBOARD vs `Consigna.Estado` de SQL — 32/32 COINCIDEN, 0 DISCREPAN**
+
+> **Veredicto: lo que muestra el dashboard es verdad.** No queda ningun rastro del bucle de reprocesado
+> ni de los datos corruptos.
+
+**DOS MATICES sobre el alcance de esa verificacion (el "OK" no cubre todo):**
+
+1. **La consigna 22 sale `OK` pero NO es un OK completo.** El script compara **solo el estado**, no el
+   usuario. Ahi: SQL dice **IKER L. LASSO** y el dashboard dice **SERGIO V. VEGA**. Coinciden en *En uso*,
+   difieren en quien. Es la correccion manual del 10/06, que no existe en la tabla `Eventos`.
+   **Sigue pendiente de confirmacion fisica (tarea B).**
+2. **En las consignas `Disponible`, `UsuarioSQL` sale vacio y `UsuarioDash` muestra un nombre. NO es un
+   fallo:** el dashboard solo pinta el usuario cuando el instrumento esta *En uso*
+   (`GenerarDashboard.ps1:182`); ese nombre del CSV es simplemente quien lo devolvio el ultimo, y en el HTML
+   no se ve.
+
+**Herramienta reutilizable:** `AuditarDashboard.ps1` (127 lineas · 6.259 bytes · ASCII puro · 0 errores de
+sintaxis). Lanzar cuando se sospeche de los datos: `cd C:\ACTUM ; .\AuditarDashboard.ps1`.
+
+### N. CORRECCIONES MANUALES QUE SOBREVIVEN — 2026-09-08
+
+**Peticion de Inigo:** *"quiero que si cambio algo a mano por cualquier razon, se quede guardado,
+que si lo he hecho es por algo"*.
+
+**El problema de fondo:** las correcciones a mano y los datos automaticos vivian **en el mismo fichero**,
+y ese fichero es regenerable. Una asignacion hecha desde el ACTUM EPI Visor **sin abrir el locker
+fisicamente no genera evento en SQL**, asi que al reconstruir desde `Eventos` esas lineas desaparecian.
+Era disciplina, no diseno: dependia de que nadie lanzase una reconstruccion.
+
+**La solucion — separar las dos cosas:**
+
+| Fichero | Que es | Se regenera? |
+|---|---|---|
+| `HistorialCompleto.csv` | Lo que dice la tabla `Eventos` | **SI** — desechable |
+| `CorreccionesManuales.csv` | Lo que decide la persona | **NO** — se conserva y se reaplica |
+
+**Implementado:** `ReconstruirHistorial.ps1` tiene un **PASO 2.5** que, antes de escribir el CSV, lee
+`CorreccionesManuales.csv` y anade sus lineas al conjunto de movimientos. Como el orden final se hace por
+fecha parseada, quedan en su sitio cronologico. Si el fichero no existe, se comporta como antes; si esta
+mal formado, avisa en rojo y continua sin aplicarlo (nunca rompe la reconstruccion). Las fechas ilegibles
+se omiten una a una con aviso.
+
+**Formato** (`;` como delimitador, en `C:\Users\User\OneDrive - GHI...\LockerACTUM\`):
+```
+FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta;Motivo
+```
+La columna **`Motivo` no se copia al historial**: solo documenta por que se hizo la correccion, para que
+dentro de un ano se sepa. Fecha en `MM/dd/yyyy HH:mm:ss`, igual que el historial.
+
+> **Para cambiar de usuario una consigna hacen falta DOS lineas:** la `Devolucion` del usuario equivocado
+> y, unos segundos despues, la `Extraccion` del correcto. El estado se deriva de la ultima accion.
+
+**Scripts nuevos en el repo** (los tres ASCII puro, 0 errores de sintaxis, validados con el parser):
+
+| Script | Que hace |
+|---|---|
+| `CrearCorreccionesManuales.ps1` | Crea/rehace `CorreccionesManuales.csv`. Hace copia de seguridad si ya existia y **verifica leyendo el fichero escrito**, no la intencion |
+| `AuditarDashboard.ps1` | Comprueba que el dashboard dice la verdad (CSV + HTML + comparacion con `Consigna.Estado`). Solo lectura |
+| `ReconstruirHistorial.ps1` | Modificado: paso 2.5 |
+
+**Contenido inicial:** las 4 lineas de SERGIO V. VEGA (consignas 18 y 22) del 10/06/2026, con su motivo.
+Las correcciones de las consignas 13, 25, 29 y 30 **NO van aqui**: aquellas si existen en `Eventos` (eran
+eventos reales que los bugs no capturaron), asi que una reconstruccion las recupera sola.
+
+**DESPLEGADO Y VERIFICADO el 08/09** (246 y 76 lineas, 0 no-ASCII, 0 errores; 4 correcciones guardadas). Se copiaron `ReconstruirHistorial.ps1` y `CrearCorreccionesManuales.ps1`
+a `C:\ACTUM\` y ejecutar una vez `CrearCorreccionesManuales.ps1`.
+
+> **Ojo con las tildes:** nunca escribir `Devolucion`/`Extraccion` con tilde literal en un `.ps1`.
+> `CrearCorreccionesManuales.ps1` las construye con `[char]0xF3`, como manda la regla del proyecto.
+
+### O. RESUELTO — las rafagas de `Usuario = 0` son la ELECTRONICA, no aperturas con llave
+
+**Confirmado el 08/09 con un caso provocado y de causa conocida.** Al abrir `ACTUM_EPI_Gestion.exe` a las
+09:30 para una comprobacion, SQL registro esto:
+
+| Momento | Causa | Eventos generados |
+|---|---|---|
+| **08/09 09:30:23** | **Se abre la app ACTUM (provocado por nosotros)** | `1` x**3** + `3` x**33** |
+| 11/08 14:53 | Reconexion Kerong (tras la de las 14:52) | `1` x**3** + `3` x**33** |
+| 07/09 13:17 | Arranque del PC tras el apagon de las 12:53 | `1` x**3** + `3` x**32** |
+
+**Firma identica.** Cuando la electronica conecta, ACTUM re-lee el estado de todas las consignas y emite
+un bloque de eventos `3` (puerta cerrada) con `Usuario_Codigo = 0`, precedido de 3 eventos `1`.
+
+> **Esto CORRIGE lo anotado el 07/09**, donde estas rafagas se atribuyeron a *"aperturas manuales con llave
+> y boton"*. La evidencia que lo descarta: **no hay ningun bloque equivalente de eventos `4` (puerta abre)**.
+> Una apertura fisica con llave generaria ~32 aperturas antes de los 32 cierres. No las hay, ni el 11/08 ni
+> el 07/09 ni el 08/09.
+
+**No ensucian el historial.** Verificado el 08/09: tras el barrido de las 09:30, las ultimas lineas del CSV
+seguian siendo de julio y abril. `MonitoreoLockerTiempoReal.ps1` solo procesa `Evento IN (10000, 10001)`
+—identificaciones de usuario— e ignora los eventos de puerta. **No hay que hacer nada con ellas.**
+
+> **Trampa de lectura documentada el mismo dia:** `Get-Content` sin `-Encoding UTF8` muestra
+> `ExtracciÃ³n` / `DevoluciÃ³n` en PowerShell 5.1, porque lee como ANSI y un `o` acentuado en UTF-8 son dos
+> bytes. **El fichero esta bien** — `AuditarDashboard.ps1`, que lee con `ReadAllText`, dio **mojibake 0**.
+> Para inspeccionar el CSV a mano: `Get-Content ... -Encoding UTF8`.
+
+> **Y que las correcciones manuales queden al final del fichero, fuera de orden cronologico, es normal.**
+> Antes de la v2.4 eso disparaba el bucle (el marcador se tomaba de la ultima linea); ahora el marcador se
+> calcula por el **maximo parseado** de todo el fichero, y el dashboard ordena por fecha al renderizar.
