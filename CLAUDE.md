@@ -41,7 +41,26 @@ Alternar agentes esta bien y ahorra cuota. Reglas para que no se pisen:
    `github.com/inigoalonsoo/LOCKER-`.
 3. **Ningun agente despliega en el locker por su cuenta.** El despliegue lo hace siempre la
    persona, por Notepad/TeamViewer, con la verificacion de lineas + no-ASCII + sintaxis.
-4. **Una propuesta descartada no se borra: se archiva** con el porque, para no volver a
+4. **Claude Code lleva las riendas; Codex y GLM aportan.** Decision de Inigo (08/09). No es jerarquia
+   por gusto: es que **una sola cabeza debe responder de lo que entra en produccion**, y quien conoce el
+   historial de averias de este sistema decide que se despliega. Codex y GLM pueden analizar, proponer,
+   escribir pruebas y encontrar huecos —lo hicieron bien el 08/09— pero **lo que toca `C:\ACTUM` pasa
+   antes por revision**. En la practica: proponer, no desplegar.
+5. **Todos los agentes siguen el mismo estilo de trabajo**, que es lo que ha hecho utiles estas sesiones:
+   - **Medir, no narrar.** `rc=0` y un `Write-Host` no son evidencia: hay que releer el sujeto (el fichero,
+     la tarea, la fila) y citar el numero. El 08/09 se cazaron asi dos falsos exitos.
+   - **Cambio minimo suficiente.** Antes de anadir maquinaria, preguntarse cuantas veces al ano corre eso
+     que se quiere proteger. Aqui: ~10 movimientos/dia y una reconstruccion manual al ano.
+   - **Fail-open en lo que corre solo.** Ver la regla dura de arriba.
+   - **Decir lo que NO se ha comprobado.** Un "23/23 pruebas" sintetico no prueba que funcione con los
+     datos reales, y hay que escribirlo.
+   - **Corregirse en voz alta.** Si un diagnostico anterior era falso, se marca como corregido en este
+     documento, no se tapa.
+6. **Al terminar una sesion, sea el agente que sea: subir a GitHub y actualizar `CLAUDE.md`.** Los dos,
+   en el mismo turno. El commit deja el **que** y el **por que** de cada cambio; `CLAUDE.md` deja el estado
+   y el siguiente paso. Sin eso, el siguiente agente —o el mismo dentro de una semana— trabaja a ciegas y
+   se repite trabajo ya hecho.
+7. **Una propuesta descartada no se borra: se archiva** con el porque, para no volver a
    discutirla desde cero. Ver `propuesta-codex-2026-09-08/LEEME.md`.
 
 ### Episodio 2026-09-08 — propuesta de Codex, evaluada y descartada
