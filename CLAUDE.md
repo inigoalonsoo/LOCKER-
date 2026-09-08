@@ -260,9 +260,29 @@ del arranque (apartado O).
 
    **4.b — ESTA CARPETA (el repo de desarrollo en OneDrive).** Hoy la raiz mezcla codigo activo,
    documentacion, backups, muestras antiguas, capturas, `.docx`, `.url` y scripts de un solo uso.
-   Clasificar por carpetas con sentido, por ejemplo:
-   `scripts/` lo que se despliega al locker · `herramientas/` lo que se lanza a mano
-   (`AuditarDashboard`, `LimpiarACTUM`, `RespaldarLocker...`) · `docs/` · `historico/` · `muestras/`.
+
+   > **OJO A LA DIFERENCIA ENTRE LOS DOS SITIOS.** En el locker la limpieza solo APARTA LO MUERTO: los
+   > 13 ficheros activos **se quedan planos en la raiz** porque sus rutas estan cableadas en 4 `.vbs` y
+   > 5 tareas. Aqui NO hay esa atadura —este repo se edita, no se ejecuta— asi que **si se puede
+   > reorganizar de verdad**. No esperar que las dos carpetas queden identicas: lo que se comparte es
+   > el CRITERIO (activo / herramienta / historico), no la forma.
+
+   Estructura propuesta, pensada para que se vea de un golpe que se despliega y que no:
+
+   ```
+   LOCKER INSTRUMENTACION/
+   |-- locker/          <- lo que va TAL CUAL a C:\ACTUM: los 5 .ps1 activos + los 4 .vbs
+   |-- herramientas/    <- se lanzan a mano: AuditarDashboard · LimpiarACTUM ·
+   |                       RespaldarLockerAntesCambios · CrearCorreccionesManuales · ReconstruirHistorial
+   |-- docs/            <- documentacion, guias, los .html de documentacion, .docx
+   |-- historico/       <- backups de scripts, versiones antiguas, propuesta-codex-2026-09-08,
+   |                       RESPALDO_ANTES_CODEX, conversaciones y notas de sesiones viejas
+   |-- muestras/        <- datos de ejemplo antiguos, renombrados a *_MUESTRA_2026-02 (pendiente 8)
+   `-- CLAUDE.md · README.md · .gitignore · .gitattributes   <- solo esto en la raiz
+   ```
+
+   > La carpeta `locker/` es la que mas valor tiene: **su contenido es exactamente lo que debe estar en
+   > `C:\ACTUM`**, asi que comparar ambas se convierte en un `diff` y deja de depender de la memoria.
    > **Cuidado:** mover un `.ps1` aqui **NO afecta al locker** (alli las rutas son absolutas
    > `C:\ACTUM\*.ps1`), pero **si invalida las rutas citadas en esta documentacion**. Actualizar
    > las referencias de `CLAUDE.md` en el mismo movimiento.
