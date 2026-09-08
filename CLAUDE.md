@@ -276,7 +276,31 @@ del arranque (apartado O).
      **`se archivarian 35 elementos y se borrarian 3`**, sin nombres repetidos. Los 13 activos y
      `ACTUM_EPI` verificados en su sitio. **Lista para `-Aplicar` cuando toque el gran orden.**
 
-   **4.b — ESTA CARPETA (el repo de desarrollo en OneDrive).** Hoy la raiz mezcla codigo activo,
+   **4.b / 4.c — ESTA CARPETA Y GITHUB. HECHO Y VERIFICADO el 08/09.**
+   La raiz paso de **64 ficheros sueltos a 5**. Estructura resultante:
+
+   ```
+   LOCKER INSTRUMENTACION/
+   |-- locker/         13  ESPEJO EXACTO de lo que debe haber en C:\ACTUM
+   |-- herramientas/    1  se lanza a mano y no vive en el locker (RespaldarLockerAntesCambios)
+   |-- docs/           14  documentacion, guias, .docx y accesos directos
+   |-- historico/      66  scripts antiguos, notas de sesiones, respaldos, propuesta-codex
+   |-- muestras/        2  datos de ejemplo, RENOMBRADOS a *_MUESTRA_2026-02
+   `-- CLAUDE.md · README.md · .gitignore · .gitattributes · RESULTS.jsonl
+   ```
+
+   **Verificado:** `locker/` coincide **exactamente** con los ficheros activos del locker real
+   (los 13; `EXPORT_Cajas.txt` no esta en el repo por ser un dato generado). Comprobar si el locker
+   esta al dia es ahora una comparacion mecanica, no un ejercicio de memoria.
+
+   **4.c GitHub:** el commit registro **89 renombrados (`R`) y solo 2 anadidos**, asi que el historial
+   de cada fichero sigue a su nueva ubicacion en vez de aparecer como borrado + nuevo.
+
+   **`.gitattributes` anadido** (era el pendiente 9): sin el, Git avisaba en cada commit de LF/CRLF y
+   podia marcar como modificados ficheros que nadie habia tocado. Los `.ps1`/`.vbs` quedan CRLF en
+   disco y LF en el repositorio; los binarios, intactos.
+
+   *(Historico de la propuesta previa a la ejecucion:)* Hoy la raiz mezcla codigo activo,
    documentacion, backups, muestras antiguas, capturas, `.docx`, `.url` y scripts de un solo uso.
 
    > **OJO A LA DIFERENCIA ENTRE LOS DOS SITIOS.** En el locker la limpieza solo APARTA LO MUERTO: los
@@ -364,7 +388,7 @@ del arranque (apartado O).
 
 ## Como desplegar un script al locker
 
-1. Abrir el `.ps1` en el repo, `Ctrl+A`, `Ctrl+C`.
+1. Abrir el `.ps1` en **`locker/`** (esa carpeta es el espejo de `C:\ACTUM`), `Ctrl+A`, `Ctrl+C`.
 2. En el locker: Bloc de notas -> pegar -> guardar en `C:\ACTUM\` con **Tipo: Todos los archivos** y
    **Codificacion: UTF-8**. (Si no se elige *Todos los archivos*, se guarda como `.ps1.txt`.)
 3. **Verificar SIEMPRE** (esto detecta un pegado truncado, que ya paso en marzo: 688 lineas llegaron 454):
