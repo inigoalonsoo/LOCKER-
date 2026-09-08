@@ -182,6 +182,8 @@ scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin error en nin
 
 ## Situacion al cierre del 08/09/2026
 
+- **Estado al cierre del 08/09: el sistema esta reparado, probado y vuelve solo tras un corte.**
+  Queda como riesgo unico la corriente (sin SAI) y la falta de deteccion de fallo.
 - **El locker esta FUERA DE SERVICIO a proposito.** `ACTUM_EPI_Gestion.exe` **cerrado** por decision de
   Inigo mientras se arregla todo. **Se reabrira al terminar** (y ahora ya tiene arranque automatico).
 - **Ultima identificacion de usuario real: `2026-07-16 13:20:21`.** Nadie usa el locker desde julio.
@@ -219,64 +221,50 @@ scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin error en nin
 
 ---
 
-# 🔴 SIGUIENTE PASO INMEDIATO — REINICIO CON CAMBIO DE BIOS
+# 🟢 SIGUIENTE PASO — 2026-09-09
 
-**Es lo de mas valor que queda.** Hace que el locker vuelva solo tras un corte de luz en vez de quedarse
-horas o dias muerto. **Requiere estar FISICAMENTE delante del PC**: TeamViewer no sirve, porque la BIOS
-aparece antes de que Windows arranque.
+> **El reinicio con cambio de BIOS ya se hizo el 08/09 por la tarde y salio bien.** El detalle esta en el
+> apartado **P**. Lo que sigue esta ordenado por valor.
 
-### Antes de bajar — averiguar la marca (para saber la tecla exacta)
+### 1. Lo unico que puede volver a tumbar el sistema: LA CORRIENTE
 
-```powershell
-Get-CimInstance Win32_ComputerSystem | Select-Object Manufacturer, Model
-Get-CimInstance Win32_BIOS | Select-Object Manufacturer, Name, SMBIOSBIOSVersion, ReleaseDate
-Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-```
+Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya no dejan el locker muerto**
+—vuelve solo—, pero atacar la causa sigue mereciendo la pena:
 
-### En el locker
+- **SAI** de 650-800 VA (60-100 EUR). Absorbe los cortes breves, que son la mayoria, y permite apagado
+  ordenado en los largos. Acaba tambien con los apagones sucios que metieron bytes NULL en el CSV.
+- **Avisar a mantenimiento del cuadro electrico.** Si se cae solo, el locker es solo el sintoma que se ha
+  notado; habra mas cosas colgando de ahi.
 
-1. Reiniciar desde el menu de Windows. **La conexion de TeamViewer se cortara: es normal.**
-2. Nada mas apagarse la pantalla, pulsar **`Supr`** repetidamente (una vez por segundo; si no, probar
-   **`F2`**). **No mantener pulsada** la tecla. Si aparece el logo de Windows, se ha llegado tarde:
-   dejar arrancar y repetir.
-3. Buscar el menu **Power** / **Power Management** / **Advanced** / **ACPI**. La opcion se llama:
-   `Restore on AC Power Loss` · `AC Power Recovery` · `After Power Failure` · `State After Power Loss` ·
-   `AC Back Function`.
-4. Ponerla en **Power On** (a veces *Always On*).
-   > ⚠️ **NO elegir `Last State`.** Esa recuerda como estaba el PC cuando se fue la luz: si el corte lo
-   > pillo apagado, se queda apagado. Es justo el fallo que se quiere eliminar.
-5. **`F10`** -> confirmar **Yes** para guardar y salir.
-6. Observar el arranque: debe entrar solo en Windows (auto-login) y, a los pocos segundos, **abrirse sola
-   la ventana de ACTUM EPI Gestion** (esa es la prueba del acceso directo creado hoy).
+### 2. Dos preguntas para personas, no para el ordenador
 
-**Si pide contrasena de BIOS:** no forzar nada, consultar.
-**Si no aparece la opcion:** fotografiar los menus de energia.
-**Si ACTUM no se abre solo:** abrirla a mano; el `.lnk` esta creado y verificado, seria otra causa.
+- **Consigna 22:** ¿quien tiene el *Analizador de Gases TESTO 340 nº **63862113***, SERGIO V. VEGA o
+  IKER L. LASSO? La taquilla esta vacia, asi que alguien lo tiene. SQL dice Iker; el dashboard, Sergio
+  (correccion manual del 10/06). **Quien conteste, decide cual es la verdad.**
+- **Consigna 5:** ¿donde esta el *Analizador de Gases TESTO 340 nº **61186226*** (`A-003`)? El sistema lo
+  da dentro desde que **DANIEL M. MARTINEZ lo devolvio el 30/04/2026** y la taquilla esta vacia.
+  Preguntar a Daniel o mirar si esta en calibracion.
 
-### Al volver — bloque de verificacion
+> ⚠️ **Son dos TESTO 340 DISTINTOS.** No confundirlos: el **63862113** es el de la 22 y esta fuera
+> legitimamente; el **61186226** es el de la 5 y esta desaparecido.
 
-```powershell
-"=== 1. ARRANCO SOLO EL MOTOR? (la prueba del acceso directo) ==="
-Get-Process | Where-Object { $_.Name -like "*ACTUM*" } | Select-Object Name, Id, StartTime | Format-Table -AutoSize
+### 3. Mejoras opcionales, por valor
 
-"=== 2. ARRANCO ONEDRIVE? (StartTime debe ser NUEVO, no 07:59:50) ==="
-Get-Process OneDrive -ErrorAction SilentlyContinue | Select-Object Name, StartTime
+| | Que | Nota |
+|---|---|---|
+| a | **Alerta de sistema caido** | Aparcada por decision de Inigo. Sigue siendo lo que evitaria el proximo silencio de semanas. **El vigilante debe correr FUERA del locker.** |
+| b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **Depende de la respuesta sobre la consigna 22.** Si SQL pasara a mandar, la 22 volveria a mostrar a Iker y desharia la correccion manual. Decidir primero quien gana. |
+| c | **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` | El banner rojo de SharePoint. **Confirmar antes** que el error que ve Inigo es ese y no otro. |
+| d | **`EstadoAnterior.json` se queda vacio** | `$estadoPorConsigna` sin definir (lineas 486-488). No rompe nada: solo afecta al metodo de reserva v1.0. |
+| e | **Quitar `MicrosoftEdgeAutoLaunch` del arranque** | Abre Edge en cada inicio. Ruido en un PC dedicado. Cosmetico. |
+| f | **De raiz: quitarse OneDrive + `fabricacion1`** | Sigue siendo el unico tramo que se rompe solo cada ~50 dias sin dar error. Alternativas del 20/05: **Graph con certificado** o **IIS local**. |
+| g | **Usar el AUTO-UPDATE** de `GenerarDashboard.ps1:6-21` | Canal de despliegue sin TeamViewer que nadie aprovecha. |
 
-"=== 3. LAS TAREAS ==="
-Get-ScheduledTask -TaskName "MonitoreoLockerTiempoReal","GenerarDashboardAdmin","ActualizarExcelLocker" | Select-Object TaskName, State | Format-Table -AutoSize
+### 4. Recordatorio operativo
 
-"=== 4. SE REGENERA EL DASHBOARD? ==="
-Get-Item "C:\Users\User\OneDrive - GHI HORNOS INDUSTRIALES S.L\LockerACTUM\DashboardLocker.html" | Select-Object Length, LastWriteTime
-
-"=== 5. EL BARRIDO DE LA ELECTRONICA AL CONECTAR ==="
-sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT CONVERT(varchar(19),FechaHora,120) AS Momento, Evento, COUNT(*) AS N FROM Eventos WHERE FechaHora >= '20260908' GROUP BY CONVERT(varchar(19),FechaHora,120), Evento ORDER BY 1"
-```
-
-**Que decide cada punto:** el **1** es la prueba del arranque automatico. El **2** confirma que el PC
-reinicio de verdad. El **5** deberia mostrar otro bloque con la firma conocida **`1`x3 + `3`x32** a la hora
-del arranque (apartado O).
-
----
+**Dejar `ACTUM_EPI_Gestion.exe` ABIERTO.** Mientras este cerrado el locker **no registra nada**, y eso no
+se recupera despues. Inigo lo cierra a proposito para trabajar por TeamViewer: acordarse de reabrirlo
+al terminar cada sesion.
 
 ## DESPUES DEL REINICIO — resto de pendientes, por orden
 
@@ -3380,8 +3368,16 @@ La contrasena expira:         14/09/2026 12:00:43   <- en 6 dias
 > ACTUM arranca -> las tareas registran.** Es lo que convertia un apagon de 2 segundos en 12 horas
 > (o 6 dias) de silencio.
 
-**Efecto secundario menor:** al arrancar se abrio tambien el explorador de archivos. Probablemente es la
-opcion de Windows que reabre las aplicaciones que estaban abiertas al apagar (`RestartApps`), no el
-acceso directo. Inofensivo; comprobar si se repite.
+**Efecto secundario menor — investigado y descartado como problema.** Al arrancar se abrio tambien el
+explorador de archivos. Medido:
+
+- `Startup` del usuario: **solo `ACTUM_EPI_Gestion.lnk`**, el nuestro. Limpio.
+- `RestartApps` **no existe** en el registro: no era esa la causa.
+- Causa probable: la opcion del propio Explorador *"Restaurar las ventanas de carpetas abiertas al iniciar
+  sesion"* (`HKCU:\...\Explorer\Advanced\PersistBrowsers`). Inofensiva.
+
+**De paso, inventario del arranque automatico:** `ACTUM_EPI_Gestion` · `OneDrive` · `SecurityHealth` ·
+`Microsoft.Lists` · `Microsoft Edge Update` · **`MicrosoftEdgeAutoLaunch`** (este abre Edge en cada
+inicio: ruido innecesario en un PC dedicado, se puede quitar).
 
 ---
