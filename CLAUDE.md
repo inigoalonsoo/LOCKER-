@@ -256,7 +256,9 @@ del arranque (apartado O).
    - **Defecto corregido tras esa simulacion (v de 166 lineas):** los patrones `*_BACKUP_*.ps1` y
      `*_backup_*.ps1` son el mismo en Windows, que no distingue mayusculas, y tres ficheros salian
      **listados y contados dos veces** (38 en vez de 35). Anadido un `HashSet` de ya-planificados.
-     **Redesplegar la version de 166 lineas antes de usar `-Aplicar`.**
+     Redesplegada y **reverificada en el locker el 08/09**: `sintaxis=0 no-ASCII=0 lineas=166` y
+     **`se archivarian 35 elementos y se borrarian 3`**, sin nombres repetidos. Los 13 activos y
+     `ACTUM_EPI` verificados en su sitio. **Lista para `-Aplicar` cuando toque el gran orden.**
 
    **4.b — ESTA CARPETA (el repo de desarrollo en OneDrive).** Hoy la raiz mezcla codigo activo,
    documentacion, backups, muestras antiguas, capturas, `.docx`, `.url` y scripts de un solo uso.
