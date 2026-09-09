@@ -161,19 +161,20 @@ mejor posicion para negociar precio, y ademas son los mas cercanos.
 | **⚠️ `Bosch / Neurylan?`** | 1 | `M-006` **CADUCADO 220 d** |
 | **⚠️ `GEDORE / Neurylan?`** | 1 | `D-001` **CADUCADO 92 d** — *es uno de los dos posiblemente averiados* |
 
-#### ⚠️ CINCO DECISIONES QUE SOLO PUEDE TOMAR INIGO
+#### ✅ LAS DUDAS DEL EXCEL — resueltas por Inigo el 09/09
 
-El Excel las dejo abiertas en su dia — **no es un error, son preguntas sin contestar**:
-
-| Codigo | Que pone | Que hay que decidir |
+| Codigo | Ponia | Respuesta |
 |---|---|---|
-| `M-006` | `Bosch / Neurylan?` | ¿va a Neurylan? Lleva **220 dias caducado** |
-| `D-001` | `GEDORE / Neurylan?` | idem, **92 dias**. Y es el atornillador que **puede estar averiado** |
-| *(un tercero)* | `Neurylan?` | confirmar |
-| `E-002` | **vacio** | no tiene empresa asignada. Caduca 20/01/2027, no corre prisa |
-| `C-002` | `NEURYLAN (Testo)` | ¿es el mismo Neurylan? Si lo es, va en el lote grande y son **8** |
+| `C-002` | `NEURYLAN (Testo)` | **Es el mismo Neurylan.** Va en el lote grande |
+| `D-002` | caduca 30/05/2030 | **No caduca**: es un boroscopio. El 2030 esta puesto a proposito, no es un error |
+| `E-002` | sin empresa | Es un **indicador de dial x2 + base** (Insize/Mitutoyo), consigna 31. **No se sabe si caduca** |
+| `M-017` | `Neurylan?` | Sonometro PEAK TECH. **Ya calibrado** hasta 06/2027, sin prisa |
+| `M-006` · `D-001` | `Bosch / Neurylan?` · `GEDORE / Neurylan?` | **Se preguntan a Neurylan en el mismo correo**, en bloque aparte |
 
-> **Si la respuesta a las tres primeras es "Neurylan", el lote pasa de 7 a 10 de 21.**
+> **PRECEDENTE QUE CIERRA LAS DOS ULTIMAS:** en su correo anterior Inigo pregunto *"¿por otro lado, seria
+> tambien posible calibrar un Sonometro PEAK TECH 8005?"* y **volvio calibrado**. Esa empresa **si acepta
+> marcas fuera de su linea**, asi que el Bosch y el GEDORE tienen todas las papeletas. *(Queda confirmar a
+> que empresa se mando aquel correo.)*
 
 #### El orden que propongo
 
@@ -186,6 +187,91 @@ El Excel las dejo abiertas en su dia — **no es un error, son preguntas sin con
 
 > **Nota sobre `D-002`:** caduca el **30/05/2030** (1.359 dias). Es el unico con un intervalo asi de largo.
 > Comprobar que no sea un error de tecleo en ACTUM.
+
+### 📧 PLANTILLA ESTANDAR — solicitud de calibracion
+
+> **Cementada el 09/09/2026**, mezclando la version de Inigo con la de Aitor Ulibarri. Se usa igual para
+> todas las empresas: solo cambia la lista de equipos.
+
+**Asunto:** `Solicitud de presupuesto - calibracion de N equipos - GHI Smart Furnaces`
+
+```
+Buenos dias,
+
+Soy Inigo de GHI Smart Furnaces. Os contacto para solicitar presupuesto y plazo para la
+calibracion de los siguientes instrumentos. Necesitamos certificado de calibracion emitido
+bajo un sistema de gestion de calidad conforme a ISO 9001.
+
+1. <Instrumento> <MARCA MODELO>, con el numero de serie <SERIE>
+2. ...
+
+[bloque opcional, solo si hay equipos de marca ajena]
+¿Por otro lado, seria tambien posible calibrar un <equipo> con el numero de serie <serie>?
+
+Os agradeceria que en la oferta indicaseis:
+- Precio por equipo.
+- Plazo desde que los recibis hasta que los devolveis.
+- Si algun equipo saliese fuera de tolerancia, si el ajuste y la recalibracion van incluidos
+  o son aparte.
+- Si haceis vosotros la recogida y la devolucion, o los enviamos nosotros.
+
+Os comento nuestra situacion de fechas: necesitamos tenerlos operativos antes de noviembre,
+por auditoria. Si algun plazo no encajase, decidmelo y organizamos los envios por lotes.
+
+Gracias, un saludo.
+
+Inigo Alonso
+Instrumentacion - GHI Smart Furnaces
+ialopez@ghifurnaces.com
+```
+
+**Por que ese orden — cada bloque esta donde esta por un motivo:**
+
+| | Que | Por que ahi |
+|---|---|---|
+| 1 | Quien eres y que pides, en una frase | Quien lo abre sabe en 3 segundos si le toca a el |
+| 2 | **ISO 9001** | Va **antes** de la lista: condiciona el precio. Al final, presupuestan sin ello y hay que repetir |
+| 3 | Los equipos, **numerados** | *Descripcion · marca y modelo · n.º de serie*. Numerados porque con 8 equipos poder decir "el 5" ahorra un correo |
+| 4 | El bloque **"¿por otro lado...?"** | Idea de Inigo. Separa lo seguro de lo dudoso, para que un "no" a eso no bloquee el resto |
+| 5 | Que quieres en la oferta, **en lista** | En lista y no en prosa: contestan punto por punto y no se olvida ninguno |
+| 6 | Tu fecha limite | Al final, para que suene a informacion y no a presion. Pero **tiene que estar**: si no, tu tienes prisa y ellos no lo saben |
+| 7 | Firma con tu correo | Para que respondan a ti y no al buzon general |
+
+> **Los dos puntos que no estaban en ninguna version previa** —*fuera de tolerancia* y *transporte*— son los
+> que hacen que la factura final no se parezca a la oferta. Preguntarlos al principio cuesta una linea.
+
+### 🔄 EN QUE ORDEN PASAN LAS COSAS
+
+| # | Paso | Quien | Que |
+|---|---|---|---|
+| 1 | **Pides presupuesto** | tu | La plantilla de arriba |
+| 2 | **Llega la oferta** | ellos | Comprobar que contestan a los **4 puntos**. Si falta alguno, preguntar **antes** de seguir |
+| 3 | **Haces el pedido** | tu | Confirmas y acordais fecha de envio. Hasta aqui el instrumento no se ha movido |
+| 4 | **Envias** | tu | **Sacarlo del locker IDENTIFICANDOSE**, no con llave. Si sale con llave, sale sin rastro |
+| 5 | **Vuelve** | ellos | Equipo + certificado |
+| 6 | **Cierras el circulo** | tu | **(a)** fecha nueva en **ACTUM EPI Visor** · **(b)** en el **Excel** · **(c)** **certificado** al servidor |
+
+> **El 6a es el que mas se olvida.** Dos meses despues parece que el dashboard falla, y lo que falta es el
+> dato. El sistema no puede saber que algo se ha calibrado: solo lee lo que hay en ACTUM.
+
+> ⚠️ **EL EXCEL NO TIENE AUTOGUARDADO** (dicho por Inigo, 09/09). Si lo editas y no guardas a mano, se
+> pierde y no avisa nadie.
+
+### 📌 PENDIENTES FISICOS DE INIGO (09/09/2026)
+
+| | Que | Detalle |
+|---|---|---|
+| 1 | **Buscar el atornillador `D-001`** | Lo dejo cerca de su sitio para mandarlo a arreglar y **no esta**. La consigna 32 lo da *En uso*, asi que abrirla con llave probablemente este vacia |
+| 2 | **Serie del `D-001` en ACTUM** | Es el **unico de los 32 sin numero de serie** en la descripcion. **Ya se sabe: `EA 10.00047`**, esta en el Excel -> se puede escribir en el Visor **sin bajar al locker** |
+| 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
+| 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
+| 5 | **Localizar el TESTO 340 de la consigna 22** | Serie `63862113`. Preguntar a Sergio Vega e Iker Lasso. **No se puede enviar a calibrar lo que no aparece** |
+| 6 | **Buscar el correo de Klotz** | No consta. Mirar el certificado anterior; si no, preguntarselo a Neurylan |
+
+> **Correccion del mismo dia:** se dijo primero que el viaje a por el numero de serie era a la consigna 32 y
+> que se podia ahorrar. **Era la 31, y ahi el viaje si hace falta.** Son dos instrumentos distintos: el 32 es
+> el atornillador (serie conocida, instrumento perdido) y el 31 el indicador de dial (instrumento en su
+> sitio, serie desconocida).
 
 ### El objetivo de fondo
 
