@@ -645,21 +645,21 @@ Limpieza posterior: 7 lineas de Javier + 1 duplicado de la consigna 26. **CSV fi
 |---|---|---|---|
 | 16/04 12:44:30 | IKER devuelve | `CorreccionesManuales.csv` | ✅ paso 2.5 |
 | 16/04 12:45:00 | **SERGIO extrae** | `CorreccionesManuales.csv` | ✅ paso 2.5 |
-| 09/09 11:52:50 | SERGIO devuelve | **editada a mano en el CSV** | ❌ **volveria a decir JAVIER** |
+| 09/09 11:52:50 | SERGIO devuelve | **`CorreccionesManuales.csv`** | ✅ **paso 2.5 la SUSTITUYE** (desde el 09/09) |
 
 **Que paso realmente el 09/09:** al devolver el analizador, Inigo se identifico **con el codigo de Javier
 Julian de Lamo (usuario 38)** por error, en vez del de Sergio Vega (usuario 14). El evento de SQL dice
 Javier y **eso no se puede cambiar**: es lo que ocurrio.
 
-> Si se reconstruye el historial, esa linea **volvera a decir Javier** (no se duplicara: tiene la misma
-> clave fecha+consigna+accion que la de SQL, asi que el paso 2.6 no la vera como huerfana). **Habra que
-> reeditarla.** Avisar a Inigo si ocurre.
+> ✅ **RESUELTO el 09/09.** Antes esa linea se habia editado a mano en el CSV y una reconstruccion la
+> habria revertido a Javier. Ahora vive en `CorreccionesManuales.csv` y el paso 2.5 **sustituye** la que
+> genera SQL, asi que sobrevive a cualquier reconstruccion. **Las 5 correcciones estan protegidas.**
 
 **Los movimientos de Javier de 2025 (consignas 12, 13, 19, 24) son reales y NO se tocan.**
 
 ---
 
-### PENDIENTE — que el paso 2.5 SUSTITUYA, no solo anada
+### ✅ HECHO 09/09 — el paso 2.5 SUSTITUYE, no solo anade
 
 **Peticion de Inigo (09/09):** *"quiero que siempre que cambie algo de esta forma por haberme equivocado o
 lo que sea, se arregle con lo de CorreccionesManuales"*.
@@ -672,9 +672,30 @@ Cerraria el circulo de los tres tipos de correccion:
 
 | Tipo | Estado |
 |---|---|
-| **Anadir** un movimiento que no existe en SQL | ✅ funciona (paso 2.5) |
-| **Editar** un movimiento que SI existe en SQL | ❌ **este es el hueco** |
-| **Escribir** directamente en el CSV | ✅ funciona (paso 2.6) |
+| **Anadir** un movimiento que no existe en SQL | ✅ paso 2.5 |
+| **Editar** un movimiento que SI existe en SQL | ✅ **paso 2.5 con sustitucion (09/09)** |
+| **Escribir** directamente en el CSV | ✅ paso 2.6 (filas huerfanas) |
+
+**La clave de sustitucion es fecha + consigna + accion. NO incluye el usuario**, precisamente para poder
+corregirlo. Desplegado y verificado el 09/09: 343 lineas, 0 errores. **5 correcciones protegidas.**
+
+### v2.7 — GUARDA ANTI-DUPLICADO, la ultima red (09/09/2026)
+
+Justo antes de escribir en el CSV, el monitor comprueba que la linea **no exista ya**. Una linea identica
+a otra **siempre** es un error: no se puede hacer dos veces la misma accion, sobre la misma consigna, en el
+mismo segundo.
+
+**Por que hace falta aunque la v2.6 quitara la causa:** el dedup del PASO 3 solo compara con el CSV la
+primera fila del lote. Si un evento ya escrito volviera a entrar por otra via —marcador corrupto, fallback
+v1.0, una reconstruccion— y llegara detras de uno nuevo, se colaria. **Esto lo hace imposible.**
+
+**FAIL-OPEN:** si el CSV no se puede leer, escribe igual. Duplicar es molesto; **perder un movimiento no se
+recupera de ningun sitio**.
+
+Si alguna vez aparece `[GUARDA] Duplicado exacto BLOQUEADO`, el CSV esta a salvo **pero hay que mirar por
+que llego hasta ahi**: significa que algo anterior fallo.
+
+Probada con ficheros reales antes de desplegar. Verificada en produccion: **638 lineas, 0 errores**.
 
 > Va en `ReconstruirHistorial.ps1`, que se lanza a mano y casi nunca. **NO toca el monitor.**
 > Al implementarlo, mover ahi la correccion de Sergio del 09/09 y quitarla del CSV editado a mano.
