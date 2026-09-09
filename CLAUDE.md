@@ -377,6 +377,23 @@ y negociarlos por lotes con el laboratorio.**
 
 > **Inigo pidio ayuda con las calibraciones ("ya te dire").** Pendiente de que concrete que necesita.
 
+**PENDIENTE DE LOCALIZAR — instrumentos de las consignas 9, 19, 26 y 27 (apuntado por Inigo, 09/09):**
+Se mandaron a calibrar; la empresa confirma que **estan calibrados y enviados de vuelta a GHI**, pero
+Inigo se fue justo entonces y **hay que localizarlos fisicamente**.
+
+> **Dato que encaja:** las cuatro figuran en el dashboard **"En uso por IÑIGO A. ALONSO"**. El sistema
+> tiene bien registrado que las saco el — que es lo que paso al mandarlas a calibrar. No hay discrepancia.
+
+> ⚠️ **OJO AL SEGUNDO PASO, QUE ES EL QUE SE OLVIDA.** Que la empresa las calibre **NO actualiza ACTUM**.
+> Al recuperarlas hay que hacer DOS cosas: meterlas fisicamente en su consigna **y actualizar la
+> FechaCaducidad en el ACTUM EPI Visor**. Sin lo segundo, el DashboardAdmin las seguira contando con la
+> caducidad vieja aunque esten recien calibradas.
+
+Consulta lista para ver que instrumentos son y que fecha tiene ACTUM registrada:
+```powershell
+sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT C.CodigoCliente AS Consigna, Cj.CodigoCliente AS Codigo, Cj.Descripcion, CONVERT(varchar(10), Cj.FechaCaducidad, 103) AS Caduca, DATEDIFF(day, GETDATE(), Cj.FechaCaducidad) AS Dias, ISNULL(U.Nombre,'') + ' ' + ISNULL(U.Apellidos,'') AS QuienLaTiene FROM Consigna C LEFT JOIN Caja Cj ON C.Caja_Codigo = Cj.Codigo LEFT JOIN Usuario U ON C.Usuario_Codigo = U.Codigo WHERE C.CodigoCliente IN ('09','19','26','27','9') ORDER BY C.CodigoCliente"
+```
+
 ### ⚠️ REGLA NUEVA — contar en HTML con regex: el instrumento suele ser el problema
 
 **Dos falsos positivos el mismo dia, los dos por el contador, no por el sujeto:**
