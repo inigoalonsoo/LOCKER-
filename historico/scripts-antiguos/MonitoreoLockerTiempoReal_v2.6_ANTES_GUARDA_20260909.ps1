@@ -1,10 +1,8 @@
-# MonitoreoLockerTiempoReal.ps1 v2.7
+# MonitoreoLockerTiempoReal.ps1 v2.6
 # Basado en tabla Eventos de SQL - garantiza CERO perdida de datos
 # Aunque el PC se apague o la tarea se pare, al reiniciar recupera todos los eventos
 #
 # HISTORIAL DE VERSIONES
-#  v2.7  2026-09-09  GUARDA ANTI-DUPLICADO antes de escribir en el CSV.
-#                    Una linea identica a otra ya escrita nunca es legitima.
 #  v2.6  2026-09-09  Marcador CON MILISEGUNDOS, tomado del evento SQL original.
 #                    Sin esto los eventos ya escritos volvian a entrar cada minuto.
 #  v2.5  2026-09-09  Escritura ATOMICA del marcador (temporal + renombrado).
@@ -462,52 +460,12 @@ if ($nuevosMovimientos.Count -gt 0) {
         [System.IO.File]::WriteAllText($archivoHistorial, "FechaHoraApertura;Usuario;Apellidos;Consigna;Descripcion;Accion;EstadoPuerta`r`n", $utf8NoBOM)
     }
 
-    # =============================================
-    # GUARDA ANTI-DUPLICADO (v2.7, 2026-09-09) - LA ULTIMA RED
-    #
-    # Una linea IDENTICA a otra ya escrita es SIEMPRE un error: no se puede hacer
-    # dos veces la misma accion, sobre la misma consigna, en el mismo segundo.
-    # Aqui se comprueba justo antes de escribir, pase lo que pase antes.
-    #
-    # POR QUE HACE FALTA aunque la v2.6 quitara la causa: el dedup del PASO 3 solo
-    # compara con el CSV la PRIMERA fila del lote (el `else` de
-    # `if ($clusterActual.Count -gt 0)`). Si un evento ya escrito volviera a entrar
-    # por cualquier via -marcador corrupto, fallback v1.0, reconstruccion- y llegara
-    # detras de uno nuevo, se colaria. Esto lo hace imposible.
-    #
-    # FAIL-OPEN: si el CSV no se puede leer, se escribe igual. Duplicar es molesto;
-    # perder un movimiento no se recupera de ningun sitio.
-    # =============================================
-    $lineasExistentes = $null
-    try {
-        if ($existeHistorial) {
-            $lineasExistentes = [System.Collections.Generic.HashSet[string]]::new()
-            foreach ($lx in [System.IO.File]::ReadAllLines($archivoHistorial)) { [void]$lineasExistentes.Add($lx) }
-        }
-    } catch {
-        Write-Host "[GUARDA] No se pudo leer el CSV para comprobar duplicados: $_" -ForegroundColor Yellow
-        Write-Host "[GUARDA] Se escribe igualmente (fail-open)" -ForegroundColor Yellow
-        $lineasExistentes = $null
-    }
-
-    $escritas = 0
-    $bloqueadas = 0
     foreach ($mov in $nuevosMovimientos) {
         $linea = "$($mov.FechaHoraApertura);$($mov.Usuario);$($mov.Apellidos);$($mov.Consigna);$($mov.Descripcion);$($mov.Accion);$($mov.EstadoPuerta)"
-        if ($null -ne $lineasExistentes -and $lineasExistentes.Contains($linea)) {
-            Write-Host "[GUARDA] Duplicado exacto BLOQUEADO: $linea" -ForegroundColor Magenta
-            $bloqueadas++
-            continue
-        }
         [System.IO.File]::AppendAllText($archivoHistorial, "$linea`r`n", $utf8NoBOM)
-        if ($null -ne $lineasExistentes) { [void]$lineasExistentes.Add($linea) }
-        $escritas++
     }
 
-    if ($bloqueadas -gt 0) {
-        Write-Host "[GUARDA] $bloqueadas duplicado(s) bloqueado(s) - revisar por que llegaron hasta aqui" -ForegroundColor Magenta
-    }
-    Write-Host "[CSV] Historial actualizado ($escritas escritas, $bloqueadas bloqueadas)" -ForegroundColor Green
+    Write-Host "[CSV] Historial actualizado" -ForegroundColor Green
 
     # Actualizar marcador con el ultimo evento procesado (formato yyyy-MM-dd HH:mm:ss)
     #

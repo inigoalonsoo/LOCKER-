@@ -170,7 +170,6 @@ Write-Host "[RECONSTRUCCION] Movimientos procesados: $($movimientos.Count)" -For
 # ----------------------------------------------------------------------
 $archivoCorrecciones = "$carpetaOneDrive\CorreccionesManuales.csv"
 $nCorr = 0
-$nSust = 0
 $nCorrMalas = 0
 
 if (Test-Path $archivoCorrecciones) {
@@ -185,7 +184,7 @@ if (Test-Path $archivoCorrecciones) {
                 $nCorrMalas++
                 continue
             }
-            $objCorr = [PSCustomObject]@{
+            $movimientos += [PSCustomObject]@{
                 FechaRaw          = $fRaw
                 FechaHoraApertura = $c.FechaHoraApertura
                 Usuario           = $c.Usuario
@@ -195,43 +194,9 @@ if (Test-Path $archivoCorrecciones) {
                 Accion            = $c.Accion
                 EstadoPuerta      = $c.EstadoPuerta
             }
-
-            # SUSTITUIR O ANADIR (anadido 2026-09-09)
-            #
-            # Si ya existe un movimiento con la MISMA CLAVE (fecha + consigna + accion),
-            # la correccion lo SUSTITUYE en vez de anadirse al lado. Sin esto solo se
-            # podian corregir movimientos que NO existen en SQL; los que si existen
-            # -por ejemplo una identificacion hecha con el codigo equivocado- volvian
-            # a aparecer con el dato erroneo en cada reconstruccion.
-            #
-            # Caso que lo motivo (09/09/2026): al devolver el analizador de la consigna
-            # 22, Inigo se identifico con el codigo de JAVIER JULIAN DE LAMO (38) en vez
-            # del de SERGIO V. VEGA (14). El evento de SQL dice Javier y eso no se puede
-            # cambiar -es lo que ocurrio-, pero el historial debe reflejar quien lo tenia
-            # de verdad. Editar el CSV a mano no bastaba: una reconstruccion lo revertia.
-            #
-            # La clave NO incluye el usuario, precisamente para poder corregirlo.
-            $claveCorr = "$($c.FechaHoraApertura)|$([int]$c.Consigna)|$($c.Accion)"
-            $idxExistente = -1
-            for ($iM = 0; $iM -lt $movimientos.Count; $iM++) {
-                $mExist = $movimientos[$iM]
-                if ("$($mExist.FechaHoraApertura)|$([int]$mExist.Consigna)|$($mExist.Accion)" -eq $claveCorr) {
-                    $idxExistente = $iM
-                    break
-                }
-            }
-
-            if ($idxExistente -ge 0) {
-                $anterior = $movimientos[$idxExistente]
-                $movimientos[$idxExistente] = $objCorr
-                Write-Host "[CORRECCIONES] SUSTITUIDO: consigna $($c.Consigna) $($c.FechaHoraApertura) -> '$($anterior.Usuario) $($anterior.Apellidos)' reemplazado por '$($c.Usuario) $($c.Apellidos)'" -ForegroundColor Cyan
-                $nSust++
-            } else {
-                $movimientos += $objCorr
-                $nCorr++
-            }
+            $nCorr++
         }
-        Write-Host "[CORRECCIONES] $nCorr anadidas + $nSust sustituidas (omitidas: $nCorrMalas)" -ForegroundColor Cyan
+        Write-Host "[CORRECCIONES] Reaplicadas $nCorr correcciones manuales (omitidas: $nCorrMalas)" -ForegroundColor Cyan
     } catch {
         Write-Host "[CORRECCIONES] ERROR leyendo $archivoCorrecciones : $_" -ForegroundColor Red
         Write-Host "[CORRECCIONES] Se continua SIN aplicarlas - revisar el fichero" -ForegroundColor Red
@@ -339,5 +304,5 @@ Write-Host ""
 Write-Host "[RESUMEN] Consignas 'En uso' segun CSV reconstruido:" -ForegroundColor Yellow
 $enUso | Select-Object Consigna, Usuario, Apellidos, Descripcion | Format-Table -AutoSize
 
-Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones anadidas, $nSust sustituidas, $nHuerfanas filas manuales conservadas)" -ForegroundColor Cyan
+Write-Host "[DONE] Reconstruccion completada ($nCorr correcciones manuales + $nHuerfanas filas manuales conservadas)" -ForegroundColor Cyan
 Write-Host "Siguiente paso: ejecutar 'C:\ACTUM\GenerarDashboard.ps1' para regenerar el HTML" -ForegroundColor Yellow
