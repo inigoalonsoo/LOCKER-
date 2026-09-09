@@ -211,9 +211,6 @@ bajo un sistema de gestion de calidad conforme a ISO 9001.
 Os agradeceria que en la oferta indicaseis:
 - Precio por equipo.
 - Plazo desde que los recibis hasta que los devolveis.
-- Si algun equipo saliese fuera de tolerancia, si el ajuste y la recalibracion van incluidos
-  o son aparte.
-- Si haceis vosotros la recogida y la devolucion, o los enviamos nosotros.
 
 Os comento nuestra situacion de fechas: necesitamos tenerlos operativos antes de noviembre,
 por auditoria. Si algun plazo no encajase, decidmelo y organizamos los envios por lotes.
@@ -237,15 +234,19 @@ ialopez@ghifurnaces.com
 | 6 | Tu fecha limite | Al final, para que suene a informacion y no a presion. Pero **tiene que estar**: si no, tu tienes prisa y ellos no lo saben |
 | 7 | Firma con tu correo | Para que respondan a ti y no al buzon general |
 
-> **Los dos puntos que no estaban en ninguna version previa** —*fuera de tolerancia* y *transporte*— son los
-> que hacen que la factura final no se parezca a la oferta. Preguntarlos al principio cuesta una linea.
+> ⚠️ **DECISION DE INIGO (09/09): la oferta solo pide PRECIO y PLAZO.** Se propusieron dos puntos mas y
+> **los descarto**, con motivo:
+> - **Transporte** — *"siempre lo enviamos nosotros"*. No es una pregunta, es un dato que ya se sabe.
+> - **Fuera de tolerancia** — se propuso porque es lo que puede hacer que la factura final no se parezca a
+>   la oferta. Inigo prefiere no incluirlo. **Queda registrado para que ningun agente lo vuelva a anadir
+>   "por ayudar": la plantilla es la de arriba, con dos puntos.**
 
 ### 🔄 EN QUE ORDEN PASAN LAS COSAS
 
 | # | Paso | Quien | Que |
 |---|---|---|---|
 | 1 | **Pides presupuesto** | tu | La plantilla de arriba |
-| 2 | **Llega la oferta** | ellos | Comprobar que contestan a los **4 puntos**. Si falta alguno, preguntar **antes** de seguir |
+| 2 | **Llega la oferta** | ellos | Comprobar que dan **precio por equipo** y **plazo**. Si falta alguno, preguntar **antes** de seguir |
 | 3 | **Haces el pedido** | tu | Confirmas y acordais fecha de envio. Hasta aqui el instrumento no se ha movido |
 | 4 | **Envias** | tu | **Sacarlo del locker IDENTIFICANDOSE**, no con llave. Si sale con llave, sale sin rastro |
 | 5 | **Vuelve** | ellos | Equipo + certificado |
@@ -264,7 +265,7 @@ ialopez@ghifurnaces.com
 
 | Lote | Equipos | Presupuesto pedido | Oferta recibida | Pedido | Enviado | Vuelto y cerrado |
 |---|---|---|---|---|---|---|
-| **1 · RS Calibration** | 3 | — | — | — | — | — |
+| **1 · RS Calibration** | 3 | **09/09/2026** | — | — | — | — |
 | **2 · Leica** | 1 | — | — | — | — | — |
 | **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
 | **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
