@@ -14,9 +14,10 @@ dias por politica de IT, **que no se puede cambiar**.
 Cuando caduca: los scripts siguen funcionando, el HTML se genera cada minuto en el disco del locker, y
 **nadie ve nada nuevo en la web**. No aparece error en ningun log — no es un error, es una ausencia.
 
-**Como se arregla:** en el locker, icono de OneDrive -> **Configuracion** -> pestana **Cuenta** ->
-re-introducir credenciales. Si se queda en *"Buscando cambios..."* mas de 10 minutos, cerrar OneDrive y
-volver a abrirlo.
+**Como se arregla:** ver el procedimiento paso a paso en **CAMBIO DE CONTRASENA DE `fabricacion1`**,
+mas abajo. Resumen: icono de OneDrive -> iniciar sesion con la nueva contrasena -> **salir de OneDrive y
+volver a abrirlo desde el menu de inicio** (este ultimo paso NO sobra) -> apuntar 42 dias y poner
+recordatorio.
 
 **Como se detecta:** comparar la hora de *"Ultima actualizacion"* del dashboard **en la web** con la del
 fichero en el locker. Si el local esta fresco y el de la web viejo, es esto.
@@ -48,6 +49,99 @@ devolverlo a su consigna:
 
 **Dos cosas, nada mas:** re-autenticar OneDrive cada ~42 dias, y los tres pasos de arriba cada vez que
 vuelve un instrumento de calibrar. **Todo lo demas el sistema lo hace solo.**
+
+---
+
+## 📐 CALIBRACIONES — proceso, empresas y contactos
+
+> **Dictado por Inigo el 09/09/2026.** Conocimiento operativo que no esta en ningun sistema.
+
+### Estrategia — por que AHORA, en septiembre
+
+**Las auditorias suelen ser en NOVIEMBRE.** De ahi todo lo demas:
+
+- **Pedir en septiembre la fecha de calibracion**, para enviarlos y que los calibren directamente. Asi los
+  instrumentos pasan **el mayor tiempo posible aqui** y no fuera esperando hueco.
+- **Dejar siempre uno de cada tipo en la empresa** (un PCE, un Testo, un nivel optico...) para que no este
+  todo calibrandose a la vez y produccion se quede sin nada. O preguntar antes que va a hacer falta.
+- Esto encaja con la avalancha detectada: **16 instrumentos caducan entre el 21/10 y el 01/12**. Agrupar
+  por lotes y por empresa en vez de mandarlos de uno en uno segun van cayendo.
+
+### A que empresa va cada instrumento
+
+**Cada instrumento se manda a la empresa que consta en el Excel** — la que lo calibro o lo suministro antes.
+
+**Excel de referencia (empresas de calibracion):**
+```
+\\srvdocumental\Ghihornos\Fabricacion\FABRICACION\Departamental\02 - INSTRUMENTACION\Locker instrumentacion\INSTRUMENTOS LOCKER.xlsx
+```
+
+> ⚠️ **OJO, son DOS Excel distintos y es facil confundirlos:**
+> - **`INSTRUMENTOS LOCKER.xlsx`** (servidor documental, ruta de arriba) -> **las empresas de calibracion**
+> - **`00.Intrumentos_Locker (1).xlsx`** (OneDrive del locker) -> el que actualiza `ActualizarExcel.ps1`
+>   cada 5 minutos con UBICACION y CALIBRADO/CADUCADO
+
+**Si hay problemas con la empresa asignada: la alternativa es NEURYLAN**, que son los mas cercanos y
+"igual pueden hacer mas de todo".
+
+### El proceso
+
+1. **Pedir presupuesto** — Inigo tiene un correo de ejemplo **fijado en Outlook** con el formato.
+2. **Hacer el pedido.**
+
+### Contactos
+
+| Empresa | Contacto |
+|---|---|
+| **Neurylan** *(alternativa general, los mas cercanos)* | `administracion@neurylan.com` |
+| **Applus** | `izaskun.conde@applus.com` |
+| **CS Instruments** | `carlos.garcia@csinstruments.es` |
+| **LEICA** | `trinidad.vilallba@leica-geosystems.com` |
+| **RS** | `Raquel.Delgado@rsgroup.com` |
+
+> Si esas personas no contestan, buscar el correo general de la empresa en Google.
+
+### PENDIENTE — dos instrumentos posiblemente AVERIADOS
+
+Hablado con la empresa de calibracion, **sin cerrar**. La idea: **llevarlos, que los revisen**, y si estan
+averiados, que valoren **si los pueden arreglar y calibrar** o no.
+
+| Instrumento | Nº serie | En ACTUM |
+|---|---|---|
+| **Atornillador Dinamometrico LDA-40 EA** | `10.00047` | **SI** — es `D-001`, **CADUCADO desde el 09/06/2026** |
+| **Indicador de temperatura Phoenix TM PTM1010** | `1774+KD-9083/4/5/6` | ⚠️ **NO APARECE** en los 32 instrumentos de ACTUM |
+
+> ⚠️ **El Phoenix TM no esta en ACTUM.** Revisada la lista completa de los 32 instrumentos del locker
+> (09/09): no hay ningun Phoenix TM ni ese numero de serie. **Si no esta dado de alta, no sale en ningun
+> dashboard y su calibracion no se controla ahi.** Comprobar y decidir si debe darse de alta:
+> ```powershell
+> sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT CodigoCliente, Descripcion FROM Caja WHERE Descripcion LIKE '%PTM%' OR Descripcion LIKE '%Phoenix%' OR Descripcion LIKE '%1774%'"
+> ```
+
+### El objetivo de fondo
+
+> **La idea de todo este dashboard es QUITAR el Excel en el futuro.** De momento Inigo lo sigue
+> actualizando a mano a proposito, hasta que el sistema cubra todo lo que hoy cubre el Excel.
+
+---
+
+## 🔑 CAMBIO DE CONTRASENA DE `fabricacion1` — el procedimiento exacto
+
+> **Dictado por Inigo el 09/09/2026.** Cada ~42 dias. Es el mantenimiento nº 1 del proyecto.
+
+1. **Salir de la pantalla de devolucion/extraccion** del locker: pulsar **SALIR** y meter el codigo de
+   usuario *(el de Inigo es `040905`; cada persona usa el suyo)*.
+2. Ya en Windows: **icono de OneDrive** (abajo a la derecha) -> **iniciar sesion** con la **nueva
+   contrasena** de `fabricacion1@ghifurnaces.com`.
+3. **Y ahora lo que no es evidente y hay que hacer igualmente:** volver a pulsar el icono de abajo a la
+   derecha -> **salir de OneDrive**. Despues, en el buscador de aplicaciones (abajo a la izquierda),
+   buscar **OneDrive**, abrirlo desde ahi y **volver a iniciar sesion**. Con eso arranca de nuevo.
+4. **Apuntar 42 dias desde ese dia** y poner un recordatorio para cambiarla **un poco ANTES de que
+   caduque**, y que el locker no llegue a pararse.
+
+> **Por que el paso 3 no sobra:** OneDrive puede quedarse en *"Buscando cambios..."* despues de
+> re-autenticar y no subir nada, con el icono girando como si trabajara. Cerrarlo y reabrirlo desde el
+> menu de inicio es lo que lo desbloquea. Ya paso el 14/05 y el 10/06.
 
 ---
 
