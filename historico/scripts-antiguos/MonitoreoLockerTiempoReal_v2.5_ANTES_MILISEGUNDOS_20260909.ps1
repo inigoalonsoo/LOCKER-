@@ -1,10 +1,8 @@
-# MonitoreoLockerTiempoReal.ps1 v2.6
+# MonitoreoLockerTiempoReal.ps1 v2.5
 # Basado en tabla Eventos de SQL - garantiza CERO perdida de datos
 # Aunque el PC se apague o la tarea se pare, al reiniciar recupera todos los eventos
 #
 # HISTORIAL DE VERSIONES
-#  v2.6  2026-09-09  Marcador CON MILISEGUNDOS, tomado del evento SQL original.
-#                    Sin esto los eventos ya escritos volvian a entrar cada minuto.
 #  v2.5  2026-09-09  Escritura ATOMICA del marcador (temporal + renombrado).
 #                    Un corte durante la escritura ya no puede dejarlo ilegible.
 #  v2.4  2026-09-07  Incidente bucle de reprocesado. DOS fixes:
@@ -55,13 +53,7 @@ $esPrimeraEjecucion = $false
 if (Test-Path $archivoMarcador) {
     $fechaTexto = (Get-Content $archivoMarcador -Raw -Encoding UTF8).Trim()
     try {
-        # v2.6: se aceptan LOS DOS formatos. El nuevo lleva milisegundos; el viejo
-        # (marcadores escritos antes del 09/09/2026) no. Si se leyera solo el nuevo,
-        # el primer arranque tras desplegar caeria al fallback y reprocesaria.
-        # El cast [string[]] NO sobra: sin el, PowerShell 5.1 no resuelve el overload
-        # de ParseExact con array de formatos y falla con AMBAS cadenas. Probado.
-        $formatosMarcador = [string[]]@('yyyy-MM-dd HH:mm:ss.fff', 'yyyy-MM-dd HH:mm:ss')
-        $ultimoProcesado = [DateTime]::ParseExact($fechaTexto, $formatosMarcador, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::None)
+        $ultimoProcesado = [DateTime]::ParseExact($fechaTexto, 'yyyy-MM-dd HH:mm:ss', [System.Globalization.CultureInfo]::InvariantCulture)
     } catch {
         try {
             $ultimoProcesado = [DateTime]::Parse($fechaTexto)
@@ -485,45 +477,8 @@ if ($nuevosMovimientos.Count -gt 0) {
         } catch { }
     }
 
-    # MARCADOR CON MILISEGUNDOS (v2.6, 2026-09-09)
-    #
-    # POR QUE: la tabla Eventos guarda FechaHora CON milisegundos, pero el marcador
-    # se escribia truncado al segundo. Como la query es `FechaHora > @ultimo`, un
-    # evento de las 11:52:50.813 seguia siendo > 11:52:50.000, asi que VOLVIA A
-    # ENTRAR en cada pasada, indefinidamente. Medido el 09/09: el evento de la
-    # consigna 22 llevaba una hora reprocesandose cada minuto.
-    #
-    # Lo unico que impedia duplicarlo era el dedup cross-batch, que NO es fiable
-    # para esto: solo comprueba contra el CSV la PRIMERA fila del lote (PASO 3, el
-    # `else` de `if ($clusterActual.Count -gt 0)`). En cuanto un evento nuevo abre
-    # cluster, los ya escritos que vengan detras se cuelan. Asi se duplico la
-    # consigna 26 el 09/09: llego el evento nuevo de la 19, abrio cluster, y el de
-    # la 26 -reprocesado- entro sin pasar por el chequeo.
-    #
-    # LA FECHA SE TOMA DEL EVENTO SQL, NO DEL CSV: en el CSV las fechas ya estan
-    # truncadas al segundo (formato MM/dd/yyyy HH:mm:ss), asi que de ahi no se
-    # pueden recuperar los milisegundos.
-    #
-    # Se usa $filasLimpias -las filas que pasaron el dedup y se han escrito-, con
-    # lo que el marcador sigue avanzando SOLO sobre lo realmente registrado, que es
-    # la regla cementada el 02/06. Si SQL fallo y se uso el fallback v1.0,
-    # $filasLimpias no existe y se cae al formato antiguo sin milisegundos.
-    $ultimaFechaSQL = $null
-    if ((Test-Path variable:filasLimpias) -and $null -ne $filasLimpias -and $filasLimpias.Count -gt 0) {
-        foreach ($fl in $filasLimpias) {
-            try {
-                $fSql = [DateTime]$fl['FechaHora']
-                if ($null -eq $ultimaFechaSQL -or $fSql -gt $ultimaFechaSQL) { $ultimaFechaSQL = $fSql }
-            } catch { }
-        }
-    }
-
     if ($ultimaFechaObj -ne $null) {
-        $textoMarcador = if ($null -ne $ultimaFechaSQL) {
-            $ultimaFechaSQL.ToString('yyyy-MM-dd HH:mm:ss.fff')
-        } else {
-            $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss')
-        }
+        $textoMarcador = $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss')
 
         # ESCRITURA ATOMICA DEL MARCADOR (v2.5, 2026-09-09)
         #
