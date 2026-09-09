@@ -1,5 +1,56 @@
 # CLAUDE.md — Sistema Locker Instrumentacion GHI
 
+## 🔧 EL UNICO MANTENIMIENTO QUE REQUIERE ESTE PROYECTO
+
+> **Dictado por Inigo el 09/09/2026.** Todo lo demas del sistema es automatico. Esto es lo unico que
+> **una persona tiene que hacer a mano**, y si no se hace, el sistema no avisa: sigue funcionando y
+> mostrando datos viejos como si fueran buenos.
+
+### 1. Re-autenticar OneDrive cuando caduca la contrasena — cada ~42 dias
+
+La contrasena de **`fabricacion1@ghifurnaces.com`** (la cuenta de OneDrive del locker) caduca cada ~42-50
+dias por politica de IT, **que no se puede cambiar**.
+
+Cuando caduca: los scripts siguen funcionando, el HTML se genera cada minuto en el disco del locker, y
+**nadie ve nada nuevo en la web**. No aparece error en ningun log — no es un error, es una ausencia.
+
+**Como se arregla:** en el locker, icono de OneDrive -> **Configuracion** -> pestana **Cuenta** ->
+re-introducir credenciales. Si se queda en *"Buscando cambios..."* mas de 10 minutos, cerrar OneDrive y
+volver a abrirlo.
+
+**Como se detecta:** comparar la hora de *"Ultima actualizacion"* del dashboard **en la web** con la del
+fichero en el locker. Si el local esta fresco y el de la web viejo, es esto.
+
+> ⚠️ **NO CONFUNDIR CON LA OTRA CONTRASENA.** La de la cuenta Windows **`User`** del locker **ya no
+> caduca** (se le quito la caducidad el 08/09 con `Set-LocalUser -PasswordNeverExpires`). Esa era la que
+> rompia el arranque automatico. La que sigue caducando es **la de `fabricacion1`**, que es de GHI y su
+> politica la fija IT.
+
+### 2. Cuando vuelve un instrumento calibrado — TRES pasos, y ninguno es automatico
+
+Que la empresa de calibracion lo calibre **no actualiza nada**. Al recibirlo hay que hacer, ademas de
+devolverlo a su consigna:
+
+| # | Que | Donde | Si no se hace |
+|---|---|---|---|
+| **a** | Poner la **nueva fecha de caducidad** | **ACTUM EPI Visor** | El `DashboardAdmin` lo seguira contando con la caducidad vieja: aparecera CADUCADO o URGENTE estando recien calibrado |
+| **b** | Apuntar la fecha tambien en el **Excel** | `00.Intrumentos_Locker (1).xlsx` | Queda descuadrado con ACTUM. *(Excel antiguo, pero Inigo lo sigue manteniendo a proposito)* |
+| **c** | Subir el **certificado de calibracion** | **servidor documental de la empresa** | No queda trazabilidad documental de la calibracion |
+
+> **El paso (a) es el que mas se olvida y el que mas ruido genera despues**: dentro de dos meses parece
+> que "el dashboard falla", cuando lo que falta es el dato. El sistema no puede saber que un instrumento
+> se ha calibrado — solo lee lo que hay en ACTUM.
+
+> **Devolverlo fisicamente a la consigna SI es automatico:** al identificarse y cerrar la puerta, el
+> movimiento se registra solo y el instrumento vuelve a *Disponible*. Eso no hay que tocarlo a mano.
+
+### Resumen para quien herede esto
+
+**Dos cosas, nada mas:** re-autenticar OneDrive cada ~42 dias, y los tres pasos de arriba cada vez que
+vuelve un instrumento de calibrar. **Todo lo demas el sistema lo hace solo.**
+
+---
+
 ## 🛑 REGLA DURA — `MonitoreoLockerTiempoReal.ps1` NO SE TOCA A LA LIGERA
 
 > **Cementada el 2026-09-08 tras la propuesta de Codex.** Aplica a CUALQUIER agente
@@ -380,6 +431,17 @@ y negociarlos por lotes con el laboratorio.**
 **PENDIENTE DE LOCALIZAR — instrumentos de las consignas 9, 19, 26 y 27 (apuntado por Inigo, 09/09):**
 Se mandaron a calibrar; la empresa confirma que **estan calibrados y enviados de vuelta a GHI**, pero
 Inigo se fue justo entonces y **hay que localizarlos fisicamente**.
+
+| Consigna | Codigo | Instrumento | Caduca |
+|---|---|---|---|
+| 09 | **L-004** | Megger Insulation tester / MIT320 / 102465739 | 26/05/2027 |
+| 19 | **T-008** | Cam.Term / TESTO 885 / 5630885 | 03/06/2027 |
+| 26 | **L-005** | Comp.Aisl / FLUKE 1507 / 43160491WS | 26/05/2027 |
+| 27 | **M-017** | Son. / PEAK TECH 8005 / 230723323 | 02/06/2027 |
+
+> ✅ **Las fechas de ACTUM YA estan actualizadas** (las cuatro en 2027): Inigo hizo el paso (a) del
+> mantenimiento antes de irse. **Solo queda localizarlos y meterlos en su consigna** — la devolucion se
+> registra sola al identificarse.
 
 > **Dato que encaja:** las cuatro figuran en el dashboard **"En uso por IÑIGO A. ALONSO"**. El sistema
 > tiene bien registrado que las saco el — que es lo que paso al mandarlas a calibrar. No hay discrepancia.
