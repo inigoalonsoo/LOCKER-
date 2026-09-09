@@ -288,6 +288,44 @@ v2.4 guardada en `C:\ACTUM\_ARCHIVOackups_scripts\MonitoreoLockerTiempoReal_v2.
 
 ---
 
+### Banner rojo de SharePoint — RESUELTO 09/09/2026
+
+**Confirmado antes de tocar nada**, no supuesto. El aviso *"No se cargo parte del contenido"* citaba
+literalmente **nuestros dos errores y ninguno mas**:
+
+```
+Uncaught SecurityError: Failed to execute 'replaceState' ... '#historial'  (about:srcdoc:3760:95)
+Uncaught SecurityError: Failed to execute 'replaceState' ... '#estado'     (about:srcdoc:3759:95)
+```
+
+Lineas 3759 y 3760 = los dos `addEventListener` del bloque `<script>`, uno por pestana. Todo lo demas de
+la consola (manifest, permissions policy, CSP, iconos duplicados, service workers) es ruido de Microsoft.
+
+**Causa:** SharePoint incrusta el HTML en un iframe `about:srcdoc` con origin `null`, donde el navegador
+prohibe `replaceState` con URL.
+
+**Se ELIMINA, no se arregla.** Ese JavaScript existia para recuperar la pestana activa tras una recarga
+(v2.1 UX, 21/04) y **el auto-refresh se quito el 11/06**: sin recargas no hay nada que recuperar. Ademas
+nunca llego a funcionar en SharePoint. En su lugar queda un comentario HTML explicando por que no debe
+volver a anadirse JavaScript ahi.
+
+> **Prueba de que los tabs no dependian de el:** en la captura del 09/09, con el script lanzando
+> excepciones, **los tabs se veian y funcionaban**. Son CSS puro (radio buttons + `:checked`).
+
+**Verificado tras desplegar:** `sintaxis=0 no-ASCII=0 lineas=705` · en el HTML `</script>` = **0**,
+`history.replaceState` = **0**, `addEventListener` = **0** · y **el banner desaparecio** al recargar con
+`Ctrl+F5`, con los tabs cambiando normalmente.
+
+> **DOS PREDICCIONES MIAS QUE FALLARON, por si sirven de aviso:**
+> 1. Dije que en el HTML debia haber `<script>` = 0 y salio **1**. No quedaba codigo: **mi propio
+>    comentario menciona la palabra `<script>`**, y el contador se contaba a si mismo. El predicado bueno
+>    busca las llamadas reales (`</script>`, `history.replaceState`, `addEventListener`), no las palabras.
+> 2. Dije que el backup pesaria 28.688 bytes y peso **29.394**. Diferencia: 706 bytes, **uno por linea**:
+>    el locker usa CRLF y el repo LF. Es lo ya anotado sobre no comparar tamanos ni hashes entre los dos
+>    sitios — se me escapo al dar la cifra.
+
+---
+
 # 🟢 SIGUIENTE PASO — 2026-09-09
 
 > **El reinicio con cambio de BIOS ya se hizo el 08/09 por la tarde y salio bien.** El detalle esta en el
@@ -321,7 +359,7 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 |---|---|---|
 | a | **Alerta de sistema caido** | Aparcada por decision de Inigo. Sigue siendo lo que evitaria el proximo silencio de semanas. **El vigilante debe correr FUERA del locker.** |
 | b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **Depende de la respuesta sobre la consigna 22.** Si SQL pasara a mandar, la 22 volveria a mostrar a Iker y desharia la correccion manual. Decidir primero quien gana. |
-| c | **Quitar el `<script>`** de `GenerarDashboard.ps1:672-684` | El banner rojo de SharePoint. **Confirmar antes** que el error que ve Inigo es ese y no otro. |
+| ~~c~~ | ~~Quitar el `<script>`~~ | ✅ **HECHO 09/09.** Confirmado en consola, eliminado y verificado: el banner desaparecio. |
 | d | **`EstadoAnterior.json` se queda vacio** | `$estadoPorConsigna` sin definir (lineas 486-488). No rompe nada: solo afecta al metodo de reserva v1.0. |
 | e | **Quitar `MicrosoftEdgeAutoLaunch` del arranque** | Abre Edge en cada inicio. Ruido en un PC dedicado. Cosmetico. |
 | **f** | **CALIBRACIONES** — tarea **recurrente**, no de un dia | La pestana Calibracion del `DashboardAdmin.html` ya clasifica por **CADUCADO / URGENTE (<30d) / PROXIMO (<90d)** leyendo `Caja.FechaCaducidad` de SQL: **sirve directamente como lista de trabajo**. Los pendientes estan apuntados en el cuaderno GHI y en recordatorios del movil. Ir mandando poco a poco. |
