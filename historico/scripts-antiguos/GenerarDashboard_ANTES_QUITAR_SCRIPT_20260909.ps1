@@ -673,18 +673,19 @@ $html += @"
 
         <p class="actualizado">Actualizado autom&aacute;ticamente cada minuto | &Uacute;ltima actualizaci&oacute;n: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</p>
     </div>
-    <!-- SIN JAVASCRIPT. Los tabs funcionan con CSS puro (radio buttons + :checked).
-         Aqui hubo un bloque <script> que guardaba la pestana activa en el hash de la
-         URL (v2.1 UX, 21/04/2026). ELIMINADO el 09/09/2026 por dos razones:
-           1. NO FUNCIONA EN SHAREPOINT y ademas ensucia: SharePoint incrusta el HTML
-              en un iframe about:srcdoc con origin 'null', donde el navegador prohibe
-              replaceState. Cada apertura lanzaba dos SecurityError y SharePoint
-              mostraba el banner rojo "No se cargo parte del contenido".
-              Confirmado en consola el 09/09 (about:srcdoc:3759 y :3760).
-           2. YA NO SERVIA PARA NADA: existia para recuperar la pestana tras una
-              recarga, y el auto-refresh se quito el 11/06/2026. Sin recargas, no hay
-              nada que recuperar.
-         NO volver a anadir JavaScript aqui: SharePoint lo bloquea o lo rompe. -->
+    <script>
+    (function(){
+        try {
+            var tabE = document.getElementById('tab-estado');
+            var tabH = document.getElementById('tab-historial');
+            var hash = (window.location.hash || '').replace('#','');
+            if (hash === 'historial' && tabH) { tabH.checked = true; }
+            else if (hash === 'estado' && tabE) { tabE.checked = true; }
+            if (tabE) { tabE.addEventListener('change', function(){ if(this.checked){ history.replaceState(null,'','#estado'); } }); }
+            if (tabH) { tabH.addEventListener('change', function(){ if(this.checked){ history.replaceState(null,'','#historial'); } }); }
+        } catch(e) {}
+    })();
+    </script>
 </body>
 </html>
 "@
