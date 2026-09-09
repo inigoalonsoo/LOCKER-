@@ -317,6 +317,10 @@ $topUsos   = if ($topInst) { $topInst.TotalUsos } else { 0 }
 # ESTE HACIENDO ALGO RARO.
 # =============================================
 $avisosSalud = @()
+# Los DATOS MEDIDOS se muestran siempre, esten bien o mal. Un tick verde puede mentir;
+# los numeros no. Y ver el chequeo funcionando es lo que distingue "todo bien" de
+# "el chequeo no esta corriendo" -que es justo lo que nadie noto del watchdog viejo.
+$datosSalud = @()
 try {
     if (Test-Path $archivoHistorial) {
         $lineasCsv = [System.IO.File]::ReadAllLines($archivoHistorial)
@@ -325,6 +329,7 @@ try {
         $dupsCsv = $lineasCsv.Count - $unicasCsv.Count
 
         # 1. Lineas duplicadas exactas: SIEMPRE son un error
+        $datosSalud += "$($lineasCsv.Count) l&iacute;neas / $($unicasCsv.Count) &uacute;nicas"
         if ($dupsCsv -gt 0) {
             $avisosSalud += "$dupsCsv l&iacute;nea(s) duplicada(s) en el historial"
         }
@@ -333,6 +338,7 @@ try {
         $bytesCsv = [System.IO.File]::ReadAllBytes($archivoHistorial)
         $nulosCsv = 0
         foreach ($bC in $bytesCsv) { if ($bC -eq 0) { $nulosCsv++ } }
+        $datosSalud += "$nulosCsv bytes NULL"
         if ($nulosCsv -gt 0) {
             $avisosSalud += "$nulosCsv byte(s) NULL en el historial (escritura interrumpida)"
         }
@@ -346,6 +352,7 @@ try {
                 if ($fMv -ge $limite24) { $recientes++ }
             } catch { }
         }
+        $datosSalud += "$recientes movimiento(s) en 24 h"
         if ($recientes -gt 60) {
             $avisosSalud += "$recientes movimientos en 24 h (lo normal son ~10): posible reprocesado"
         }
@@ -361,9 +368,16 @@ try {
         }
         if ($null -eq $fMarc) {
             $avisosSalud += "el marcador no se puede leer"
-        } elseif ($fMarc -gt (Get-Date).AddMinutes(5)) {
-            $avisosSalud += "el marcador apunta al FUTURO: no se registrar&aacute;n movimientos"
+            $datosSalud += "marcador ILEGIBLE"
+        } else {
+            $datosSalud += "marcador $($fMarc.ToString('dd/MM/yyyy HH:mm:ss'))"
+            if ($fMarc -gt (Get-Date).AddMinutes(5)) {
+                $avisosSalud += "el marcador apunta al FUTURO: no se registrar&aacute;n movimientos"
+            }
         }
+    } else {
+        $datosSalud += "marcador NO ENCONTRADO"
+        $avisosSalud += "no se encuentra el marcador UltimoEventoProcesado.txt"
     }
 } catch {
     $avisosSalud += "el chequeo de salud fall&oacute;"
@@ -486,6 +500,22 @@ $html = @"
         .aviso-salud ul { margin: 0 0 8px 18px; padding: 0; }
         .aviso-salud li { margin: 3px 0; }
         .aviso-pie { font-size: .85em; opacity: .85; }
+
+        /* SALUD OK - la tira verde: confirma que el chequeo se ha ejecutado */
+        .salud-ok {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 20px;
+            margin-bottom: 16px;
+            background: rgba(34,197,94,0.10);
+            border: 1px solid rgba(34,197,94,0.35);
+            border-radius: 12px;
+            color: #86EFAC;
+            font-size: 0.86em;
+        }
+        .salud-ok strong { color: #BBF7D0; }
+        .salud-icono { font-size: 1.1em; }
 
         /* ALERT BANNER - solo aparece si hay caducados/urgentes */
         .alert-banner {
@@ -864,14 +894,22 @@ $html = @"
     </div>
 "@
 
-# AVISO DE SALUD (solo si el chequeo detecto algo anormal)
+# ESTADO DE SALUD - se muestra SIEMPRE, en verde o en rojo
+$textoDatos = ($datosSalud -join "  &middot;  ")
 if ($avisosSalud.Count -gt 0) {
     $listaAvisos = ($avisosSalud | ForEach-Object { "<li>$_</li>" }) -join ""
     $html += @"
     <div class="aviso-salud">
         <strong>ATENCI&Oacute;N &mdash; el sistema ha detectado algo anormal</strong>
         <ul>$listaAvisos</ul>
-        <span class="aviso-pie">Revisar antes de fiarse de estos datos. Diagn&oacute;stico: ejecutar AuditarDashboard.ps1 en C:\ACTUM</span>
+        <span class="aviso-pie">Medido: $textoDatos<br>Revisar antes de fiarse de estos datos. Diagn&oacute;stico: ejecutar AuditarDashboard.ps1 en C:\ACTUM</span>
+    </div>
+"@
+} else {
+    $html += @"
+    <div class="salud-ok">
+        <span class="salud-icono">&#10004;</span>
+        <span><strong>Sistema comprobado</strong> &mdash; sin anomal&iacute;as. $textoDatos</span>
     </div>
 "@
 }

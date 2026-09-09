@@ -765,9 +765,18 @@ mal nadie se entera hasta que alguien mira con atencion. El 09/09 estuvo escribi
 **cada minuto** y solo se cazo porque estabamos delante; en agosto un bucle de reprocesado destruyo el CSV
 y **paso 19 dias** sin que nadie lo supiera.
 
-**Que se ha hecho:** `GenerarDashboardAdmin.ps1` se autodiagnostica antes de construir el HTML y, si algo
-no cuadra, pinta un **banner rojo arriba del todo** —encima del de calibraciones—, con su propia clase CSS
-`.aviso-salud`.
+**Que se ha hecho:** `GenerarDashboardAdmin.ps1` se autodiagnostica antes de construir el HTML y **siempre
+muestra el resultado** arriba del todo, encima del de calibraciones:
+
+- **Verde** (`.salud-ok`) si todo esta bien, con **los numeros medidos**:
+  *536 lineas / 536 unicas · 0 bytes NULL · 2 movimientos en 24 h · marcador 09/09/2026 11:52:50*
+- **Rojo** (`.aviso-salud`) con la lista de lo que falla, y los numeros medidos igualmente.
+
+> **Por que se muestra siempre y por que numeros en vez de un tick verde** — peticion de Inigo (09/09):
+> *"quiero que aparezca algun banner o algo aunque haya 0 errores, pero que se vea"*. Tiene razon de fondo:
+> **un detector que solo habla cuando falla no deja distinguir "todo bien" de "el chequeo no esta
+> corriendo"**. Es exactamente lo que nadie noto del watchdog viejo, que llevaba meses callado sin hacer
+> nada. Y se pintan los **numeros**, no un tick: un tick verde puede mentir; `536 / 536` es una medida.
 
 **Las cuatro comprobaciones** (las cuatro firmas de averia que este proyecto ya ha sufrido):
 
@@ -814,13 +823,20 @@ y otra vez sobre el bloque ya movido al Admin, con **resultado identico**:
 | C · 80 movimientos en 24 h + marcador a +2 dias | 2 avisos | **2**, los dos correctos |
 | D · marcador con texto basura | 1 aviso | **1** |
 
-**Discrimina: calla con datos sanos y habla con cada una de las cuatro averias.**
+**Discrimina: calla con datos sanos y habla con cada una de las cuatro averias.** Reprobado una tercera vez
+tras anadir la tira verde: los mismos 4 casos, mismo resultado, y **los datos medidos aparecen en los cuatro**
+(tambien en el sano, que es lo que se queria).
+
+**Desplegado y verificado en el locker el 09/09** (primera version, la de solo-rojo):
+`sintaxis=0 no-ASCII=0 lineas=1243`, y el HTML resultante con **`banner_salud=0` · `banner_calibracion=1` ·
+126.267 bytes**. Predicado cumplido al digito: el de salud callado porque el CSV esta sano, el de
+calibraciones encendido porque hay 5 caducados.
 
 **Verificacion de los dos ficheros:**
 
 | Fichero | Lineas | no-ASCII | Sintaxis | Here-strings |
 |---|---|---|---|---|
-| `GenerarDashboardAdmin.ps1` (con el banner) | **1.243** | 0 | 0 errores | 16/16 |
+| `GenerarDashboardAdmin.ps1` (con el aviso) | **1.281** | 0 | 0 errores | 17/17 |
 | `GenerarDashboard.ps1` (revertido, sin tocar) | **705** | 0 | 0 errores | 5/5 |
 
 > **`GenerarDashboard.ps1` vuelve a ser exactamente el que ya esta en el locker:** no hay que redesplegarlo.
