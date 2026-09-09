@@ -300,75 +300,6 @@ $topUsos   = if ($topInst) { $topInst.TotalUsos } else { 0 }
 # - Tabs CSS puro sin JavaScript (compatible OneDrive web)
 # - Encoding ASCII final (red de seguridad definitiva)
 # =============================================
-# =============================================
-# CHEQUEO DE SALUD (anadido 2026-09-09)
-#
-# El sistema no tiene forma de avisar de que algo va mal: la tarea corre oculta y
-# los fallos son SILENCIOSOS. El 09/09 estuvo escribiendo lineas duplicadas cada
-# minuto y solo se detecto porque habia alguien mirando; en agosto, un bucle de
-# reprocesado destruyo el CSV y nadie se entero en 19 dias.
-#
-# Va en el ADMIN y NO en el dashboard publico (decision de Inigo, 09/09): el aviso
-# es tecnico y quien puede actuar sobre el es quien abre este panel. Al publico
-# solo le sembraria dudas sobre unos datos que casi siempre estan bien.
-#
-# Esto NO sustituye a una alerta externa -si el PC esta muerto, nadie genera este
-# HTML-, pero cubre el caso que si se puede cubrir desde dentro: QUE EL SISTEMA
-# ESTE HACIENDO ALGO RARO.
-# =============================================
-$avisosSalud = @()
-try {
-    if (Test-Path $archivoHistorial) {
-        $lineasCsv = [System.IO.File]::ReadAllLines($archivoHistorial)
-        $unicasCsv = New-Object 'System.Collections.Generic.HashSet[string]'
-        foreach ($lc in $lineasCsv) { [void]$unicasCsv.Add($lc) }
-        $dupsCsv = $lineasCsv.Count - $unicasCsv.Count
-
-        # 1. Lineas duplicadas exactas: SIEMPRE son un error
-        if ($dupsCsv -gt 0) {
-            $avisosSalud += "$dupsCsv l&iacute;nea(s) duplicada(s) en el historial"
-        }
-
-        # 2. Bytes NULL: firma de escritura cortada por un apagon
-        $bytesCsv = [System.IO.File]::ReadAllBytes($archivoHistorial)
-        $nulosCsv = 0
-        foreach ($bC in $bytesCsv) { if ($bC -eq 0) { $nulosCsv++ } }
-        if ($nulosCsv -gt 0) {
-            $avisosSalud += "$nulosCsv byte(s) NULL en el historial (escritura interrumpida)"
-        }
-
-        # 3. Volumen anormal en 24 h: firma del bucle de reprocesado
-        $limite24 = (Get-Date).AddDays(-1)
-        $recientes = 0
-        foreach ($mv in $historial) {
-            try {
-                $fMv = [DateTime]::ParseExact($mv.FechaHoraApertura, 'MM/dd/yyyy HH:mm:ss', $null)
-                if ($fMv -ge $limite24) { $recientes++ }
-            } catch { }
-        }
-        if ($recientes -gt 60) {
-            $avisosSalud += "$recientes movimientos en 24 h (lo normal son ~10): posible reprocesado"
-        }
-    }
-
-    # 4. Marcador: ni ilegible ni apuntando al futuro
-    $archivoMarcadorChk = Join-Path $carpetaOneDrive 'UltimoEventoProcesado.txt'
-    if (Test-Path $archivoMarcadorChk) {
-        $txtMarc = (Get-Content $archivoMarcadorChk -Raw -Encoding UTF8).Trim()
-        $fMarc = $null
-        foreach ($fmtM in @('yyyy-MM-dd HH:mm:ss.fff','yyyy-MM-dd HH:mm:ss')) {
-            try { $fMarc = [DateTime]::ParseExact($txtMarc, $fmtM, $null); break } catch { }
-        }
-        if ($null -eq $fMarc) {
-            $avisosSalud += "el marcador no se puede leer"
-        } elseif ($fMarc -gt (Get-Date).AddMinutes(5)) {
-            $avisosSalud += "el marcador apunta al FUTURO: no se registrar&aacute;n movimientos"
-        }
-    }
-} catch {
-    $avisosSalud += "el chequeo de salud fall&oacute;"
-}
-
 $html = @"
 <!DOCTYPE html>
 <html lang="es">
@@ -472,20 +403,6 @@ $html = @"
         }
 
         .timestamp { color: var(--ghi-text-medium); font-size: 0.82em; }
-
-        /* AVISO DE SALUD - solo aparece si el sistema detecta algo anormal */
-        .aviso-salud {
-            background: linear-gradient(135deg, #7f1d1d, #991b1b);
-            border: 2px solid #ef4444;
-            border-radius: 12px;
-            padding: 18px 22px;
-            margin-bottom: 20px;
-            color: #fee2e2;
-        }
-        .aviso-salud strong { display: block; font-size: 1.05em; letter-spacing: .04em; margin-bottom: 8px; }
-        .aviso-salud ul { margin: 0 0 8px 18px; padding: 0; }
-        .aviso-salud li { margin: 3px 0; }
-        .aviso-pie { font-size: .85em; opacity: .85; }
 
         /* ALERT BANNER - solo aparece si hay caducados/urgentes */
         .alert-banner {
@@ -863,18 +780,6 @@ $html = @"
         </div>
     </div>
 "@
-
-# AVISO DE SALUD (solo si el chequeo detecto algo anormal)
-if ($avisosSalud.Count -gt 0) {
-    $listaAvisos = ($avisosSalud | ForEach-Object { "<li>$_</li>" }) -join ""
-    $html += @"
-    <div class="aviso-salud">
-        <strong>ATENCI&Oacute;N &mdash; el sistema ha detectado algo anormal</strong>
-        <ul>$listaAvisos</ul>
-        <span class="aviso-pie">Revisar antes de fiarse de estos datos. Diagn&oacute;stico: ejecutar AuditarDashboard.ps1 en C:\ACTUM</span>
-    </div>
-"@
-}
 
 # BANNER DE ALERTA (solo si hay caducados o urgentes)
 if ($totalCaducados -gt 0 -or $totalUrgentes -gt 0) {

@@ -749,7 +749,7 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 
 | | Que | Nota |
 |---|---|---|
-| a | **Alerta de sistema caido** | Aparcada por decision de Inigo, pero **cubierta a medias el 09/09** con el banner de salud del dashboard (ver abajo). Lo que el banner NO cubre: que el PC este muerto. Para eso el vigilante tiene que correr FUERA del locker. |
+| a | **Alerta de sistema caido** | Aparcada por decision de Inigo, pero **cubierta a medias el 09/09** con el banner de salud del **DashboardAdmin** (ver abajo). Lo que el banner NO cubre: que el PC este muerto, ni avisa a nadie por si solo (hay que abrir el Admin). Para eso el vigilante tiene que correr FUERA del locker. |
 | b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **Depende de la respuesta sobre la consigna 22.** Si SQL pasara a mandar, la 22 volveria a mostrar a Iker y desharia la correccion manual. Decidir primero quien gana. |
 | ~~c~~ | ~~Quitar el `<script>`~~ | ✅ **HECHO 09/09.** Confirmado en consola, eliminado y verificado: el banner desaparecio. |
 | ~~d~~ | ~~`EstadoAnterior.json` vacio~~ | ✅ **EVALUADO Y DESCARTADO 09/09.** Ver abajo. |
@@ -758,15 +758,16 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 | g | **De raiz: quitarse OneDrive + `fabricacion1`** | Sigue siendo el unico tramo que se rompe solo cada ~50 dias sin dar error. Alternativas del 20/05: **Graph con certificado** o **IIS local**. |
 | h | **Usar el AUTO-UPDATE** de `GenerarDashboard.ps1:6-21` | Canal de despliegue sin TeamViewer que nadie aprovecha. |
 
-### 3.bis · BANNER DE SALUD EN EL DASHBOARD — hecho el 09/09
+### 3.bis · BANNER DE SALUD EN EL **DASHBOARD ADMIN** — hecho el 09/09
 
 **El problema que resuelve:** este sistema **falla en silencio**. La tarea corre oculta, y cuando algo va
 mal nadie se entera hasta que alguien mira con atencion. El 09/09 estuvo escribiendo lineas duplicadas
 **cada minuto** y solo se cazo porque estabamos delante; en agosto un bucle de reprocesado destruyo el CSV
 y **paso 19 dias** sin que nadie lo supiera.
 
-**Que se ha hecho:** `GenerarDashboard.ps1` se autodiagnostica antes de construir el HTML y, si algo no
-cuadra, pinta un **banner rojo arriba del todo**. Quien abra el dashboard lo ve sin buscarlo.
+**Que se ha hecho:** `GenerarDashboardAdmin.ps1` se autodiagnostica antes de construir el HTML y, si algo
+no cuadra, pinta un **banner rojo arriba del todo** —encima del de calibraciones—, con su propia clase CSS
+`.aviso-salud`.
 
 **Las cuatro comprobaciones** (las cuatro firmas de averia que este proyecto ya ha sufrido):
 
@@ -777,16 +778,34 @@ cuadra, pinta un **banner rojo arriba del todo**. Quien abra el dashboard lo ve 
 | 3 | **Mas de 60 movimientos en 24 h** (lo normal son ~10) | firma del reprocesado en marcha |
 | 4 | **Marcador ilegible o en el FUTURO** | si apunta al futuro, `FechaHora > @ultimo` no devuelve nada nunca |
 
-**Por que va en `GenerarDashboard.ps1` y NO en el monitor:** la regla dura. El monitor es el unico
-componente cuyo fallo no se recupera despues. El dashboard es regenerable: si esto se rompiera, se pierde
-un HTML que se rehace al minuto siguiente.
+#### ⚠️ POR QUE EN EL ADMIN Y NO EN EL DASHBOARD PUBLICO — decision de Inigo, 09/09
+
+Se implemento primero en `GenerarDashboard.ps1` y se **revirtio**. Pregunta de Inigo: *"¿Pero lo va a ver
+todo el mundo?"*. **Si**: `DashboardLocker.html` es el que se reparte por el enlace de SharePoint a toda la
+gente de GHI. Un aviso rojo que dice *"bytes NULL en el historial"* no le dice nada a quien solo quiere ver
+si su instrumento esta libre, y **siembra dudas sobre unos datos que casi siempre estan bien**.
+
+El aviso es tecnico y **quien puede actuar sobre el es quien abre el panel de administracion**. Ahi va.
+
+> **Contrapartida honesta: solo avisa cuando alguien abra el Admin.** Es peor cobertura que el publico —
+> nadie recibe nada, hay que ir a mirar. Se acepta a cambio de no meter ruido a 88 usuarios.
+
+> **Matiz medido, para no venderlo mejor de lo que es:** `DashboardAdmin.html` y `DashboardLocker.html`
+> **viven en la misma carpeta** `LockerACTUM` de OneDrive. Lo que los separa hoy es **que enlace se ha
+> repartido**, no un permiso distinto. "Interno" lo es en la practica, no por configuracion.
+> **No se ha comprobado que tengan permisos diferentes en SharePoint.**
+
+**Por que NO va en el monitor:** la regla dura. `MonitoreoLockerTiempoReal.ps1` es el unico componente cuyo
+fallo no se recupera despues. Los dos dashboards son regenerables: si esto se rompiera, se pierde un HTML
+que se rehace al minuto siguiente.
 
 **Lo que este banner NO puede hacer** — y conviene tenerlo claro: **si el PC esta muerto, no hay nadie
 generando el HTML**, asi que no avisa de nada. Cubre "el sistema esta haciendo algo raro", no "el sistema
 no esta". Para lo segundo sigue haciendo falta un vigilante externo (pendiente 3.a).
 
 **Probado antes de desplegar, con casos conocidos positivo y negativo** (regla: un detector recien escrito
-es un sujeto mas, no un instrumento fiable):
+es un sujeto mas, no un instrumento fiable). Ejecutado **dos veces**: sobre la version del dashboard publico
+y otra vez sobre el bloque ya movido al Admin, con **resultado identico**:
 
 | Caso | Esperado | Medido |
 |---|---|---|
@@ -796,7 +815,17 @@ es un sujeto mas, no un instrumento fiable):
 | D · marcador con texto basura | 1 aviso | **1** |
 
 **Discrimina: calla con datos sanos y habla con cada una de las cuatro averias.**
-Verificacion del fichero: **792 lineas · 0 no-ASCII · 0 errores de sintaxis · here-strings 5/5.**
+
+**Verificacion de los dos ficheros:**
+
+| Fichero | Lineas | no-ASCII | Sintaxis | Here-strings |
+|---|---|---|---|---|
+| `GenerarDashboardAdmin.ps1` (con el banner) | **1.243** | 0 | 0 errores | 16/16 |
+| `GenerarDashboard.ps1` (revertido, sin tocar) | **705** | 0 | 0 errores | 5/5 |
+
+> **`GenerarDashboard.ps1` vuelve a ser exactamente el que ya esta en el locker:** no hay que redesplegarlo.
+> **Solo se despliega `GenerarDashboardAdmin.ps1`.**
+> Version previa en `historico/scripts-antiguos/GenerarDashboardAdmin_ANTES_SALUD_20260909.ps1`.
 
 ### 4. Recordatorio operativo
 
