@@ -827,10 +827,28 @@ y otra vez sobre el bloque ya movido al Admin, con **resultado identico**:
 tras anadir la tira verde: los mismos 4 casos, mismo resultado, y **los datos medidos aparecen en los cuatro**
 (tambien en el sano, que es lo que se queria).
 
-**Desplegado y verificado en el locker el 09/09** (primera version, la de solo-rojo):
-`sintaxis=0 no-ASCII=0 lineas=1243`, y el HTML resultante con **`banner_salud=0` · `banner_calibracion=1` ·
-126.267 bytes**. Predicado cumplido al digito: el de salud callado porque el CSV esta sano, el de
-calibraciones encendido porque hay 5 caducados.
+**DESPLEGADO Y VERIFICADO EN EL LOCKER el 09/09.** Dos despliegues el mismo dia:
+
+| Version | Verificacion del `.ps1` | Verificacion del HTML generado |
+|---|---|---|
+| solo-rojo | `sintaxis=0 no-ASCII=0 lineas=1243` | `banner_salud=0` · `banner_calibracion=1` · 126.267 bytes |
+| **con tira verde (la actual)** | `sintaxis=0 no-ASCII=0 lineas=1281` | **`verde=1` · `rojo=0` · `calibracion=1`** |
+
+**Predicado cumplido al digito** en las dos: el de salud callado (o en verde) porque el CSV esta sano, y el
+de calibraciones encendido porque hay 5 caducados.
+
+**La linea que salio en produccion, leida del HTML:**
+```
+Sistema comprobado - sin anomalias.
+536 lineas / 536 unicas  ·  0 bytes NULL  ·  5 movimiento(s) en 24 h  ·  marcador 09/09/2026 11:52:50
+```
+
+> **Tres cosas que esa linea confirma de paso, sin haberlas buscado:**
+> 1. **536/536, ratio 1,00** — el bucle sigue muerto y la limpieza de esta manana aguanta.
+> 2. **El marcador de la v2.6 se lee bien.** Es el que se escribio con milisegundos (`11:52:50.813`); que
+>    aparezca aqui prueba **en produccion** que el `ParseExact` con array de formatos y su cast `[string[]]`
+>    funciona — hasta ahora solo estaba probado en banco.
+> 3. **5 movimientos en 24 h**, la actividad de hoy. Lejos del umbral de 60.
 
 **Verificacion de los dos ficheros:**
 
