@@ -118,6 +118,75 @@ averiados, que valoren **si los pueden arreglar y calibrar** o no.
 > sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT CodigoCliente, Descripcion FROM Caja WHERE Descripcion LIKE '%PTM%' OR Descripcion LIKE '%Phoenix%' OR Descripcion LIKE '%1774%'"
 > ```
 
+### 📋 PLAN DE PEDIDOS — cruzado el 09/09/2026 (ACTUM + Excel del servidor)
+
+> **Como se hizo:** se cruzo `Caja.FechaCaducidad` de **ACTUM** (la fuente de verdad de las fechas) con la
+> columna **EMPRESA** del Excel del servidor documental (la fuente de a quien se manda cada uno).
+> **32/32 instrumentos cuadran entre las dos fuentes: cero huecos.**
+
+**21 instrumentos hay que pedirlos AHORA** (5 caducados + 16 que caducan en 90 dias).
+
+#### El hallazgo que cambia la estrategia
+
+Tu regla es *"dejar siempre uno de cada tipo en la empresa"*. Medido: **solo 4 modelos tienen mas de una
+unidad.** De los 21 a pedir, **14 son unidad UNICA** — si se van, no hay repuesto de eso, punto.
+
+**Donde SI se puede escalonar:**
+
+| Modelo | Unidades | Como |
+|---|---|---|
+| **TESTO 872** (camara termografica) | 3 — `C-002` 29/10 · `S-001` 04/11 · `S-002` 04/11 | mandar **2, quedarse 1**, y el tercero cuando vuelva el primero |
+| **TESTO 340** (analizador de gases) | 3 — `T-100-1` 04/11 · `A-004` 11/11 · `A-003` 12/01/27 | mandar los **dos que caducan**; `A-003` se queda de reserva *(ojo: `A-003` esta EN PARADERO DESCONOCIDO, ver consigna 5)* |
+| **LEICA NA 730 PLUS** (nivel optico) | 2 — `M-005` **caducado** · `M-001` 01/12 | mandar **`M-005` ya**; `M-001` espera a que vuelva |
+| **PCE T-1200** | 3 — todos fuera del horizonte (105d+) | **nada que hacer ahora** |
+
+**Los 14 de unidad unica** (`T-017` `M-006` `A-005` `D-001` `L-006` `L-010` `T-007` `S-006` `T-100-4`
+`L-002` `T-004` `T-005-1` `M-020` `L-001`): aqui no hay escalonado posible. Es donde toca **preguntar antes
+que va a hacer falta**, que es la otra mitad de tu regla.
+
+#### LOS LOTES, por empresa
+
+**NEURYLAN es el lote grande: 7 seguros, y hasta 10 si se le dan los 3 dudosos.** De 21, la mitad. Es la
+mejor posicion para negociar precio, y ademas son los mas cercanos.
+
+| Empresa | N | Instrumentos (dias a caducar) |
+|---|---|---|
+| **NEURYLAN** | **7** | `T-004` 55 · `S-001` 56 · `T-100-1` 56 · `S-002` 56 · `M-020` 57 · `T-005-1` 57 · `A-004` 63 |
+| **APPLUS** | 4 | `L-006` 42 · `L-010` 42 · `T-007` 43 · `L-001` 65 — *las tres pinzas FLUKE y la pistola* |
+| **RS CALIBRATION** | 3 | `T-017` **CADUCADO 286 d** · `T-100-4` 51 · `L-002` 51 |
+| **LEICA** | 2 | `M-005` **CADUCADO 132 d** · `M-001` 83 |
+| **CS Instruments** | 1 | `S-006` 45 |
+| **NEURYLAN (Testo)** | 1 | `C-002` 50 — *mismo proveedor, la etiqueta del Excel lo separa sin motivo* |
+| **KLOTZ** | 1 | `A-005` **CADUCADO 162 d** |
+| **⚠️ `Bosch / Neurylan?`** | 1 | `M-006` **CADUCADO 220 d** |
+| **⚠️ `GEDORE / Neurylan?`** | 1 | `D-001` **CADUCADO 92 d** — *es uno de los dos posiblemente averiados* |
+
+#### ⚠️ CINCO DECISIONES QUE SOLO PUEDE TOMAR INIGO
+
+El Excel las dejo abiertas en su dia — **no es un error, son preguntas sin contestar**:
+
+| Codigo | Que pone | Que hay que decidir |
+|---|---|---|
+| `M-006` | `Bosch / Neurylan?` | ¿va a Neurylan? Lleva **220 dias caducado** |
+| `D-001` | `GEDORE / Neurylan?` | idem, **92 dias**. Y es el atornillador que **puede estar averiado** |
+| *(un tercero)* | `Neurylan?` | confirmar |
+| `E-002` | **vacio** | no tiene empresa asignada. Caduca 20/01/2027, no corre prisa |
+| `C-002` | `NEURYLAN (Testo)` | ¿es el mismo Neurylan? Si lo es, va en el lote grande y son **8** |
+
+> **Si la respuesta a las tres primeras es "Neurylan", el lote pasa de 7 a 10 de 21.**
+
+#### El orden que propongo
+
+1. **RS CALIBRATION y LEICA primero.** Tienen los caducados mas antiguos (`T-017` 286 dias, `M-005`
+   132 dias) y son lotes pequenos: se resuelven rapido y quitan lo mas sangrante.
+2. **NEURYLAN despues, como lote unico** — resolviendo antes las 3 dudas para que vayan 10 y no 7.
+3. **APPLUS**, los 4 juntos. Las tres pinzas FLUKE son de funciones distintas (4-20 mA, 1500 V, 1000 A):
+   **no son intercambiables entre si**, asi que aqui no hay escalonado posible aunque parezcan lo mismo.
+4. **KLOTZ y CS**, sueltos, cuando toque.
+
+> **Nota sobre `D-002`:** caduca el **30/05/2030** (1.359 dias). Es el unico con un intervalo asi de largo.
+> Comprobar que no sea un error de tecleo en ACTUM.
+
 ### El objetivo de fondo
 
 > **La idea de todo este dashboard es QUITAR el Excel en el futuro.** De momento Inigo lo sigue
