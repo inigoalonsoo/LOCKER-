@@ -257,6 +257,26 @@ ialopez@ghifurnaces.com
 > ⚠️ **EL EXCEL NO TIENE AUTOGUARDADO** (dicho por Inigo, 09/09). Si lo editas y no guardas a mano, se
 > pierde y no avisa nadie.
 
+### 📊 ESTADO DE LA CAMPANA — se actualiza segun vayan contestando
+
+> **Este es el cuaderno de la campana.** Inigo ira diciendo que manda y que le responden; se apunta aqui,
+> en el mismo turno, con la fecha. Sin esto, dentro de tres semanas nadie sabe por donde iba.
+
+| Lote | Equipos | Presupuesto pedido | Oferta recibida | Pedido | Enviado | Vuelto y cerrado |
+|---|---|---|---|---|---|---|
+| **1 · RS Calibration** | 3 | — | — | — | — | — |
+| **2 · Leica** | 1 | — | — | — | — | — |
+| **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
+| **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
+| **5 · Applus** | 4 | — | — | — | — | — |
+| **6 · CS Instruments** | 1 | — | — | — | — | — |
+
+**Retenidos a proposito, para no quedarse sin repuesto:** `M-001` (2º nivel optico LEICA) y `S-002`
+(3ª camara TESTO 872). Se mandan **cuando vuelva** el primero de su pareja.
+
+**Al cerrar cada lote, los 3 pasos del apartado de mantenimiento:** fecha en ACTUM · fecha en el Excel ·
+certificado al servidor documental.
+
 ### 📌 PENDIENTES FISICOS DE INIGO (09/09/2026)
 
 | | Que | Detalle |
@@ -265,7 +285,7 @@ ialopez@ghifurnaces.com
 | 2 | **Serie del `D-001` en ACTUM** | Es el **unico de los 32 sin numero de serie** en la descripcion. **Ya se sabe: `EA 10.00047`**, esta en el Excel -> se puede escribir en el Visor **sin bajar al locker** |
 | 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
 | 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
-| 5 | **Localizar el TESTO 340 de la consigna 22** | Serie `63862113`. Preguntar a Sergio Vega e Iker Lasso. **No se puede enviar a calibrar lo que no aparece** |
+| 5 | **Localizar el TESTO 340 de la consigna 22** | Serie `63862113`. Preguntar a Sergio Vega e Iker Lasso. **No se puede enviar a calibrar lo que no aparece.** *(Ojo: NO confundir con el `A-003`, serie `61186226`, que si esta — lo metio Inigo en la consigna 5 con llave.)* |
 | 6 | **Buscar el correo de Klotz** | No consta. Mirar el certificado anterior; si no, preguntarselo a Neurylan |
 
 > **Correccion del mismo dia:** se dijo primero que el viaje a por el numero de serie era a la consigna 32 y
