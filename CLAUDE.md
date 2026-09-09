@@ -276,6 +276,9 @@ escrituras que crezcan · verificado tras desplegar.
 
 **Desplegado y verificado el 09/09:** `sintaxis=0 no-ASCII=0 lineas=551`, bloque en la linea 483,
 `LastTaskResult 0`, marcador intacto en `2026-09-08 13:44:43` y **ningun `.tmp` suelto**.
+**Y el dashboard regenerado a las 8:31:07**, ya con la v2.5 desplegada: eso prueba que el script corre
+**entero**, hasta la llamada final a `GenerarDashboard.ps1`. Un `LastTaskResult 0` por si solo no lo
+probaria — el `.vbs` lanza PowerShell y termina, asi que daria 0 aunque el script petara al arrancar.
 v2.4 guardada en `C:\ACTUM\_ARCHIVOackups_scripts\MonitoreoLockerTiempoReal_v2.4_ANTES_ATOMICO_20260909.ps1`
 (24.206 bytes) y en `historico/scripts-antiguos/` del repo.
 
