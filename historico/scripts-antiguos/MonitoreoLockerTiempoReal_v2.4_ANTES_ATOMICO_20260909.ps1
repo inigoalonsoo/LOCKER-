@@ -1,10 +1,8 @@
-# MonitoreoLockerTiempoReal.ps1 v2.5
+# MonitoreoLockerTiempoReal.ps1 v2.4
 # Basado en tabla Eventos de SQL - garantiza CERO perdida de datos
 # Aunque el PC se apague o la tarea se pare, al reiniciar recupera todos los eventos
 #
 # HISTORIAL DE VERSIONES
-#  v2.5  2026-09-09  Escritura ATOMICA del marcador (temporal + renombrado).
-#                    Un corte durante la escritura ya no puede dejarlo ilegible.
 #  v2.4  2026-09-07  Incidente bucle de reprocesado. DOS fixes:
 #                    - PASO 5 (marcador): el maximo se calcula por fecha PARSEADA.
 #                      Antes 'Sort-Object FechaHoraApertura' ordenaba por TEXTO y
@@ -478,40 +476,8 @@ if ($nuevosMovimientos.Count -gt 0) {
     }
 
     if ($ultimaFechaObj -ne $null) {
-        $textoMarcador = $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss')
-
-        # ESCRITURA ATOMICA DEL MARCADOR (v2.5, 2026-09-09)
-        #
-        # POR QUE: WriteAllText NO es atomico. Si un corte de luz o un reinicio pilla
-        # esa escritura a medias, el fichero queda vacio o partido. En el siguiente
-        # arranque el marcador no se puede leer, el script cae al fallback de PASO 1
-        # (que RESTA 10 segundos) y vuelve a procesar el ultimo evento -> linea
-        # duplicada en el CSV.
-        #
-        # CASO REAL MEDIDO: el 08/09 el reinicio de las 13:33 (para cambiar la BIOS)
-        # corto una escritura del marcador y el evento del 16/07 13:20:21 se escribio
-        # dos veces. En agosto, ESE MISMO mecanismo con el bug del Sort-Object encima
-        # destruyo el CSV entero (103.495 filas con 187 reales).
-        #
-        # COMO: se escribe a un temporal y se RENOMBRA. En NTFS el renombrado es
-        # atomico, asi que ante un corte solo caben dos resultados: el marcador viejo
-        # entero, o el nuevo entero. Nunca uno a medias.
-        try {
-            $tmpMarcador = "$archivoMarcador.tmp"
-            [System.IO.File]::WriteAllText($tmpMarcador, $textoMarcador, $utf8NoBOM)
-            if ([System.IO.File]::Exists($archivoMarcador)) {
-                [System.IO.File]::Replace($tmpMarcador, $archivoMarcador, [NullString]::Value)
-            } else {
-                [System.IO.File]::Move($tmpMarcador, $archivoMarcador)
-            }
-            Write-Host "[MARCADOR] Actualizado a $textoMarcador (escritura atomica)" -ForegroundColor Green
-        } catch {
-            # FAIL-OPEN: si el renombrado falla por lo que sea, se escribe directo.
-            # Peor garantia que la atomica, pero MUY preferible a dejar el marcador
-            # sin avanzar: eso reprocesaria el mismo evento cada minuto.
-            Write-Host "[MARCADOR] Escritura atomica fallo ($_) - se escribe directo" -ForegroundColor Yellow
-            [System.IO.File]::WriteAllText($archivoMarcador, $textoMarcador, $utf8NoBOM)
-        }
+        [System.IO.File]::WriteAllText($archivoMarcador, $ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'), $utf8NoBOM)
+        Write-Host "[MARCADOR] Actualizado a $($ultimaFechaObj.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor Green
     } else {
         Write-Host "[MARCADOR] Ninguna fecha parseable - marcador SIN CAMBIOS (mas seguro que avanzarlo a ciegas)" -ForegroundColor Red
     }
