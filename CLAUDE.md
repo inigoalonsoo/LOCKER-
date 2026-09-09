@@ -659,6 +659,22 @@ Javier y **eso no se puede cambiar**: es lo que ocurrio.
 
 ---
 
+### `EstadoAnterior.json` vacio — EVALUADO Y DESCARTADO (09/09/2026)
+
+`$estadoPorConsigna` solo aparece en las lineas 621-623, justo donde se escribe el fichero, y **nunca se
+define**: por eso queda en `{}`. Ese fichero lo lee **solo el fallback v1.0**, el metodo antiguo que salta
+si la tabla `Eventos` fallara.
+
+**Por que NO se arregla:** ese fallback **tambien necesita SQL** (lee la tabla `Consigna`), asi que solo
+serviria en un escenario rarisimo — que `Eventos` falle pero el resto de la base funcione. Y no se ha
+activado ni una vez desde abril. Tocar el script que corre cada minuto para mejorar una red de emergencia
+que nunca se usa, y que en su escenario probablemente tampoco podria trabajar, **no pasa el filtro del
+cambio minimo suficiente**.
+
+> ⚠️ **SENAL DE ALARMA:** si algun dia aparece `[FALLBACK]` en el log, hay que mirarlo. Significaria que
+> estamos en ese escenario raro **y con la red degradada** (estado previo vacio), asi que el fallback
+> podria no detectar bien los cambios.
+
 ### ✅ HECHO 09/09 — el paso 2.5 SUSTITUYE, no solo anade
 
 **Peticion de Inigo (09/09):** *"quiero que siempre que cambie algo de esta forma por haberme equivocado o
@@ -736,8 +752,8 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 | a | **Alerta de sistema caido** | Aparcada por decision de Inigo. Sigue siendo lo que evitaria el proximo silencio de semanas. **El vigilante debe correr FUERA del locker.** |
 | b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **Depende de la respuesta sobre la consigna 22.** Si SQL pasara a mandar, la 22 volveria a mostrar a Iker y desharia la correccion manual. Decidir primero quien gana. |
 | ~~c~~ | ~~Quitar el `<script>`~~ | ✅ **HECHO 09/09.** Confirmado en consola, eliminado y verificado: el banner desaparecio. |
-| d | **`EstadoAnterior.json` se queda vacio** | `$estadoPorConsigna` sin definir (lineas 486-488). No rompe nada: solo afecta al metodo de reserva v1.0. |
-| e | **Quitar `MicrosoftEdgeAutoLaunch` del arranque** | Abre Edge en cada inicio. Ruido en un PC dedicado. Cosmetico. |
+| ~~d~~ | ~~`EstadoAnterior.json` vacio~~ | ✅ **EVALUADO Y DESCARTADO 09/09.** Ver abajo. |
+| ~~e~~ | ~~Quitar `MicrosoftEdgeAutoLaunch`~~ | ✅ **HECHO 09/09.** Ya no se abre Edge al arrancar. El arranque queda con `ACTUM_EPI_Gestion`, `OneDrive`, `Microsoft Edge Update` (actualizador silencioso, no abre ventanas), `Microsoft.Lists` y `SecurityHealth`. |
 | **f** | **CALIBRACIONES** — tarea **recurrente**, no de un dia | La pestana Calibracion del `DashboardAdmin.html` ya clasifica por **CADUCADO / URGENTE (<30d) / PROXIMO (<90d)** leyendo `Caja.FechaCaducidad` de SQL: **sirve directamente como lista de trabajo**. Los pendientes estan apuntados en el cuaderno GHI y en recordatorios del movil. Ir mandando poco a poco. |
 | g | **De raiz: quitarse OneDrive + `fabricacion1`** | Sigue siendo el unico tramo que se rompe solo cada ~50 dias sin dar error. Alternativas del 20/05: **Graph con certificado** o **IIS local**. |
 | h | **Usar el AUTO-UPDATE** de `GenerarDashboard.ps1:6-21` | Canal de despliegue sin TeamViewer que nadie aprovecha. |
