@@ -221,6 +221,70 @@ scripts siguen funcionando y **nadie ve nada nuevo en la web**, sin error en nin
 
 ---
 
+## Sesion 2026-09-09 — v2.5: escritura atomica del marcador
+
+**Chequeo matinal:** noche tranquila (0 cortes), 19 h de uptime, tareas `Ready`, OneDrive corriendo desde
+el 08/09 14:33 y dashboard regenerandose. **El CSV no se habia escrito desde las 13:45:06 del 08/09** — el
+bucle sigue muerto.
+
+**Pero aparecio UNA linea duplicada** (532 lineas / 531 unicas). Diagnostico completo:
+
+- La repetida era `07/16/2026 13:20:21;IKER L.;LASSO;08;...;Extraccion` — **antigua, no de la prueba**.
+- Posiciones **527 y 530** de 532: la copia se escribio **en la misma pasada** que los dos movimientos de
+  la prueba funcional (lineas 531-532), no en un arranque posterior.
+- La prueba en si salio impecable: CSV con 2 lineas y SQL con 2 eventos (`10000` a 13:43:35 y `10001` a
+  13:44:43, usuario 62). **El dedup funciono.**
+
+**CAUSA RAIZ, leida en el codigo (`MonitoreoLockerTiempoReal.ps1:71-101`):** `WriteAllText` **no es
+atomico**. El reinicio del 08/09 a las 13:33 (para cambiar la BIOS) corto la escritura del marcador; en la
+pasada siguiente no se pudo leer, el script activo `$esPrimeraEjecucion`, tomo el maximo del CSV
+(`07/16 13:20:21`) y **le resto 10 segundos** de ventana de solapamiento -> la query
+`FechaHora > 13:20:11` devolvio el evento de 13:20:21 y lo reescribio.
+
+> **Es EL MISMO mecanismo que destruyo el CSV en agosto.** Entonces, con el bug del `Sort-Object`
+> alfabetico encima, produjo 103.495 filas con 187 reales. Ahora, con la v2.4 ya puesta, el mismo escenario
+> produjo **UNA linea**. El fix del 07/09 contuvo el desastre; la v2.5 elimina la causa.
+
+**Por que el dedup no la pillo:** compara el evento nuevo contra la **ultima** linea del CSV, y esa era una
+correccion manual de SERGIO VEGA de abril. Como el CSV no esta en orden cronologico estricto (las
+correcciones se anaden al final), la comparacion no encontro pareja. **No se toca**: arreglarlo exigiria
+maquinaria en el script que corre cada minuto, para un sintoma que el dashboard ya colapsa al renderizar.
+
+**Limpieza aplicada:** 1 linea quitada -> **531 / 531, ratio 1,00**, dashboard con **530 movimientos**.
+Copia previa en `HistorialCompleto.csv.ANTES_DEDUP_20260909.bak`.
+
+### v2.5 — el cambio
+
+Un unico punto (`:479`): el marcador se escribe a un **temporal** y se **renombra** con `File.Replace`.
+En NTFS el renombrado es atomico: ante un corte solo caben dos resultados, **el marcador viejo entero o el
+nuevo entero, nunca uno a medias**.
+
+```powershell
+[System.IO.File]::WriteAllText($tmpMarcador, $textoMarcador, $utf8NoBOM)
+[System.IO.File]::Replace($tmpMarcador, $archivoMarcador, [NullString]::Value)
+```
+
+> **`[NullString]::Value`, no `$null`.** El overload con `$null` no resuelve en PowerShell 5.1. Se probo
+> ejecutandolo de verdad antes de escribirlo: deja el contenido nuevo y borra el temporal.
+
+Lleva `catch` que escribe directo si el renombrado fallara — **fail-open**: peor garantia que la atomica,
+pero muy preferible a dejar el marcador sin avanzar, que reprocesaria el mismo evento cada minuto.
+
+**Paso por la regla dura del monitor:** probado con datos reales · sin dependencias nuevas · **mejora** el
+fail-open (hoy un corte deja el marcador ilegible; con esto no puede) · sin estado persistente nuevo · sin
+escrituras que crezcan · verificado tras desplegar.
+
+**Desplegado y verificado el 09/09:** `sintaxis=0 no-ASCII=0 lineas=551`, bloque en la linea 483,
+`LastTaskResult 0`, marcador intacto en `2026-09-08 13:44:43` y **ningun `.tmp` suelto**.
+v2.4 guardada en `C:\ACTUM\_ARCHIVOackups_scripts\MonitoreoLockerTiempoReal_v2.4_ANTES_ATOMICO_20260909.ps1`
+(24.206 bytes) y en `historico/scripts-antiguos/` del repo.
+
+> ⚠️ **PENDIENTE DE EJERCITARSE.** El marcador **solo se escribe cuando hay un movimiento nuevo**, asi que
+> con ACTUM cerrado el codigo nuevo no llega a ejecutarse. Esta desplegado y sano, pero **la escritura
+> atomica no estara probada hasta el proximo movimiento real en el locker**. No darlo por verificado antes.
+
+---
+
 # 🟢 SIGUIENTE PASO — 2026-09-09
 
 > **El reinicio con cambio de BIOS ya se hizo el 08/09 por la tarde y salio bien.** El detalle esta en el
