@@ -567,6 +567,120 @@ sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON
 
 ---
 
+### v2.6 — CAUSA RAIZ DE LOS DUPLICADOS, ENCONTRADA Y CERRADA (09/09/2026)
+
+**Los duplicados del CSV no eran mala suerte: eran dos fallos encadenados.**
+
+#### Fallo 1 — el marcador perdia los milisegundos
+
+La tabla `Eventos` guarda `FechaHora` **con milisegundos**; el marcador se escribia **truncado al segundo**.
+Como la query es `FechaHora > @ultimo`:
+
+```
+evento real : 11:52:50.813
+marcador    : 11:52:50.000   ->  11:52:50.813 > 11:52:50.000  =  SIEMPRE VERDADERO
+```
+
+**El evento volvia a entrar en CADA pasada, indefinidamente.** Medido en vivo: el de la consigna 22
+llevaba **una hora** reprocesandose cada minuto, visible en el log como
+`[DEDUP] Artefacto cross-batch descartado (consigna 22, 0.813 s)`.
+
+#### Fallo 2 — el dedup solo protege a la primera fila del lote (LATENTE, no se toca)
+
+En PASO 3, el chequeo contra el CSV esta en el `else` de `if ($clusterActual.Count -gt 0)`, asi que
+**solo se aplica mientras no haya ningun cluster abierto**. En cuanto una fila abre cluster, las siguientes
+ya no se comparan con el CSV.
+
+Asi se duplico la consigna 26 el 09/09: llego el evento **nuevo** de la 19, ordenado antes (19 < 26), abrio
+cluster; el de la **26** —reprocesado por el fallo 1— entro detras **sin pasar por el chequeo**.
+
+> **Se deja como esta**: sin reprocesos no llega a manifestarse. Arreglarlo seria maquinaria extra en el
+> script que corre cada minuto. **Cambio minimo suficiente.**
+
+#### El arreglo
+
+El marcador se escribe con **milisegundos**, y la fecha se toma **del evento SQL original** (`$filasLimpias`),
+no del CSV, donde ya viene truncada. Sigue avanzando **solo sobre lo escrito**, como manda la regla del 02/06.
+La lectura acepta los dos formatos, para que el marcador viejo siga valiendo.
+
+**Verificado en produccion:**
+```
+[MARCADOR] Actualizado a 2026-09-09 11:52:50.813 (escritura atomica)
+...siguiente pasada...
+[EVENTOS] Encontrados: 0 eventos de identificacion     <- el reproceso PARO
+```
+
+#### 🔬 EL BUG SE MANIFESTO EN VIVO — y enseno algo que nadie habia previsto
+
+Al editar a mano la linea de la consigna 22 (cambiar JAVIER JULIAN DE LAMO por SERGIO V. VEGA), el
+monitor **volvio a escribir la original siete veces**, una por minuto.
+
+**Por que:** el dedup identifica los eventos comparando **nombre y apellidos** con la ultima linea del CSV.
+Al cambiar el nombre a mano, dejo de reconocerlo como ya escrito, y como el evento seguia entrando
+(fallo 1), lo reescribia en cada pasada.
+
+> ⚠️ **REGLA: no editar a mano una linea del CSV correspondiente a un evento RECIENTE mientras el evento
+> pueda seguir entrando.** Con la v2.6 ya no puede — el marcador lo deja atras — pero el patron es
+> importante: **editar un nombre rompe el reconocimiento del dedup.**
+
+Limpieza posterior: 7 lineas de Javier + 1 duplicado de la consigna 26. **CSV final: 536 / 536, ratio 1,00,
+535 movimientos.**
+
+#### 🧪 DOS COSAS QUE SOLO SE VIERON POR PROBAR ANTES DE DESPLEGAR
+
+1. **`ParseExact` con array de formatos NO se resuelve en PowerShell 5.1 sin cast `[string[]]`.** Fallaba
+   con **ambas** cadenas. De haberlo desplegado, el marcador habria dejado de leerse en cada pasada y el
+   script caeria al fallback siempre — peor que el problema original.
+2. **La primera prueba dio un FALSO POSITIVO**: tras la excepcion las variables quedaban en `$null`, y
+   comparar una fecha con `$null` devuelve `True`. El test decia que todo iba bien.
+
+> **Probar el mecanismo con datos de verdad antes de tocar produccion no es ceremonia: aqui evito
+> desplegar algo peor que el bug.**
+
+---
+
+### Consigna 22 — mapa de correcciones (importante si algun dia se reconstruye)
+
+| Cuando | Que | Donde vive | Sobrevive a reconstruir? |
+|---|---|---|---|
+| 16/04 12:44:30 | IKER devuelve | `CorreccionesManuales.csv` | ✅ paso 2.5 |
+| 16/04 12:45:00 | **SERGIO extrae** | `CorreccionesManuales.csv` | ✅ paso 2.5 |
+| 09/09 11:52:50 | SERGIO devuelve | **editada a mano en el CSV** | ❌ **volveria a decir JAVIER** |
+
+**Que paso realmente el 09/09:** al devolver el analizador, Inigo se identifico **con el codigo de Javier
+Julian de Lamo (usuario 38)** por error, en vez del de Sergio Vega (usuario 14). El evento de SQL dice
+Javier y **eso no se puede cambiar**: es lo que ocurrio.
+
+> Si se reconstruye el historial, esa linea **volvera a decir Javier** (no se duplicara: tiene la misma
+> clave fecha+consigna+accion que la de SQL, asi que el paso 2.6 no la vera como huerfana). **Habra que
+> reeditarla.** Avisar a Inigo si ocurre.
+
+**Los movimientos de Javier de 2025 (consignas 12, 13, 19, 24) son reales y NO se tocan.**
+
+---
+
+### PENDIENTE — que el paso 2.5 SUSTITUYA, no solo anada
+
+**Peticion de Inigo (09/09):** *"quiero que siempre que cambie algo de esta forma por haberme equivocado o
+lo que sea, se arregle con lo de CorreccionesManuales"*.
+
+Hoy el paso 2.5 **anade** las lineas de `CorreccionesManuales.csv`. Si en vez de eso **sustituyera** cuando
+ya existe un movimiento con la misma clave (fecha + consigna + accion), se podria corregir **cualquier**
+movimiento —incluidos los que SQL genera— y sobreviviria a toda reconstruccion.
+
+Cerraria el circulo de los tres tipos de correccion:
+
+| Tipo | Estado |
+|---|---|
+| **Anadir** un movimiento que no existe en SQL | ✅ funciona (paso 2.5) |
+| **Editar** un movimiento que SI existe en SQL | ❌ **este es el hueco** |
+| **Escribir** directamente en el CSV | ✅ funciona (paso 2.6) |
+
+> Va en `ReconstruirHistorial.ps1`, que se lanza a mano y casi nunca. **NO toca el monitor.**
+> Al implementarlo, mover ahi la correccion de Sergio del 09/09 y quitarla del CSV editado a mano.
+
+---
+
 # 🟢 SIGUIENTE PASO — 2026-09-09
 
 > **El reinicio con cambio de BIOS ya se hizo el 08/09 por la tarde y salio bien.** El detalle esta en el
