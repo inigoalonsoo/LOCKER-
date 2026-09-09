@@ -265,7 +265,7 @@ ialopez@ghifurnaces.com
 
 | Lote | Equipos | Presupuesto pedido | Oferta recibida | Pedido | Enviado | Vuelto y cerrado |
 |---|---|---|---|---|---|---|
-| **1 · RS Calibration** | 3 | **09/09/2026** · reenviado a `ofertas@` el 10/09 | — | — | — | — |
+| **1 · RS Calibration** | 3 | **09/09/2026** · reenviado a `ofertas@` el 09/09 | — | — | — | — |
 | **2 · Leica** | 1 | — | — | — | — | — |
 | **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
 | **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
@@ -273,7 +273,7 @@ ialopez@ghifurnaces.com
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
 
 **Historial del lote 1 (RS):** enviado a Raquel Delgado el **09/09**. Respondio **autorespuesta de
-vacaciones hasta el 13/09** con la lista de buzones generales. Reenviado a `ofertas@RS.rsgroup.com` con
+vacaciones hasta el 13/09** con la lista de buzones generales. Reenviado el mismo **09/09** a `ofertas@RS.rsgroup.com` con
 copia a Raquel, para no perder 4 dias y que ella lo tenga al volver.
 > ⚠️ Ese buzon es de *"solicitud de ofertas de **material**"* y esto es un **servicio** de calibracion:
 > puede que redirijan otra vez. Siguiente parada: `soporte.tecnico@RS.rsgroup.com` o el telefono
