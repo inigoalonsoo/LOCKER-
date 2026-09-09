@@ -326,6 +326,74 @@ volver a anadirse JavaScript ahi.
 
 ---
 
+### Auditoria del DashboardAdmin — 09/09/2026 · CORRECTO EN LAS TRES PESTANAS
+
+Nunca se habia verificado (al `DashboardLocker` si, el 08/09). Como Inigo lo usa para controlar las
+calibraciones, convenia comprobar que no se estaba fiando de datos equivocados.
+
+**Calibraciones — clavadas contra SQL:**
+
+| | Admin (badges) | menos el CSS | SQL | |
+|---|---|---|---|---|
+| CADUCADO | 6 | **5** | **5** | ✅ |
+| URGENTE | 1 | **0** | **0** | ✅ |
+| PROXIMO | 17 | **16** | **16** | ✅ |
+| CALIBRADO | 12 | **11** | **11** | ✅ |
+
+> El CSS define cada clase de badge en la hoja de estilo, asi que el contador suma **1 de mas por
+> categoria**. Mismo efecto que ya se anoto el 07/09 con `badge-en-uso` del Locker.
+
+Los **5 caducados aparecen por su codigo** (`T-017`, `M-006`, `A-005`, `M-005`, `D-001`), no solo en el
+contador: un contador puede acertar el numero y equivocarse de instrumento.
+
+**Usuarios:** los **88** de SQL estan todos. **No filtra por `Activo`** (`SELECT ... FROM Usuario ORDER BY
+CodigoCliente`, linea 122).
+
+**Se regenera cada minuto** (comprobado: 08:57:29).
+
+### Estado de las calibraciones a 09/09/2026
+
+**5 CADUCADOS:**
+
+| Codigo | Instrumento | Caduco | Lleva |
+|---|---|---|---|
+| **T-017** | Cal.pro. y gen.senal / RSPRO135 / 23200551 | 27/11/2025 | **286 dias** |
+| M-006 | Nivel Optico / BOSCH GOL 20 D / 801000535 | 01/02/2026 | 220 dias |
+| A-005 | Analizador particulas / KLOTZ / AMF20707 | 31/03/2026 | 162 dias |
+| M-005 | Nivel Optico / LeicaNA730Plus / 5718201 | 30/04/2026 | 132 dias |
+| D-001 | Atornillador Dinamometrico / LDA-40 | 09/06/2026 | 92 dias |
+
+> **El `M-005` es el instrumento que se saco en la prueba funcional del 08/09** (consigna 03), y estaba
+> caducado desde abril. El sistema lo permitio sin avisar. **No es un fallo**: ACTUM controla accesos, no
+> calibraciones. Pero es un caso real de coger un instrumento caducado sin enterarse — si algun dia
+> interesa, el dashboard podria avisarlo.
+
+**AVALANCHA A LA VISTA: 16 instrumentos caducan entre el 21/10 y el 01/12/2026.** Medio locker en seis
+semanas (las dos pinzas FLUKE, tres camaras termicas TESTO, dos analizadores de gases, el medidor laser...).
+Si se mandan de uno en uno segun caen, seran seis semanas sin la mitad del material: **conviene agruparlos
+y negociarlos por lotes con el laboratorio.**
+
+**Cero instrumentos sin fecha de caducidad:** los 32 estan controlados. No hay ninguno en el limbo.
+
+> **Inigo pidio ayuda con las calibraciones ("ya te dire").** Pendiente de que concrete que necesita.
+
+### ⚠️ REGLA NUEVA — contar en HTML con regex: el instrumento suele ser el problema
+
+**Dos falsos positivos el mismo dia, los dos por el contador, no por el sujeto:**
+
+1. **`<script>` = 1 tras eliminarlo.** No quedaba codigo: **el comentario explicativo menciona la palabra**
+   y el contador se contaba a si mismo. Predicado bueno: buscar las **llamadas reales**
+   (`</script>`, `history.replaceState`, `addEventListener`), no las palabras.
+2. **Parecian faltar 32 usuarios en el Admin.** El patron `<tr>` no captura `<tr style="...">`, y la tabla
+   de Registro de Uso genera sus filas asi (`GenerarDashboardAdmin.ps1:913`). Contando bien:
+   88 usuarios + 32 calibracion + 3 cabeceras = **123**, exacto.
+
+> **Antes de dar por buena una anomalia medida con regex sobre HTML, comprobar que el patron captura todas
+> las variantes de la etiqueta.** Usar `<tr` en vez de `<tr>`, y verificar contra el codigo que genera el
+> HTML. Cuesta un minuto y evita perseguir un fantasma.
+
+---
+
 # 🟢 SIGUIENTE PASO — 2026-09-09
 
 > **El reinicio con cambio de BIOS ya se hizo el 08/09 por la tarde y salio bien.** El detalle esta en el
