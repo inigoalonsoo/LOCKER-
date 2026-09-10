@@ -408,6 +408,35 @@ RS PRO y 76,86 EUR por el Martindale), se evita el alta que pedia RS, y queda **
 **Precios de referencia para negociar** (pedido 2507486, oct-2025): Martindale **76,86 EUR** ·
 RS PRO 135 **239,00 EUR**.
 
+### 🔍 BUSCAR EL ATORNILLADOR `D-001` — el rastro, medido el 10/09
+
+**Ultimo movimiento registrado, y ahi se acaba:**
+
+```
+01/04/2026 13:24:35  ASIER A. ALABORT      Devolucion
+01/04/2026 13:25:33  AITOR U. ULIBARRI     Extraccion   <- fin del rastro
+```
+
+**`AITOR U. ULIBARRI` lo saco el 1 de abril y no consta devolucion.** Mas de cinco meses.
+
+**Dos fuentes independientes coinciden**, asi que no es suposicion:
+- El `HistorialCompleto.csv` (lineas 469-470).
+- El evento **`1002`** capturado el 08/09 al abrir consignas: la **32 asignada al usuario 59 = AITOR**.
+
+**Anomalia del mismo dia:** Asier A. Alabort lo **devolvio** a las 13:24:35 **sin que conste que lo sacara
+nunca**. Circulo de mano en mano sin pasar por el locker — lo que encaja con que acabase en el sitio de
+Inigo sin registro.
+
+**Orden para buscarlo:** (1) **Aitor Ulibarri**, ultimo registrado · (2) **Asier Alabort**, lo tuvo justo
+antes y sabe a quien se lo paso · (3) el propio sitio de Inigo, donde el recuerda haberlo dejado para
+mandarlo a arreglar.
+
+> ⚠️ **CORRECCION:** se anoto que el `D-001` era *"el unico de los 32 sin numero de serie en ACTUM"*.
+> **Es FALSO.** Las filas del historial de **noviembre de 2025** ya lo llevan:
+> `Atornillador Dinametrico / LDA-40 / EA 10.00047`. El dato se leyo de una tabla con el texto **truncado**
+> y se dio por ausente lo que solo estaba cortado. **Mismo patron que los `<tr>` y el `<script>`: fallaba el
+> instrumento de medida, no el sujeto.** Antes de declarar que un campo esta vacio, leerlo sin truncar.
+
 ### 📦 LOTE NEURYLAN — pedido el 10/09/2026
 
 **8 equipos a presupuestar + 3 consultas de marca ajena.** Se pide precio de los ocho pero **se envian en
@@ -461,7 +490,7 @@ con el `A-003` extraido por Javier de Lamo, mandar los **dos** analizadores TEST
 | ~~**1 · RS / Amidata**~~ | ~~3~~ | **DESCARTADO 10/09** — se va **directo a Applus**, que es quien calibra de verdad. Los 3 equipos pasan al lote 5 | | | | |
 | **2 · Leica** | 1 | — | — | — | — | — |
 | ~~**3 · Klotz**~~ | ~~1~~ | **FUSIONADO 10/09** con Neurylan: no consta contacto ni pedido ni certificado de Klotz | | | | |
-| **4 · Neurylan** | **8 + 3** | **10/09/2026** | — | — | — | — |
+| **4 · Neurylan** | **8 + 3** | **10/09/2026 · ENVIADO** | — | — | — | — |
 | **5 · Applus** | **7** *(4 FLUKE + los 3 que iban via RS)* | **10/09/2026** | — | — | — | — |
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
 
@@ -497,7 +526,7 @@ certificado al servidor documental.
 | | Que | Detalle |
 |---|---|---|
 | 1 | **Buscar el atornillador `D-001`** | Lo dejo cerca de su sitio para mandarlo a arreglar y **no esta**. La consigna 32 lo da *En uso*, asi que abrirla con llave probablemente este vacia |
-| 2 | **Serie del `D-001` en ACTUM** | Es el **unico de los 32 sin numero de serie** en la descripcion. **Ya se sabe: `EA 10.00047`**, esta en el Excel -> se puede escribir en el Visor **sin bajar al locker** |
+| ~~2~~ | ~~**Serie del `D-001` en ACTUM**~~ | ❌ **NO ERA PENDIENTE.** La serie `EA 10.00047` **ya estaba** en la descripcion desde 2025; se leyo truncada. Ver la correccion en la seccion de busqueda del `D-001` |
 | 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
 | 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
 | ~~5~~ | ~~**Localizar el TESTO 340 de la consigna 22**~~ | **RESUELTO 09/09:** lo tenia Sergio Vega y lo devolvio identificandose a las **11:52:50**. CSV: una sola devolucion, serie `63862113`. |
@@ -594,8 +623,13 @@ Basta mirar la fecha de `DashboardLocker.html` en el explorador: si esta fresca,
 > **Esa carpeta es ademas la base natural del vigilante externo** cuando se quiera hacer (pendiente aplazado):
 > un equipo que NO es el locker viendo si ese fichero se queda parado.
 
-**Pendiente de dato:** nadie ha apuntado **cuando se cambio por ultima vez la contrasena de `fabricacion1`**,
-asi que no se puede anticipar la proxima. **La proxima vez que se cambie, apuntar el dia** y contar 42.
+**Plan de Inigo (10/09), y funciona:** cuando toque el cambio, **apuntar el dia**, poner recordatorio en el
+movil a los ~42 dias o algo antes, y **cambiarla un dia antes de que caduque** para que el locker no llegue
+a pararse nunca. De momento se gestiona asi.
+
+> **A medio plazo Inigo quiere quitarse el problema de raiz**: pedir que no caduque, o publicar el dashboard
+> por otra via. **Medido el 10/09: la via del IIS local esta descartada** (redes separadas, ver el pendiente
+> de OneDrive). **La que queda es Graph con certificado**, que no caduca nunca.
 
 ## 🔑 ACCESO SAT — es a TODO, no a una consigna
 
@@ -831,7 +865,15 @@ Los correos estan escritos y listos en la seccion de calibraciones. **RS descart
    **APLAZADA por Inigo el 10/09/2026:** el banner de salud actual sirve de momento. Posible futuro:
    vigilancia externa con Power Automate, comprobacion cada 10 min y aviso si el dashboard supera 20 min
    sin actualizar. No implementar ahora.
-3. **Quitarse OneDrive + `fabricacion1`** — se rompe solo cada ~42 dias. Graph con certificado, o IIS local.
+3. **Quitarse OneDrive + `fabricacion1`** — se rompe solo cada ~42 dias.
+   **IIS LOCAL DESCARTADO POR MEDICION (10/09):** desde el PC de Inigo (`192.168.216.101`) el locker
+   (`172.16.5.40`) **no responde — 100 % de paquetes perdidos**. Son redes separadas sin ruta, igual que el
+   locker tampoco alcanza el servidor documental. Un IIS ahi serviria una web que **nadie de oficina podria
+   abrir**. *(Matiz: el ping podria estar bloqueado por firewall aunque pasara HTTP; confirmarlo es una
+   pregunta a IT, no un experimento.)*
+   **Queda una sola via real: Microsoft Graph con certificado.** No depende de la red —el locker tiene
+   internet— y **el certificado no caduca nunca**, asi que termina con los 42 dias para siempre. Es una
+   peticion a IT de ~10 min: registrar una app en el Entra ID que GHI ya tiene. Sin coste.
 4. **Leer `Consigna.Usuario_Codigo`** para la pestana Estado.
 
 ## ⚠️ LO QUE CODEX NO DEBE HACER
