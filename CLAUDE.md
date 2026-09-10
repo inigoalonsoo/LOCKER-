@@ -423,9 +423,17 @@ Leidos de la tabla `Parametros` de SQL:
 
 | Campo | Valor a 10/09 | Que controla |
 |---|---|---|
-| `SegundosTimeoutMensajes` | **10** | cuanto se ve un mensaje en pantalla |
-| `SegundosTimeoutFormularios` | **20** | ← **el que corta la extraccion.** Tiempo en la pantalla de seleccion |
-| `SegundosTimeoutPuertaAbierta` | **60** | cuanto puede quedarse la puerta abierta |
+| `SegundosTimeoutMensajes` | 10 → **20** | cuanto se ve un mensaje en pantalla |
+| `SegundosTimeoutFormularios` | 20 → **120** | ← **el que cortaba la extraccion.** Tiempo en la pantalla de seleccion |
+| `SegundosTimeoutPuertaAbierta` | 60 → **120** | cuanto puede quedarse la puerta abierta |
+
+**Cambiado y VERIFICADO el 10/09**: la consulta sobre `Parametros` devuelve `20 | 120 | 120`. El cambio esta
+en la base de datos, no solo en la ventana. Falta la prueba real cronometrando una extraccion.
+
+> La pantalla de PARAMETROS (v25.02) tiene ademas pestanas de **Ubicaciones, Electronicas, Consignas y
+> Estaciones**, y una tabla de usuarios propia del programa con **`Admin` / contrasena `1234` en texto
+> plano** (permisos de Visor y Parametros). Es diseno del fabricante, como la contrasena de `sa` en
+> `Par.txt`. Anotado por si algun dia hay auditoria de IT.
 
 > **Esto corrige lo anotado el 04/06.** Aquel dia se subio *"Segundos Timeout Puerta"* de 20 a 60 y se dio el
 > problema por resuelto. **El cambio se hizo bien y sigue puesto (60)** — pero el que molesta al extraer es
