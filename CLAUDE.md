@@ -408,6 +408,49 @@ RS PRO y 76,86 EUR por el Martindale), se evita el alta que pedia RS, y queda **
 **Precios de referencia para negociar** (pedido 2507486, oct-2025): Martindale **76,86 EUR** ·
 RS PRO 135 **239,00 EUR**.
 
+### 📦 LOTE NEURYLAN — pedido el 10/09/2026
+
+**8 equipos a presupuestar + 3 consultas de marca ajena.** Se pide precio de los ocho pero **se envian en
+DOS TANDAS**, para no quedarse sin ningun instrumento operativo de un tipo.
+
+| # | Codigo | Instrumento | Serie | Caduca | Tanda |
+|---|---|---|---|---|---|
+| 1 | `C-002` | Camara termografica TESTO 872 | 62826812 | 29/10 | **1.ª** |
+| 2 | `S-001` | Camara termografica TESTO 872 | 62813457 | 04/11 | **1.ª** |
+| 3 | `S-002` | Camara termografica TESTO 872 | 62826952 | 04/11 | 2.ª — **se queda de reserva** |
+| 4 | `T-100-1` | Analizador de gases TESTO 340 | 63862113 | 04/11 | **1.ª** |
+| 5 | `A-004` | Analizador de gases TESTO 340 | 62370623 | 11/11 | 2.ª — **se queda de reserva** |
+| 6 | `T-005-1` | Termometro con sonda TESTO 925 | 34768073 | 05/11 | **1.ª** (unidad unica) |
+| 7 | `M-020` | Medidor presion diferencial TESTO 512 | BA150023 | 05/11 | **1.ª** (unidad unica) |
+| 8 | `T-004` | Calibrador multifuncion EXTECH PRC30 | 15549 | 03/11 | **1.ª** (unidad unica) |
+
+**Consultas de marca ajena, en bloque aparte del correo:**
+
+| Codigo | Equipo | Nota |
+|---|---|---|
+| `M-006` | Nivel optico BOSCH GOL 20 D, `801000535` | **220 dias caducado** |
+| `A-005` | Analizador de particulas KLOTZ ABAKUS, `AMF-20707` | **162 dias caducado** — ver abajo |
+| `D-001` | Atornillador GEDORE LDA-40 EA, `10.00047` | **92 dias**, posiblemente averiado, y **hoy perdido** |
+
+#### Por que el KLOTZ va aqui y no a Klotz
+
+Buscado el 10/09 en todo el servidor documental: **no hay certificado del `A-005`, no hay carpeta de pedidos
+de KLOTZ, y no hay ningun fichero con ese nombre.** Las carpetas de pedidos son solo APPLUS, CS, LEICA,
+NEURYLAN y RS AMIDATA.
+
+> **No consta que el `A-005` lo haya calibrado nunca nadie.** El "KLOTZ" del Excel parece ser **el fabricante**,
+> no la empresa a la que se mando. Por eso se pregunta a Neurylan, que ya acepto un PEAK TECH fuera de su
+> linea. Si dicen que no, entonces se busca a Klotz directamente.
+
+#### El ajuste que obligo a rehacer el lote
+
+El plan original mandaba 7 equipos con `S-002` retenida. **Al mirar los datos del 10/09 aparecio un problema:**
+con el `A-003` extraido por Javier de Lamo, mandar los **dos** analizadores TESTO 340 dejaba el locker
+**sin ningun analizador de gases disponible**. De ahi las dos tandas y que `A-004` se quede.
+
+> **Desbloqueo:** el `T-100-1` es el de la consigna 22, que volvio el 09/09. **Antes no se podia mandar
+> porque no aparecia; ahora si.**
+
 ### 📊 ESTADO DE LA CAMPANA — se actualiza segun vayan contestando
 
 > **Este es el cuaderno de la campana.** Inigo ira diciendo que manda y que le responden; se apunta aqui,
@@ -417,8 +460,8 @@ RS PRO 135 **239,00 EUR**.
 |---|---|---|---|---|---|---|
 | ~~**1 · RS / Amidata**~~ | ~~3~~ | **DESCARTADO 10/09** — se va **directo a Applus**, que es quien calibra de verdad. Los 3 equipos pasan al lote 5 | | | | |
 | **2 · Leica** | 1 | — | — | — | — | — |
-| **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
-| **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
+| ~~**3 · Klotz**~~ | ~~1~~ | **FUSIONADO 10/09** con Neurylan: no consta contacto ni pedido ni certificado de Klotz | | | | |
+| **4 · Neurylan** | **8 + 3** | **10/09/2026** | — | — | — | — |
 | **5 · Applus** | **7** *(4 FLUKE + los 3 que iban via RS)* | **10/09/2026** | — | — | — | — |
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
 
@@ -532,6 +575,27 @@ al arrancar.
 
 > **`Par.txt` contiene la contrasena de `sa` en claro** (`C:\ACTUM\ACTUM_EPI\*\Par.txt`). Es del fabricante,
 > no nuestro, pero conviene saberlo si algun dia hay auditoria de IT.
+
+## ❓ ¿EL BANNER DE SALUD DETECTA QUE ONEDRIVE DEJE DE SUBIR? — NO
+
+**Pregunta de Inigo (10/09):** *"igual si deja de sincronizar por la contrasena lo avisa en el banner"*.
+
+**No puede.** El chequeo corre **dentro del locker** y mira el CSV y el marcador, que son ficheros locales.
+Si la sesion de `fabricacion1` caduca, el locker **sigue generandolo todo bien** y el banner sale **verde**:
+lo que se queda vieja es la copia de la **web**, y eso desde dentro no se ve. Es la misma razon por la que
+el vigilante tiene que correr FUERA.
+
+**Pero hay una comprobacion de 5 segundos que ya existe y no costo nada montar:** la carpeta del locker
+**esta sincronizada en el PC de Inigo**, en
+`C:\Users\ialopez\OneDrive - GHI HORNOS INDUSTRIALES S.L\Archivos de Fabricacion1 - GHI Smart Furnaces - LockerACTUM\`.
+Basta mirar la fecha de `DashboardLocker.html` en el explorador: si esta fresca, OneDrive sube.
+
+> **Medido el 10/09 a las 12:48:** `DashboardLocker.html` marcaba **12:48**. Sincronizacion viva, en tiempo real.
+> **Esa carpeta es ademas la base natural del vigilante externo** cuando se quiera hacer (pendiente aplazado):
+> un equipo que NO es el locker viendo si ese fichero se queda parado.
+
+**Pendiente de dato:** nadie ha apuntado **cuando se cambio por ultima vez la contrasena de `fabricacion1`**,
+asi que no se puede anticipar la proxima. **La proxima vez que se cambie, apuntar el dia** y contar 42.
 
 ## 🔑 ACCESO SAT — es a TODO, no a una consigna
 
@@ -1243,7 +1307,7 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 | | Que | Nota |
 |---|---|---|
 | a | **Alerta de sistema caido** | Aparcada por decision de Inigo, pero **cubierta a medias el 09/09** con el banner de salud del **DashboardAdmin** (ver abajo). Lo que el banner NO cubre: que el PC este muerto, ni avisa a nadie por si solo (hay que abrir el Admin). Para eso el vigilante tiene que correr FUERA del locker. |
-| b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **DESBLOQUEADO 09/09:** Sergio devolvio realmente el instrumento de la consigna 22 a las 11:52:50. La mejora sigue siendo opcional, pero ya no depende de averiguar quien lo tenia. |
+| ~~b~~ | ~~**Leer `Consigna.Usuario_Codigo` para la pestana Estado**~~ | ❌ **DESCARTADO 10/09 por Inigo.** Ya no estaba bloqueado, pero **es mala idea**: pondria a **SQL** a mandar en la columna Estado, y SQL es justo quien se equivoca en los casos corregidos a mano. Las 5 filas de `CorreccionesManuales.csv` existen porque SQL dice IKER donde debe decir SERGIO. Darle el mando **resucitaria el dato erroneo**. |
 | ~~c~~ | ~~Quitar el `<script>`~~ | ✅ **HECHO 09/09.** Confirmado en consola, eliminado y verificado: el banner desaparecio. |
 | ~~d~~ | ~~`EstadoAnterior.json` vacio~~ | ✅ **EVALUADO Y DESCARTADO 09/09.** Ver abajo. |
 | ~~e~~ | ~~Quitar `MicrosoftEdgeAutoLaunch`~~ | ✅ **HECHO 09/09.** Ya no se abre Edge al arrancar. El arranque queda con `ACTUM_EPI_Gestion`, `OneDrive`, `Microsoft Edge Update` (actualizador silencioso, no abre ventanas), `Microsoft.Lists` y `SecurityHealth`. |
