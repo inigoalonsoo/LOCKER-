@@ -1,5 +1,7 @@
-# Archivos generados automáticamente (no subir al repo)
+# Archivos generados automaticamente (no subir al repo)
 *.html
+# ...salvo los informes escritos a mano, que si son documentos del proyecto
+!docs/INFORME_*.html
 EstadoAnterior.json
 HistorialCompleto.csv
 EXPORT_*.txt

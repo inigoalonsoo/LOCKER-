@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recuperación del Locker ACTUM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#FBF9F8; --surface:#FFFFFF; --surface-2:#F3EFEE;
+  --ink:#1B1618; --ink-2:#4A4145; --muted:#736970;
+  --border:#E6DEDC; --border-2:#D4C8C5;
+  --accent:#C31E2E; --accent-soft:#FCEEEF;
+  --bad:#A8201A; --good:#2E6B4F; --warn:#8A5A00;
+  --shadow:0 1px 2px rgba(27,22,24,.05), 0 6px 20px rgba(27,22,24,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#141012; --surface:#1D181A; --surface-2:#251F21;
+    --ink:#F4EFF0; --ink-2:#D2C8CB; --muted:#9C9195;
+    --border:#332B2E; --border-2:#443A3D;
+    --accent:#F26473; --accent-soft:#331A1D;
+    --bad:#EE8177; --good:#7CC8A1; --warn:#DDA96B;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#141012; --surface:#1D181A; --surface-2:#251F21;
+  --ink:#F4EFF0; --ink-2:#D2C8CB; --muted:#9C9195;
+  --border:#332B2E; --border-2:#443A3D;
+  --accent:#F26473; --accent-soft:#331A1D;
+  --bad:#EE8177; --good:#7CC8A1; --warn:#DDA96B;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:16px; line-height:1.6;
+}
+.wrap{max-width:820px; margin:0 auto; padding:40px 24px 72px}
+h1,h2,h3{font-family:Archivo,"Source Sans 3",sans-serif; margin:0; text-wrap:balance}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent); font-weight:500;
+}
+
+/* cabecera */
+header{padding-bottom:26px; border-bottom:3px solid var(--accent); margin-bottom:34px}
+h1{font-size:2.6em; font-weight:700; letter-spacing:-.025em; line-height:1.03; margin:10px 0 14px}
+.sub{font-size:1.08em; color:var(--ink-2); max-width:60ch; margin:0}
+.meta{
+  display:flex; flex-wrap:wrap; gap:6px 20px; margin-top:20px;
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
+}
+
+/* titular numerico */
+.titular{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--border); border:1px solid var(--border); border-radius:12px;
+  overflow:hidden; margin-bottom:38px; box-shadow:var(--shadow);
+}
+.tcard{background:var(--surface); padding:20px 18px}
+.tcard b{
+  display:block; font-family:Archivo,sans-serif; font-size:2.1em; font-weight:700;
+  line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--accent);
+}
+.tcard span{display:block; font-size:.9em; color:var(--ink-2); margin-top:7px}
+@media (max-width:640px){ .titular{grid-template-columns:1fr} }
+
+section{margin-bottom:40px}
+h2{font-size:1.35em; font-weight:600; letter-spacing:-.01em; margin-bottom:6px}
+.lead{color:var(--ink-2); margin:0 0 18px; max-width:62ch}
+
+/* antes/despues */
+table{border-collapse:collapse; width:100%; font-size:.94em}
+.tabla{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow)}
+.tabla-scroll{overflow-x:auto}
+th{
+  text-align:left; background:var(--surface-2); color:var(--muted);
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.11em;
+  text-transform:uppercase; font-weight:500; padding:11px 16px; white-space:nowrap;
+  border-bottom:1px solid var(--border);
+}
+td{padding:11px 16px; border-bottom:1px solid var(--border); vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.antes{color:var(--bad); font-family:"IBM Plex Mono",monospace; font-size:.88em; white-space:nowrap}
+td.ahora{color:var(--good); font-family:"IBM Plex Mono",monospace; font-size:.88em; font-weight:500; white-space:nowrap}
+td.q{font-weight:600}
+
+/* dias */
+.dia{
+  position:relative; padding:0 0 4px 74px; margin-bottom:26px;
+}
+.dia::before{
+  content:attr(data-fecha); position:absolute; left:0; top:2px;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500;
+  color:var(--muted); letter-spacing:.04em;
+}
+.dia::after{
+  content:""; position:absolute; left:58px; top:8px; bottom:-26px; width:2px; background:var(--border);
+}
+.dia:last-child::after{display:none}
+.dia h3{
+  font-size:1.08em; font-weight:600; margin-bottom:4px; position:relative;
+}
+.dia h3::before{
+  content:""; position:absolute; left:-24px; top:8px; width:10px; height:10px;
+  border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--ground);
+}
+.dia p{margin:0 0 10px; color:var(--ink-2); max-width:60ch}
+.dia ul{margin:0; padding-left:19px; color:var(--ink-2)}
+.dia li{margin:4px 0}
+.dia li b{color:var(--ink)}
+.rotulo{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10px;
+  letter-spacing:.08em; text-transform:uppercase; padding:2px 9px; border-radius:99px;
+  background:var(--accent-soft); color:var(--accent); margin-left:8px; vertical-align:2px;
+}
+
+/* destacado */
+.nota{
+  border-left:3px solid var(--accent); background:var(--surface); padding:16px 20px;
+  border-radius:0 10px 10px 0; margin:20px 0; box-shadow:var(--shadow);
+}
+.nota p{margin:0; color:var(--ink-2)}
+.nota p + p{margin-top:9px}
+.nota strong{color:var(--ink)}
+
+/* peticion */
+.peticion{
+  background:var(--surface); border:2px solid var(--accent); border-radius:12px;
+  padding:22px 24px; box-shadow:var(--shadow);
+}
+.peticion h3{font-size:1.12em; font-weight:700; color:var(--accent); margin-bottom:8px}
+.peticion p{margin:0 0 10px; color:var(--ink-2)}
+.peticion .precio{
+  font-family:Archivo,sans-serif; font-size:1.5em; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+footer{
+  margin-top:48px; padding-top:20px; border-top:1px solid var(--border);
+  font-size:.85em; color:var(--muted);
+}
+footer p{margin:0 0 6px; max-width:66ch}
+@media (max-width:560px){
+  h1{font-size:2em}
+  .dia{padding-left:0}
+  .dia::before{position:static; display:block; margin-bottom:3px}
+  .dia::after,.dia h3::before{display:none}
+  .dia{border-left:2px solid var(--border); padding-left:16px}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Instrumentación · Informe semanal</div>
+  <h1>Recuperación del locker ACTUM</h1>
+  <p class="sub">El sistema que controla los 32 instrumentos de medida del taller llevaba desde agosto sin registrar nada y con el histórico dañado. Esta semana se ha reparado, se ha protegido para que no vuelva a ocurrir y se ha puesto en marcha la campaña de calibraciones de cara a las auditorías de noviembre.</p>
+  <div class="meta">
+    <span>Iñigo Alonso</span>
+    <span>7 – 10 de septiembre de 2026</span>
+    <span>GHI Smart Furnaces</span>
+  </div>
+</header>
+
+<div class="titular">
+  <div class="tcard">
+    <b>0</b>
+    <span>movimientos perdidos, comprobado contra los 170.797 registros de la base de datos</span>
+  </div>
+  <div class="tcard">
+    <b>19 d → 1 min</b>
+    <span>lo que tardaba el locker en volver tras un corte de luz, y lo que tarda ahora</span>
+  </div>
+  <div class="tcard">
+    <b>21</b>
+    <span>instrumentos con la calibración ya en trámite antes de las auditorías</span>
+  </div>
+</div>
+
+<section>
+  <h2>De dónde veníamos</h2>
+  <p class="lead">El lunes el sistema llevaba semanas escribiendo datos corruptos sin que nadie lo supiera. Estas son las mismas medidas, antes y hoy.</p>
+  <div class="tabla tabla-scroll"><table>
+    <thead><tr><th>Qué se mide</th><th>Lunes</th><th>Hoy</th></tr></thead>
+    <tbody>
+      <tr><td class="q">Fichero de histórico</td><td class="antes">10,4 MB · 103.494 filas</td><td class="ahora">54 KB · 536 filas</td></tr>
+      <tr><td class="q">Filas repetidas</td><td class="antes">una de cada 600 era real</td><td class="ahora">ninguna · 537/537</td></tr>
+      <tr><td class="q">Datos dañados por apagones</td><td class="antes">4 líneas ilegibles</td><td class="ahora">0</td></tr>
+      <tr><td class="q">Estado real de las taquillas</td><td class="antes">el panel mostraba ceros</td><td class="ahora">32 de 32 correctas</td></tr>
+      <tr><td class="q">Tras un corte de corriente</td><td class="antes">se quedaba muerto</td><td class="ahora">arranca solo, verificado</td></tr>
+      <tr><td class="q">Si algo va mal</td><td class="antes">nadie se enteraba</td><td class="ahora">avisa en el panel</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>La semana, día a día</h2>
+
+  <div class="dia" data-fecha="LUN 07/09">
+    <h3>Encontrar la causa y recuperar el histórico<span class="rotulo">Incidente</span></h3>
+    <p>El dashboard llevaba parado desde mediados de agosto. Se localizó el origen leyendo el código, no a base de probar: una única línea ordenaba las fechas como si fueran texto, así que el sistema se quedaba atrapado releyendo diciembre de 2025 una y otra vez.</p>
+    <ul>
+      <li>Histórico completo <b>reconstruido desde la base de datos</b>, de octubre de 2024 a hoy.</li>
+      <li>Verificado que <b>no se perdió ni un solo movimiento</b>: los meses en blanco eran las vacaciones de agosto.</li>
+      <li>Copia forense guardada antes de tocar nada.</li>
+    </ul>
+  </div>
+
+  <div class="dia" data-fecha="MAR 08/09">
+    <h3>Que no se vuelva a caer<span class="rotulo">Prevención</span></h3>
+    <p>Se revisó el ordenador entero. El disco y la memoria están sanos: lo que falla es la corriente — <b>ocho cortes en cinco semanas</b>. El daño no lo hacía el apagón, sino que el equipo se quedaba apagado hasta que alguien pasaba por allí.</p>
+    <ul>
+      <li>BIOS configurada para <b>encenderse sola</b> al volver la luz.</li>
+      <li>Arreglado el arranque automático de Windows, que estaba roto sin que se supiera: el equipo se habría quedado pidiendo contraseña.</li>
+      <li>ACTUM se abre solo al iniciar. <b>Probado con un reinicio real.</b></li>
+      <li>Suspensión e hibernación desactivadas; una tarea automática que borraba correcciones, retirada.</li>
+    </ul>
+  </div>
+
+  <div class="dia" data-fecha="MIÉ 09/09">
+    <h3>Blindar los datos<span class="rotulo">Fiabilidad</span></h3>
+    <p>Aparecieron líneas duplicadas. Se persiguió hasta el origen: el sistema guardaba la hora sin milisegundos, así que un movimiento volvía a entrar cada minuto, indefinidamente.</p>
+    <ul>
+      <li>Corregido, y añadida una <b>segunda barrera</b> que impide escribir una línea repetida aunque el fallo vuelva por otra vía.</li>
+      <li>Las <b>correcciones hechas a mano ya no se pierden</b>: viven aparte y se reaplican solas si alguna vez hay que rehacer el histórico.</li>
+      <li>El panel <b>se autodiagnostica</b> y avisa en rojo si detecta algo anormal. Antes fallaba en silencio.</li>
+      <li>Eliminado el aviso de error que salía al abrir el dashboard desde la web.</li>
+    </ul>
+  </div>
+
+  <div class="dia" data-fecha="JUE 10/09">
+    <h3>Calibraciones y usabilidad<span class="rotulo">Puesta en marcha</span></h3>
+    <p>Con el sistema estable, la semana se cierra atacando lo que sí tiene fecha límite: las auditorías de noviembre.</p>
+    <ul>
+      <li>El tiempo para sacar un instrumento pasa de <b>20 a 120 segundos</b>: era tan corto que cortaba la operación a media.</li>
+      <li>Inventario de calibraciones cruzando la base de datos con el registro del departamento: <b>32 de 32 cuadran</b>.</li>
+      <li><b>Dos pedidos de presupuesto enviados</b> y los envíos organizados en dos tandas, para no quedarse sin instrumentos en el taller.</li>
+      <li>Corregido el registro del departamento, que confundía la marca del aparato con el laboratorio que lo calibra.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Las calibraciones, en marcha</h2>
+  <p class="lead">Al revisarlo aparecieron <strong>5 instrumentos con la calibración vencida</strong> —uno de ellos desde hace 286 días— y <strong>16 más que vencen antes de diciembre</strong>. Es media instalación en seis semanas.</p>
+  <div class="tabla tabla-scroll"><table>
+    <thead><tr><th>Laboratorio</th><th>Equipos</th><th>Situación</th></tr></thead>
+    <tbody>
+      <tr><td class="q">Applus</td><td class="mono">7</td><td>presupuesto solicitado</td></tr>
+      <tr><td class="q">Neurylan</td><td class="mono">8 + 3</td><td>presupuesto solicitado</td></tr>
+      <tr><td class="q">Leica · CS Instruments</td><td class="mono">2</td><td>sin urgencia, van después</td></tr>
+    </tbody>
+  </table></div>
+  <div class="nota">
+    <p><strong>Un ahorro que salió de revisar los papeles.</strong> Tres equipos se venían calibrando a través de un distribuidor que los subcontrataba. Al comprobar los certificados anteriores se vio quién los calibraba realmente, y esta vez se ha pedido presupuesto directamente al laboratorio.</p>
+    <p>Se conservan además los precios del año pasado para poder comparar la oferta.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Lo que queda</h2>
+  <p class="lead">El software está resuelto. Lo que sigue abierto no depende de él.</p>
+  <div class="peticion">
+    <h3>La causa de fondo sigue ahí: la corriente</h3>
+    <p>Ocho cortes en cinco semanas. El equipo ya vuelve solo, así que el impacto es mucho menor, pero cada apagón sigue interrumpiendo la escritura de datos y puede dañar el histórico — es exactamente lo que provocó la avería de agosto.</p>
+    <p><strong>Un SAI resolvería los cortes breves, que son la mayoría</strong>, y permitiría un apagado ordenado en los largos.</p>
+    <p class="precio">60 – 100 €</p>
+    <p style="margin-top:12px">Conviene además avisar a mantenimiento del cuadro eléctrico: si se cae solo, el locker es únicamente el síntoma que se ha detectado.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Todo el trabajo queda documentado y versionado, con cada cambio registrado junto al motivo y la comprobación que lo respalda, de modo que el sistema no dependa de una sola persona.</p>
+  <p>Las cifras de este informe están medidas sobre el sistema en producción, no estimadas.</p>
+</footer>
+
+</div>
+
+</body>
+</html>
