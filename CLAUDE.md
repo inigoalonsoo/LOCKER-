@@ -487,30 +487,41 @@ correcto mientras se espera respuesta.
 > **Ojo, hay CUATRO instrumentos con `RS CALIBRATION`, no tres.** El cuarto es el `E-003`, que no entro en
 > la campana porque caduca a 160 dias. Si Applus acepta los tres actuales, este va detras.
 
-#### ⚠️ LO QUE FALTA DECIDIR: la primera columna NO es la marca
+#### ✅ TERMINADO EL 10/09 — 31 de 32, y queda bien
 
-Tal como quedo, **la columna `EMPRESA` sigue siendo el proveedor, repetido**:
+Inigo eligio el camino **A** (rellenar la marca de verdad) y lo completo el mismo dia. **La columna `M`
+(`EMPRESA`) ya es la MARCA y la `N` (`CALIBRAR EN`) el proveedor.** Estado medido:
 
-```
-C-002   TESTO 872     EMPRESA: NEURYLAN    CALIBRAR EN: NEURYLAN
-L-006   FLUKE 771     EMPRESA: APPLUS      CALIBRAR EN: APPLUS
-```
+| Columna | Contenido | Estado |
+|---|---|---|
+| **M · EMPRESA** | marca del fabricante: TESTO, FLUKE, LEICA, PCE, RS PRO, MARTINDALE, MEGGER, EXTECH, PEAK TECH, BOSCH, KLOTZ, GEDORE, DRAGER, CS | **31/32** |
+| **N · CALIBRAR EN** | a quien se le compra: NEURYLAN, APPLUS, LEICA, CS | completa |
 
-Neurylan no fabrica la TESTO 872 —es su distribuidor— y Applus no fabrica la FLUKE 771. Resultado: las dos
-columnas **dicen lo mismo en 28 de 32 filas**; solo difieren las 4 de RS.
+**Unica casilla vacia: `M34` (`E-002`).** La marca **si se sabe** — esta en la propia columna MODELO:
+**`Insize/Mitutoyo`**. El `CALIBRAR EN` de esa fila **debe seguir vacio**: no se sabe donde se calibra ni si
+caduca.
 
-**Dos caminos, decision de Inigo:**
+**Dos decisiones de Inigo mejores que lo propuesto:**
+- **`E-003` → `(RS CALIBRATION / APPLUS)`** en vez de `(APPLUS)` a secas. **Conserva de donde venia y adonde
+  iria**, asi que dentro de un ano se entiende el cambio sin preguntar.
+- **Mantuvo los interrogantes** en vez de simplificarlos a `¿NEURYLAN?`. Mas conservador y no se pierde nada.
 
-| | Que hacer | A favor | En contra |
-|---|---|---|---|
-| **A** | Rellenar la marca de verdad: TESTO, FLUKE, LEICA, KLOTZ, BOSCH, GEDORE, RS PRO, MARTINDALE, PCE, DRAGER, INSIZE, EXTECH, MEGGER | explicito, permite filtrar por marca | **la columna MODELO ya lleva la marca** — duplica |
-| **B** | Dejar solo `CALIBRAR EN` y quitar la ambiguedad de raiz | mas simple, cero trabajo | la marca hay que leerla en MODELO |
+#### 🧩 EL ULTIMO INTERROGANTE SE CIERRA CON EL PROPIO EXCEL
 
-> **Recomendacion:** la **B**, por sencillez — `MODELO` ya dice `TESTO 872`, `FLUKE 771`,
-> `LEICA NA 730 PLUS`. La **A** solo compensa si se va a filtrar o agrupar por marca.
+`M-017` es el unico con `Neurylan?` en `CALIBRAR EN`. **Pero mirando las filas vecinas se resuelve:**
 
-**Retoque menor pendiente:** `C-002` sigue como `NEURYLAN (Testo)` en las dos columnas. Ya esta confirmado
-que es el mismo Neurylan, asi que puede quedar `NEURYLAN` a secas.
+| Codigo | Marca | CALIBRAR EN |
+|---|---|---|
+| `L-004` | MEGGER | NEURYLAN |
+| `T-008` | TESTO | NEURYLAN |
+| `L-005` | FLUKE | NEURYLAN |
+| **`M-017`** | **PEAK TECH** | **`Neurylan?`** |
+
+**Esos cuatro son exactamente los del correo que Inigo enseno el 10/09** —el que preguntaba *"¿por otro lado,
+seria tambien posible calibrar un Sonometro PEAK TECH 8005?"*— y **volvieron juntos**.
+
+> **Si los otros tres son Neurylan, el cuarto tambien: era el mismo mensaje.** Y si no hay certeza sobre los
+> tres, entonces el interrogante deberia estar en los cuatro, no en uno solo. **Coherencia, no dato nuevo.**
 
 ### 💡 IDEA DE INIGO (10/09) — partir la columna EMPRESA del Excel en dos
 
