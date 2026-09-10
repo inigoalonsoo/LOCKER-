@@ -471,6 +471,47 @@ Asi queda siempre **una pinza y un calibrador** dentro, y salen primero el venci
 > Inigo que les comunique el envio en DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al
 > hacer el pedido, saldran los 7 (u 8) de golpe y el locker se queda vacio.
 
+### ✅ COLUMNA `CALIBRAR EN` — creada por Inigo el 10/09, revisada
+
+Inigo la creo el mismo dia. **Los tres cambios decididos estan hechos:** `T-100-4`, `L-002` y `T-017`
+pasan a **APPLUS** en `CALIBRAR EN`. Los interrogantes se dejaron igual en ambas columnas, que es lo
+correcto mientras se espera respuesta.
+
+**Las dos filas que no cuadraban al revisarlas:**
+
+| Fila | Codigo | Que es | Que puso | Lectura |
+|---|---|---|---|---|
+| 33 | **`E-003`** | Medidor LCR **RS Pro** LCR1701, consigna 30, caduca 16/02/2027 (160 d) | `RS CALIBRATION` → **`(APPLUS)`** | **paréntesis bien puesto**: es marca RS Pro como el `T-017` y el `T-100-4`, asi que **por patron** iria a Applus, pero **no hay certificado suyo** en el servidor: no esta probado. Caduca en 160 dias — **decidir cuando Applus conteste** sobre los otros tres |
+| 34 | **`E-002`** | Indicador de dial x2 + base, consigna 31 | vacio / vacio | correcto: sigue sin saberse |
+
+> **Ojo, hay CUATRO instrumentos con `RS CALIBRATION`, no tres.** El cuarto es el `E-003`, que no entro en
+> la campana porque caduca a 160 dias. Si Applus acepta los tres actuales, este va detras.
+
+#### ⚠️ LO QUE FALTA DECIDIR: la primera columna NO es la marca
+
+Tal como quedo, **la columna `EMPRESA` sigue siendo el proveedor, repetido**:
+
+```
+C-002   TESTO 872     EMPRESA: NEURYLAN    CALIBRAR EN: NEURYLAN
+L-006   FLUKE 771     EMPRESA: APPLUS      CALIBRAR EN: APPLUS
+```
+
+Neurylan no fabrica la TESTO 872 —es su distribuidor— y Applus no fabrica la FLUKE 771. Resultado: las dos
+columnas **dicen lo mismo en 28 de 32 filas**; solo difieren las 4 de RS.
+
+**Dos caminos, decision de Inigo:**
+
+| | Que hacer | A favor | En contra |
+|---|---|---|---|
+| **A** | Rellenar la marca de verdad: TESTO, FLUKE, LEICA, KLOTZ, BOSCH, GEDORE, RS PRO, MARTINDALE, PCE, DRAGER, INSIZE, EXTECH, MEGGER | explicito, permite filtrar por marca | **la columna MODELO ya lleva la marca** — duplica |
+| **B** | Dejar solo `CALIBRAR EN` y quitar la ambiguedad de raiz | mas simple, cero trabajo | la marca hay que leerla en MODELO |
+
+> **Recomendacion:** la **B**, por sencillez — `MODELO` ya dice `TESTO 872`, `FLUKE 771`,
+> `LEICA NA 730 PLUS`. La **A** solo compensa si se va a filtrar o agrupar por marca.
+
+**Retoque menor pendiente:** `C-002` sigue como `NEURYLAN (Testo)` en las dos columnas. Ya esta confirmado
+que es el mismo Neurylan, asi que puede quedar `NEURYLAN` a secas.
+
 ### 💡 IDEA DE INIGO (10/09) — partir la columna EMPRESA del Excel en dos
 
 *"Se podria hacer una columna nueva: la de empresa que sea de que empresa es, y otra que se llame
