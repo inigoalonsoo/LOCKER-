@@ -66,6 +66,7 @@ h1{font-size:2.6em; font-weight:700; letter-spacing:-.025em; line-height:1.03; m
   display:block; font-family:Archivo,sans-serif; font-size:2.1em; font-weight:700;
   line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--accent);
 }
+.tcard b.frase{font-size:1.55em; letter-spacing:-.015em; line-height:1.1}
 .tcard span{display:block; font-size:.9em; color:var(--ink-2); margin-top:7px}
 @media (max-width:640px){ .titular{grid-template-columns:1fr} }
 
@@ -128,18 +129,6 @@ td.q{font-weight:600}
 .nota p + p{margin-top:9px}
 .nota strong{color:var(--ink)}
 
-/* peticion */
-.peticion{
-  background:var(--surface); border:2px solid var(--accent); border-radius:12px;
-  padding:22px 24px; box-shadow:var(--shadow);
-}
-.peticion h3{font-size:1.12em; font-weight:700; color:var(--accent); margin-bottom:8px}
-.peticion p{margin:0 0 10px; color:var(--ink-2)}
-.peticion .precio{
-  font-family:Archivo,sans-serif; font-size:1.5em; font-weight:700; color:var(--ink);
-  font-variant-numeric:tabular-nums;
-}
-
 footer{
   margin-top:48px; padding-top:20px; border-top:1px solid var(--border);
   font-size:.85em; color:var(--muted);
@@ -175,8 +164,8 @@ footer p{margin:0 0 6px; max-width:66ch}
     <span>movimientos perdidos, comprobado contra los 170.797 registros de la base de datos</span>
   </div>
   <div class="tcard">
-    <b>19 d → 1 min</b>
-    <span>lo que tardaba el locker en volver tras un corte de luz, y lo que tarda ahora</span>
+    <b class="frase">Arranca solo</b>
+    <span>tras un corte de luz vuelve a registrar sin que nadie tenga que ir a encenderlo</span>
   </div>
   <div class="tcard">
     <b>21</b>
@@ -194,7 +183,7 @@ footer p{margin:0 0 6px; max-width:66ch}
       <tr><td class="q">Filas repetidas</td><td class="antes">una de cada 600 era real</td><td class="ahora">ninguna · 537/537</td></tr>
       <tr><td class="q">Datos dañados por apagones</td><td class="antes">4 líneas ilegibles</td><td class="ahora">0</td></tr>
       <tr><td class="q">Estado real de las taquillas</td><td class="antes">el panel mostraba ceros</td><td class="ahora">32 de 32 correctas</td></tr>
-      <tr><td class="q">Tras un corte de corriente</td><td class="antes">se quedaba muerto</td><td class="ahora">arranca solo, verificado</td></tr>
+      <tr><td class="q">Tras un corte de corriente</td><td class="antes">había que ir a encenderlo</td><td class="ahora">arranca solo, verificado</td></tr>
       <tr><td class="q">Si algo va mal</td><td class="antes">nadie se enteraba</td><td class="ahora">avisa en el panel</td></tr>
     </tbody>
   </table></div>
@@ -267,12 +256,12 @@ footer p{margin:0 0 6px; max-width:66ch}
 <section>
   <h2>Lo que queda</h2>
   <p class="lead">El software está resuelto. Lo que sigue abierto no depende de él.</p>
-  <div class="peticion">
-    <h3>La causa de fondo sigue ahí: la corriente</h3>
-    <p>Ocho cortes en cinco semanas. El equipo ya vuelve solo, así que el impacto es mucho menor, pero cada apagón sigue interrumpiendo la escritura de datos y puede dañar el histórico — es exactamente lo que provocó la avería de agosto.</p>
-    <p><strong>Un SAI resolvería los cortes breves, que son la mayoría</strong>, y permitiría un apagado ordenado en los largos.</p>
-    <p class="precio">60 – 100 €</p>
-    <p style="margin-top:12px">Conviene además avisar a mantenimiento del cuadro eléctrico: si se cae solo, el locker es únicamente el síntoma que se ha detectado.</p>
+  <div class="nota">
+    <p><strong>Los cortes de luz siguen: ocho en cinco semanas.</strong> Ya no dejan el locker parado — vuelve solo y sigue registrando—, y la forma en que se guardan los datos se ha reforzado para que un apagón a media escritura no pueda dañar el histórico, que es justo lo que ocurrió en agosto.</p>
+    <p>Merece la pena, eso sí, <strong>comentárselo a mantenimiento</strong>: si ese cuadro se cae solo ocho veces en cinco semanas, el locker es solo el equipo donde se ha notado. Habrá más cosas colgando de él.</p>
+  </div>
+  <div class="nota">
+    <p><strong>Lo único que queda sin cubrir: si el sistema se parase, nadie recibiría un aviso.</strong> El panel ya se autodiagnostica, pero para avisar de que el ordenador está apagado haría falta una vigilancia desde fuera. Está estudiado y anotado; se hará si se considera necesario.</p>
   </div>
 </section>
 
