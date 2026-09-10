@@ -414,6 +414,56 @@ certificado al servidor documental.
 
 ---
 
+## ⏱️ LOS TRES TIMEOUTS DE ACTUM — medidos el 10/09/2026
+
+**Sintoma de Inigo:** *"el tiempo que hay para extraer es muy pequeno, como 15 segundos"*.
+
+**Causa:** hay **TRES** temporizadores, no uno, y en junio se cambio el que no era para este sintoma.
+Leidos de la tabla `Parametros` de SQL:
+
+| Campo | Valor a 10/09 | Que controla |
+|---|---|---|
+| `SegundosTimeoutMensajes` | **10** | cuanto se ve un mensaje en pantalla |
+| `SegundosTimeoutFormularios` | **20** | ← **el que corta la extraccion.** Tiempo en la pantalla de seleccion |
+| `SegundosTimeoutPuertaAbierta` | **60** | cuanto puede quedarse la puerta abierta |
+
+> **Esto corrige lo anotado el 04/06.** Aquel dia se subio *"Segundos Timeout Puerta"* de 20 a 60 y se dio el
+> problema por resuelto. **El cambio se hizo bien y sigue puesto (60)** — pero el que molesta al extraer es
+> **`SegundosTimeoutFormularios`**, que se quedo en 20. Dos parametros parecidos, sintomas distintos.
+
+**Como se cambia:** `C:\ACTUM\ACTUM_EPI\Parametros\` → **doble clic en `ACTUM_EPI_Parametros.exe`**.
+
+> ⚠️ **NO abrir `ACTUM_EPI_Parametros.exe.config` con el Bloc de notas** — es el fichero de configuracion,
+> no la aplicacion, y no tiene campos que tocar. Ademas apunta a `ACTUM-JOSEP\SQLEXPRESS` (el PC del
+> fabricante): **esta obsoleto, el programa lee `Par.txt`**. Inigo abrio ese por error el 10/09.
+
+**Verificacion tras el cambio** — no fiarse de que la ventana se cierre sin error:
+```powershell
+sqlcmd -S "GHI-TAQUILLAS\SQLEXPRESS" -d Actum_GHI -E -W -s"|" -Q "SET NOCOUNT ON; SELECT SegundosTimeoutMensajes, SegundosTimeoutFormularios, SegundosTimeoutPuertaAbierta FROM Parametros"
+```
+Y despues **cerrar y reabrir `ACTUM_EPI_Gestion.exe`**, que es quien atiende el panel y lee los parametros
+al arrancar.
+
+> **`Par.txt` contiene la contrasena de `sa` en claro** (`C:\ACTUM\ACTUM_EPI\*\Par.txt`). Es del fabricante,
+> no nuestro, pero conviene saberlo si algun dia hay auditoria de IT.
+
+## 🔑 ACCESO SAT — es a TODO, no a una consigna
+
+**El 10/09 Inigo dio acceso a consignas restringidas a JAVIER JULIAN DE LAMO** desde el ACTUM EPI Visor, para
+que pudiera sacar el `A-003` (analizador de gases TESTO 340 n.º 61186226, consigna 5).
+
+> ⚠️ **`Usuario.AccesoConsignasRestringidas = True` NO es acceso a una consigna concreta: es acceso a TODAS
+> las restringidas**, y es permanente hasta que se retire. Si se concedio solo para un instrumento,
+> **plantearse retirarlo cuando lo devuelva**. Si se deja, que sea decision consciente: pasa al grupo de los
+> que pueden abrir todo (IKER L. LASSO, AITOR U. ULIBARRI, JOSE G. G. GONZALEZ, INIGO A. ALONSO).
+
+**Estado del `A-003` tras esto:** extraido **a nombre de Julian**, que se identifico el. Con eso queda
+registrado correctamente en `Eventos` y **no hace falta correccion manual**.
+
+> **Falsa alarma del mismo dia:** se reporto que la consigna 5 no dejaba ni extraer ni devolver, y se
+> preparo un diagnostico completo (estado de la consigna, eventos, rele, tabla `Errores`). **No hacia falta:
+> la opcion si estaba, Inigo no la habia visto.** Queda el metodo apuntado por si vuelve a pasar de verdad.
+
 ## 🛑 REGLA DURA — `MonitoreoLockerTiempoReal.ps1` NO SE TOCA A LA LIGERA
 
 > **Cementada el 2026-09-08 tras la propuesta de Codex.** Aplica a CUALQUIER agente
