@@ -94,7 +94,7 @@ vuelve un instrumento de calibrar. **Todo lo demas el sistema lo hace solo.**
 | Empresa | Contacto |
 |---|---|
 | **Neurylan** *(alternativa general, los mas cercanos)* | `administracion@neurylan.com` |
-| **Applus** | `izaskun.conde@applus.com` |
+| **Applus** | `izaskun.conde@applus.com` · **de los certificados:** `comercial.ac6m@applus.com` (FLUKE) y `calibraciones.applusleganes@applus.com` (Applus Metrology, Leganes, tel. **910 901 590**) |
 | **CS Instruments** | `carlos.garcia@csinstruments.es` |
 | **LEICA** | `trinidad.vilallba@leica-geosystems.com` |
 | **RS** *(RS Iberia — Alcobendas, Madrid)* | `raquel.delgado@rsgroup.com` · tel. **+34 915 129 772**. Buzones generales: ofertas `ofertas@RS.rsgroup.com` · pedidos `pedidos@RS.rsgroup.com` · soporte tecnico `soporte.tecnico@RS.rsgroup.com` · atencion al cliente `atencion.cliente@RS.rsgroup.com` · centralita **91 512 96 99** (1 clientes / 2 soporte / 3 financiero) |
@@ -258,6 +258,44 @@ ialopez@ghifurnaces.com
 > ⚠️ **EL EXCEL NO TIENE AUTOGUARDADO** (dicho por Inigo, 09/09). Si lo editas y no guardas a mano, se
 > pierde y no avisa nadie.
 
+### 🔎 LOS CERTIFICADOS MANDAN, NO EL EXCEL — 10/09/2026
+
+**Lo destapo Inigo**: RS pidio darle de alta como cliente nuevo para poder ofertar, y al mirar los
+certificados anteriores del Martindale y del RS PRO `22120786` vio que **los habia calibrado APPLUS**, no RS.
+Es decir: **la columna EMPRESA del Excel no es fiable; el certificado si.**
+
+**Verificado leyendo los 32 certificados de** `...\Locker instrumentacion\CERTIFICADOS DE CALIBRACION\`
+(una carpeta por instrumento):
+
+| Instrumento | Excel decia | Certificado dice |
+|---|---|---|
+| `L-002` Martindale PC15250 | RS CALIBRATION | **Applus Metrology S.L.U., Leganes** — cert. `25E020693` |
+| `T-100-4` RS PRO 135 | RS CALIBRATION | **Applus Metrology S.L.U., Leganes** — cert. `25LC124636` |
+| `L-001` `L-006` `L-010` `T-007` | APPLUS | **Applus** ✅ — certs. `OT00281928` `OT00275926/27/29` |
+| `M-001` | LEICA | **Leica** ✅ |
+
+> **Trampa del nombre de fichero:** los certificados de `L-002` y `T-100-4` se llaman `..._RS-GHI.pdf`, que
+> parece decir RS. **Ese "RS" es la MARCA del instrumento (RS PRO), no el laboratorio.** Hubo que abrir el
+> PDF para verlo: el nombre del fichero no es evidencia.
+
+**Dos direcciones distintas de Applus**, segun el certificado:
+- `comercial.ac6m@applus.com` — los cuatro FLUKE
+- `calibraciones.applusleganes@applus.com` — el Martindale y el RS PRO *(Applus Metrology, Avda. Juan Caramuel 7, 28919 Leganes · tel. 910 901 590)*
+
+#### ⚠️ HALLAZGO NO BUSCADO: los 5 caducados son los 5 SIN CERTIFICADO
+
+Carpetas **vacias**: `T-017` · `M-005` · `M-006` · `A-005` · `D-001` — **exactamente los cinco caducados**.
+Tambien estan vacias `D-002`, `E-002` y `E-003`.
+
+> No parece casualidad. O no se calibraron, o **el certificado nunca se subio** — que es el paso **(c)** del
+> proceso de cierre, justo el que se salta. **Sin certificado, en una auditoria ese instrumento no esta
+> respaldado aunque ACTUM tenga fecha.** Conviene revisarlo antes de noviembre.
+
+#### Consecuencia para la campana
+
+**El lote de RS se disuelve y sus 3 equipos pasan a APPLUS**, que sube de 4 a **7 instrumentos** y se
+convierte en el segundo lote. Decision de Inigo, 10/09.
+
 ### 📊 ESTADO DE LA CAMPANA — se actualiza segun vayan contestando
 
 > **Este es el cuaderno de la campana.** Inigo ira diciendo que manda y que le responden; se apunta aqui,
@@ -265,12 +303,18 @@ ialopez@ghifurnaces.com
 
 | Lote | Equipos | Presupuesto pedido | Oferta recibida | Pedido | Enviado | Vuelto y cerrado |
 |---|---|---|---|---|---|---|
-| **1 · RS Calibration** | 3 | **09/09/2026** · reenviado a `ofertas@` el 09/09 | — | — | — | — |
+| ~~**1 · RS Calibration**~~ | ~~3~~ | **ANULADO 10/09** — los certificados dicen que era Applus. Los 3 equipos pasan al lote 5 | | | | |
 | **2 · Leica** | 1 | — | — | — | — | — |
 | **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
 | **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
-| **5 · Applus** | 4 | — | — | — | — | — |
+| **5 · Applus** | **7** *(4 FLUKE + los 3 de RS)* | **10/09/2026** | — | — | — | — |
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
+
+**Historial del lote 5 (Applus, antes 1+5):** el 10/09 se pide presupuesto de **los 7 juntos** a
+`izaskun.conde@applus.com`, con copia a `comercial.ac6m@applus.com` y `calibraciones.applusleganes@applus.com`
+por si son laboratorios distintos. **En el correo van las referencias de sus propios certificados anteriores**
+(`OT00275926/27/29`, `OT00281928`, `25E020693`, `25LC124636`): es lo que mas acelera una oferta, porque no
+tienen que buscar nada.
 
 **Historial del lote 1 (RS):** enviado a Raquel Delgado el **09/09**. Respondio **autorespuesta de
 vacaciones hasta el 13/09** con la lista de buzones generales. Reenviado el mismo **09/09** a `ofertas@RS.rsgroup.com` con
