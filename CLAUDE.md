@@ -466,6 +466,32 @@ Asi queda siempre **una pinza y un calibrador** dentro, y salen primero el venci
 > **NO hace falta reescribir a Applus:** la oferta pedida cubre los 7. Las tandas se le comunican **al hacer
 > el pedido**, cuando ya se conozca su plazo.
 
+> ⏰ **RECORDATORIO ACTIVO, pedido por Inigo (10/09):** *"en cuanto me respondan se lo digo, acuerdate me
+> dices que se lo diga"*. **Cuando llegue la oferta de Applus O la de Neurylan, lo PRIMERO es recordarle a
+> Inigo que les comunique el envio en DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al
+> hacer el pedido, saldran los 7 (u 8) de golpe y el locker se queda vacio.
+
+### 💡 IDEA DE INIGO (10/09) — partir la columna EMPRESA del Excel en dos
+
+*"Se podria hacer una columna nueva: la de empresa que sea de que empresa es, y otra que se llame
+CALIBRAR EN."* **Para un futuro, cuando el lo vea.** Ataca justo la confusion que costo tiempo el 10/09.
+
+En realidad son **TRES** cosas distintas, aunque solo dos necesitan columna:
+
+| | Que es | De donde sale | Columna? |
+|---|---|---|---|
+| **MARCA** | quien fabrico el instrumento | el propio equipo | **si** — columna nueva |
+| **CALIBRAR EN** | **a quien se le COMPRA** la calibracion | el pedido | **si** — la actual `EMPRESA` renombrada |
+| *(quien la hace)* | quien firma el certificado | el certificado PDF | **no** — se consulta cuando haga falta |
+
+> **La tercera puede NO coincidir con la segunda, y es normal, no un error.** Caso real: se le compraba a
+> **RS/Amidata** y calibraba **Applus Metrology**. Por no tener esto separado, el 10/09 se dio por falso el
+> Excel cuando estaba bien.
+
+**Ejemplo de como quedaria:** `A-005` -> MARCA: **Klotz** · CALIBRAR EN: **Neurylan** *(si lo aceptan)*.
+Hoy esa casilla pone `KLOTZ` a secas y no se sabe cual de las dos cosas significa — y resulta que era la
+marca, porque **no consta ningun pedido ni certificado de Klotz**.
+
 ### 🔍 BUSCAR EL ATORNILLADOR `D-001` — el rastro, medido el 10/09
 
 **Ultimo movimiento registrado, y ahi se acaba:**
