@@ -1,5 +1,83 @@
 # CLAUDE.md — Sistema Locker Instrumentacion GHI
 
+## 📍 TRASPASO A CLAUDE CODE — 10/09/2026, despues de Codex
+
+> **ESTE ES EL ESTADO MAS RECIENTE.** Sustituye cualquier pendiente antiguo que lo contradiga.
+
+### Confirmado hoy
+
+- **Timeout de extraccion: CERRADO.** Tras reiniciar `ACTUM_EPI_Gestion.exe`, la pantalla aguanta los
+  **120 segundos** configurados. Los valores efectivos quedan `20 | 120 | 120`.
+- **Prueba real nueva:** el `A-003` (TESTO 340, serie `61186226`) fue extraido correctamente por
+  **Javier Julian de Lamo** el 10/09 a las **09:30:21**. Debe conservarlo porque lo necesita; **NO devolverlo
+  ahora** y no retirar su acceso SAT hasta que lo devuelva, si ese acceso se le dio solo para esto.
+- **Consigna 22: CERRADA** — el instrumento volvio. **Pero OJO al mecanismo, que no fue el que se
+  anoto:** el TESTO 340 `63862113` **NO lo devolvio Sergio identificandose**. Lo devolvio **Inigo el 09/09 a
+  las 11:52:50 identificandose por error con el codigo de JAVIER JULIAN DE LAMO (usuario 38)**. La fila del
+  CSV dice SERGIO V. VEGA **porque es una correccion manual**, no porque Sergio se identificara.
+  - **Evidencia:** `CorreccionesManuales.csv`, ultima fila, con su motivo escrito:
+    *"Al devolver el analizador, Inigo se identifico con el codigo de JAVIER JULIAN DE LAMO (38) en vez del
+    de SERGIO V. VEGA (14). El evento de SQL dice Javier y no se puede cambiar."*
+  - **La conclusion se mantiene:** el instrumento esta de vuelta y no hay que preguntar a nadie. Pero
+    **la tabla `Eventos` de SQL dice JAVIER**, y quien reconstruya el historial vera Javier salvo que el
+    paso 2.5 reaplique la correccion — que lo hace, porque **sustituye** desde el 09/09.
+  - **Por que importa la distincion:** si se da por hecho que "Sergio se identifico", alguien puede pensar
+    que SQL y el CSV coinciden. **No coinciden**, y esa es exactamente la razon de que exista
+    `CorreccionesManuales.csv`.
+- **`D-001`:** la serie `EA 10.00047` **ya esta puesta en ACTUM**. Sigue pendiente encontrar fisicamente
+  el atornillador.
+- Estado medido del CSV al revisar la extraccion: **537 lineas totales, 536 movimientos, 536/536 unicos,
+  0 bytes NULL**; marcador `2026-09-10 09:30:21.667`.
+
+### Decisiones de Inigo — dejar para un posible futuro
+
+- **Alerta externa de sistema caido:** no hacer ahora. El banner de salud del DashboardAdmin sirve de
+  momento. Futuro posible: vigilancia externa cada 10 min con aviso tras 20 min sin actualizar.
+- **SAI + diagnostico del cuadro electrico:** no hacer ahora. Si se retoma, primero fotografiar regleta,
+  fuentes y etiquetas, sumar los W reales y dejar 20 % de margen. El SAI mitiga cortes; revisar el cuadro
+  busca la causa. Antecedente: **8 apagones en 5 semanas**.
+- **Calibraciones:** dejar en espera de la respuesta de Applus para los **7 equipos**. No avanzar ahora.
+  > ⚠️ **MATIZ (Claude Code, 10/09): esa espera solo aplica al lote de Applus.** Los otros **4 lotes no
+  > dependen de Applus para nada**: Neurylan (7+2), Leica (1), Klotz (1) y CS (1). Y **dos de los cinco
+  > caducados estan justo ahi**: `M-006` (**220 dias**, se pregunta a Neurylan) y `A-005` (**162 dias**,
+  > Klotz). Las auditorias son en noviembre y el calendario corre. Decidir si se mandan o si se paran
+  > tambien — pero que sea decision, no efecto secundario.
+
+### Siguiente trabajo real, sin resucitar pendientes cerrados
+
+1. `L-004` (Megger MIT320, `102465739`): poner pegatina y meterlo en la consigna 9 identificandose. La
+   ultima operacion encontrada en el CSV sigue siendo una extraccion del 14/05/2026.
+2. `E-002`, consigna 31: abrir con llave, leer el numero de serie fisico y registrarlo en ACTUM. El numero
+   no consta ni en ACTUM ni en el Excel.
+3. Encontrar fisicamente el atornillador `D-001`; la serie ya no es pendiente.
+4. Cuando se quiera volver a software: valorar leer `Consigna.Usuario_Codigo` para la pestana Estado. La
+   dependencia sobre la consigna 22 ya esta resuelta.
+5. A largo plazo siguen abiertos quitar la dependencia de OneDrive + `fabricacion1` (Graph con certificado
+   o IIS local). No mezclarlo con los trabajos rapidos anteriores.
+
+> **IMPORTANTE PARA CLAUDE CODE — no mezclar listas:** Inigo quiere continuar primero con los pendientes
+> originales anteriores. El orden inmediato es **L-004 -> E-002 -> localizar D-001**. Calibraciones espera
+> respuesta de Applus; alerta externa y SAI/cuadro estan aplazados. Los cuatro puntos de software de la
+> seccion siguiente son hallazgos NUEVOS de una prospeccion de Codex, archivados para un posible futuro;
+> **NO eran lo que se venia haciendo y NO son el siguiente trabajo salvo que Inigo los elija expresamente.**
+
+### Hallazgos para futuro — prospeccion Codex 10/09
+
+No son tareas para ejecutar automaticamente; estan medidos y ordenados en
+`runs/prospeccion-pendientes-2026-09-10/DESCUBRIMIENTO.md`:
+
+1. El fallback usado si falla la tabla `Eventos` persiste `EstadoAnterior.json` vacio: **0/32 estados**.
+2. Los **2 auto-updates** de dashboards copian y ejecutan por timestamp sin gate de sintaxis/hash/backup.
+3. `AuditarDashboard.ps1` comprueba las **32 consignas**, pero tiene **0 llamadas** desde el monitor.
+4. Los **2 HTML** se escriben directamente, no mediante temporal + reemplazo atomico.
+
+Tambien se re-midio el bloque antiguo de cuatro instrumentos enviados a calibrar: `T-008`, `L-005` y
+`M-017` ya fueron devueltos el 09/09 (CSV lineas 534, 533 y 532); **solo `L-004` sigue abierto**.
+
+> **Regla de continuidad:** antes de citar como pendiente la ubicacion de un instrumento, buscar su numero
+> de serie en el `HistorialCompleto.csv` sincronizado y leer la ultima fila. El error de no hacerlo hizo
+> reaparecer falsamente el pendiente ya cerrado de la consigna 22.
+
 ## 🔧 EL UNICO MANTENIMIENTO QUE REQUIERE ESTE PROYECTO
 
 > **Dictado por Inigo el 09/09/2026.** Todo lo demas del sistema es automatico. Esto es lo unico que
@@ -379,7 +457,7 @@ certificado al servidor documental.
 | 2 | **Serie del `D-001` en ACTUM** | Es el **unico de los 32 sin numero de serie** en la descripcion. **Ya se sabe: `EA 10.00047`**, esta en el Excel -> se puede escribir en el Visor **sin bajar al locker** |
 | 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
 | 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
-| 5 | **Localizar el TESTO 340 de la consigna 22** | Serie `63862113`. Preguntar a Sergio Vega e Iker Lasso. **No se puede enviar a calibrar lo que no aparece.** *(Ojo: NO confundir con el `A-003`, serie `61186226`, que si esta — lo metio Inigo en la consigna 5 con llave.)* |
+| ~~5~~ | ~~**Localizar el TESTO 340 de la consigna 22**~~ | **RESUELTO 09/09:** lo tenia Sergio Vega y lo devolvio identificandose a las **11:52:50**. CSV: una sola devolucion, serie `63862113`. |
 | 6 | **Buscar el correo de Klotz** | No consta. Mirar el certificado anterior; si no, preguntarselo a Neurylan |
 
 > **Correccion del mismo dia:** se dijo primero que el viaje a por el numero de serie era a la consigna 32 y
@@ -505,6 +583,11 @@ Condiciones para modificarlo, TODAS obligatorias:
 
 Alternar agentes esta bien y ahorra cuota. Reglas para que no se pisen:
 
+> **REFUERZO 10/09/2026 — pendientes de instrumentos:** antes de citar como vivo un pendiente sobre
+> ubicacion, extraccion o devolucion, buscar primero el numero de serie en el `HistorialCompleto.csv`
+> sincronizado y leer su ultima fila. Caso que lo motiva: se volvio a preguntar por el TESTO 340
+> `63862113` aunque el CSV ya contenia su devolucion por Sergio Vega a las **11:52:50 del 09/09**.
+
 1. **`CLAUDE.md` es el unico traspaso.** Quien haga un cambio o reciba un dato del locker lo
    registra aqui en el mismo turno, con evidencia y siguiente paso. No marcar como ejecutado lo
    que solo esta propuesto.
@@ -601,8 +684,8 @@ el viaje al locker del 08/09 tarde.** Se conserva la lista para saber que se pro
 3. **No hay deteccion de fallo.** Aparcada por decision de Inigo. Si el sistema se cae, **nadie se entera
    hasta que alguien mira**. Es lo que dejo el PC 19 dias muerto en agosto, y ahora ademas **no hay
    respaldo humano**: Imanolia lo lleva sola.
-4. **Consigna 22:** el dashboard dice SERGIO V. VEGA y SQL dice IKER L. LASSO. Solo lo resuelve mirar
-   quien tiene fisicamente el analizador TESTO 340.
+4. ~~**Consigna 22:** averiguar si el TESTO 340 lo tenia Sergio o Iker.~~ **RESUELTO 09/09:** lo tenia
+   Sergio Vega y lo devolvio identificandose a las **11:52:50** (CSV, serie `63862113`).
 5. **La dependencia de OneDrive + `fabricacion1`.** Sigue siendo el unico tramo que se rompe solo, cada
    ~50 dias, sin dar error en ningun log. Hoy funciona; volvera a caducar.
 
@@ -670,13 +753,20 @@ Los correos estan escritos y listos en la seccion de calibraciones. **RS descart
 2. **`L-004`** — pegatina y meterlo en la consigna 9 **identificandose**.
 3. **Atornillador `D-001`** — perdido. Su serie (`EA 10.00047`) si esta en el Excel: se puede poner en
    ACTUM sin bajar.
-4. **TESTO 340 de la consigna 22** (`63862113`) — preguntar a Sergio Vega e Iker Lasso.
+4. ~~**TESTO 340 de la consigna 22** (`63862113`) — preguntar a Sergio Vega e Iker Lasso.~~
+   **RESUELTO 09/09:** devuelto por Sergio Vega a las **11:52:50**, una sola fila en el CSV.
 5. **Correo de Klotz** — no consta.
 6. **Retirar el acceso SAT a Julian de Lamo** cuando devuelva el `A-003`, si se le dio solo para eso.
 
 ### D · Lo grande, sin tocar
 1. **SAI + cuadro electrico** — la unica causa raiz viva. 8 apagones en 5 semanas.
+   **APLAZADO por Inigo el 10/09/2026.** Antes de comprar: fotografiar regleta, fuentes y etiquetas;
+   sumar los W de PC, pantalla, electronica del locker y red que realmente necesiten respaldo, y dejar
+   un 20 % de margen. El SAI mitiga los cortes; revisar el cuadro es lo que busca la causa.
 2. **Alerta de sistema caido de verdad** — el vigilante debe correr **FUERA** del locker.
+   **APLAZADA por Inigo el 10/09/2026:** el banner de salud actual sirve de momento. Posible futuro:
+   vigilancia externa con Power Automate, comprobacion cada 10 min y aviso si el dashboard supera 20 min
+   sin actualizar. No implementar ahora.
 3. **Quitarse OneDrive + `fabricacion1`** — se rompe solo cada ~42 dias. Graph con certificado, o IIS local.
 4. **Leer `Consigna.Usuario_Codigo`** para la pestana Estado.
 
@@ -1153,7 +1243,7 @@ Los cortes van a seguir (8 en 5 semanas, el ultimo el 07/09 a las 19:15). **Ya n
 | | Que | Nota |
 |---|---|---|
 | a | **Alerta de sistema caido** | Aparcada por decision de Inigo, pero **cubierta a medias el 09/09** con el banner de salud del **DashboardAdmin** (ver abajo). Lo que el banner NO cubre: que el PC este muerto, ni avisa a nadie por si solo (hay que abrir el Admin). Para eso el vigilante tiene que correr FUERA del locker. |
-| b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **Depende de la respuesta sobre la consigna 22.** Si SQL pasara a mandar, la 22 volveria a mostrar a Iker y desharia la correccion manual. Decidir primero quien gana. |
+| b | **Leer `Consigna.Usuario_Codigo` para la pestana Estado** | **DESBLOQUEADO 09/09:** Sergio devolvio realmente el instrumento de la consigna 22 a las 11:52:50. La mejora sigue siendo opcional, pero ya no depende de averiguar quien lo tenia. |
 | ~~c~~ | ~~Quitar el `<script>`~~ | ✅ **HECHO 09/09.** Confirmado en consola, eliminado y verificado: el banner desaparecio. |
 | ~~d~~ | ~~`EstadoAnterior.json` vacio~~ | ✅ **EVALUADO Y DESCARTADO 09/09.** Ver abajo. |
 | ~~e~~ | ~~Quitar `MicrosoftEdgeAutoLaunch`~~ | ✅ **HECHO 09/09.** Ya no se abre Edge al arrancar. El arranque queda con `ACTUM_EPI_Gestion`, `OneDrive`, `Microsoft Edge Update` (actualizador silencioso, no abre ventanas), `Microsoft.Lists` y `SecurityHealth`. |
@@ -4313,8 +4403,8 @@ sin bajar al locker, basta abrir consignas y leer los `1002`.
 
 #### P.4 · Auditoria fisica
 
-- **Consigna 22: VACIA** ✅ coherente con *En uso*. El dashboard acierta en el estado; lo que sigue sin
-  saberse es si el TESTO 340 (nº **63862113**) lo tiene Sergio o Iker. Hay que preguntarles.
+- ~~**Consigna 22: VACIA** y pendiente de saber si lo tenia Sergio o Iker.~~ **RESUELTO 09/09:** lo tenia
+  Sergio Vega y lo devolvio identificandose a las **11:52:50**; una sola fila para el nº **63862113**.
 - **Resto de consignas revisadas: todo correcto.**
 - **⚠️ CONSIGNA 5 — el instrumento NO esta.** El sistema la da *Disponible* (SQL `Estado=2`, instrumento
   `A-003`, sin usuario) y **fisicamente esta vacia**.
