@@ -258,43 +258,77 @@ ialopez@ghifurnaces.com
 > ⚠️ **EL EXCEL NO TIENE AUTOGUARDADO** (dicho por Inigo, 09/09). Si lo editas y no guardas a mano, se
 > pierde y no avisa nadie.
 
-### 🔎 LOS CERTIFICADOS MANDAN, NO EL EXCEL — 10/09/2026
+### 🔎 QUIEN VENDE Y QUIEN CALIBRA SON COSAS DISTINTAS — 10/09/2026
 
-**Lo destapo Inigo**: RS pidio darle de alta como cliente nuevo para poder ofertar, y al mirar los
-certificados anteriores del Martindale y del RS PRO `22120786` vio que **los habia calibrado APPLUS**, no RS.
-Es decir: **la columna EMPRESA del Excel no es fiable; el certificado si.**
+> **Esta seccion se reescribio el mismo dia.** La primera version decia *"los certificados mandan, el Excel
+> miente"*. **Era falso**, y lo destapo la carpeta de pedidos. Se conserva el error porque explica el matiz.
 
-**Verificado leyendo los 32 certificados de** `...\Locker instrumentacion\CERTIFICADOS DE CALIBRACION\`
-(una carpeta por instrumento):
+**Como empezo:** RS pidio dar de alta a GHI como cliente nuevo para poder ofertar. Inigo miro los
+certificados anteriores del Martindale y del RS PRO `22120786` y **los firmaba APPLUS**, no RS. Conclusion
+aparente: el Excel se equivoca.
 
-| Instrumento | Excel decia | Certificado dice |
-|---|---|---|
-| `L-002` Martindale PC15250 | RS CALIBRATION | **Applus Metrology S.L.U., Leganes** — cert. `25E020693` |
-| `T-100-4` RS PRO 135 | RS CALIBRATION | **Applus Metrology S.L.U., Leganes** — cert. `25LC124636` |
-| `L-001` `L-006` `L-010` `T-007` | APPLUS | **Applus** ✅ — certs. `OT00281928` `OT00275926/27/29` |
-| `M-001` | LEICA | **Leica** ✅ |
+**Lo que habia en realidad**, leido en
+`...\Locker instrumentacion\CALIBRACIONES INFORMACION (pedidos)\RS AMIDATA\2507486.pdf`:
 
-> **Trampa del nombre de fichero:** los certificados de `L-002` y `T-100-4` se llaman `..._RS-GHI.pdf`, que
-> parece decir RS. **Ese "RS" es la MARCA del instrumento (RS PRO), no el laboratorio.** Hubo que abrir el
-> PDF para verlo: el nombre del fichero no es evidencia.
+```
+Pedido 2507486 - 16/10/2025 - AMIDATA, S.A.
+Parque Emp. Urbis Center, Av. Europa 19 E-3 - 28224 Pozuelo de Alarcon
 
-**Dos direcciones distintas de Applus**, segun el certificado:
-- `comercial.ac6m@applus.com` — los cuatro FLUKE
-- `calibraciones.applusleganes@applus.com` — el Martindale y el RS PRO *(Applus Metrology, Avda. Juan Caramuel 7, 28919 Leganes · tel. 910 901 590)*
+  Calibracion: MARTINDALE PC15250 .........  76,86 EUR
+  Calibracion: RS PRO 135 Thermometer ..... 239,00 EUR
+                                    Total   315,86 EUR + IVA (382,19)
+  Oferta RS de referencia: A1009058218
+```
 
-#### ⚠️ HALLAZGO NO BUSCADO: los 5 caducados son los 5 SIN CERTIFICADO
+**AMIDATA es RS** (su filial espanola). Se le compra a RS, **y RS subcontrata la calibracion a Applus
+Metrology**. Por eso el pedido es de RS y el certificado lo firma Applus. **Los dos documentos dicen la
+verdad, pero responden a preguntas distintas:**
 
-Carpetas **vacias**: `T-017` · `M-005` · `M-006` · `A-005` · `D-001` — **exactamente los cinco caducados**.
-Tambien estan vacias `D-002`, `E-002` y `E-003`.
+| Fuente | Responde a |
+|---|---|
+| Columna **EMPRESA** del Excel | **a quien se le COMPRA** |
+| **Certificado** | **quien CALIBRA fisicamente** — puede ser un subcontratista |
 
-> No parece casualidad. O no se calibraron, o **el certificado nunca se subio** — que es el paso **(c)** del
-> proceso de cierre, justo el que se salta. **Sin certificado, en una auditoria ese instrumento no esta
-> respaldado aunque ACTUM tenga fecha.** Conviene revisarlo antes de noviembre.
+> **REGLA:** antes de concluir que una fuente se equivoca, buscar si las dos pueden ser ciertas a la vez.
+> Aqui se dio por falso el Excel con solo media evidencia. **La carpeta de pedidos es la que cierra la
+> pregunta de "a quien se le compra"**, y no se habia mirado.
 
-#### Consecuencia para la campana
+#### Lo que si quedo confirmado leyendo los 32 certificados
 
-**El lote de RS se disuelve y sus 3 equipos pasan a APPLUS**, que sube de 4 a **7 instrumentos** y se
-convierte en el segundo lote. Decision de Inigo, 10/09.
+| Instrumento | Laboratorio que firma |
+|---|---|
+| `L-001` `L-006` `L-010` `T-007` (FLUKE) | **Applus** — `comercial.ac6m@applus.com` · certs. `OT00281928` `OT00275926/27/29` |
+| `L-002` `T-100-4` | **Applus Metrology, Leganes** — `calibraciones.applusleganes@applus.com`, tel. **910 901 590** · certs. `25E020693` `25LC124636` |
+| `M-001` | **Leica** |
+| La mayoria de los TESTO | certificados emitidos por **Testo** (`info@testotis.es`), pedidos via **Neurylan** |
+
+> **Trampa del nombre de fichero:** los certificados de `L-002` y `T-100-4` se llaman `..._RS-GHI.pdf`.
+> Ese "RS" es la **marca del instrumento** (RS PRO), no el laboratorio. Hubo que abrir el PDF.
+
+#### Certificados que faltan — pendientes de localizar, NO ausentes
+
+Carpetas vacias: `T-017` · `M-005` · `M-006` · `A-005` · `D-001` · `D-002` · `E-002` · `E-003`.
+Los cinco primeros son **los cinco caducados**.
+
+> Se anoto que *"o no se calibraron o no se subio el certificado"*. **Inigo lo matiza (10/09): lo mas probable
+> es que no los encontrase**, y para esos vale la empresa del Excel, que es donde se lo habran hecho la
+> ultima vez. **Queda como "pendiente de localizar", no como "sin calibrar".** Conviene cerrarlo antes de
+> noviembre: en auditoria, un instrumento sin certificado no esta respaldado aunque ACTUM tenga fecha.
+
+#### DECISION (Inigo, 10/09): ir DIRECTO a Applus con los 7
+
+*"Para que ellos subcontraten a Applus, para eso les escribimos nosotros directamente."*
+
+**Sostenido por la evidencia:** Applus **ya calibro ese RS PRO 135 exacto** (cert. `25LC124636`), asi que la
+capacidad esta demostrada, no supuesta. Se ahorra el margen del intermediario (RS cobro 239,00 EUR por el
+RS PRO y 76,86 EUR por el Martindale), se evita el alta que pedia RS, y queda **un solo proveedor para los 7**.
+
+> **Riesgo unico anotado:** si un RS PRO 135 sale **fuera de tolerancia**, un laboratorio externo lo calibra
+> y lo reporta, pero **ajustarlo o repararlo** depende de que tenga acceso a la marca. Por la via de RS eso lo
+> cubria el fabricante. Es lo unico que aportaba el intermediario.
+
+**Precios de referencia para negociar** (pedido 2507486, oct-2025): Martindale **76,86 EUR** ·
+RS PRO 135 **239,00 EUR**.
 
 ### 📊 ESTADO DE LA CAMPANA — se actualiza segun vayan contestando
 
@@ -303,25 +337,33 @@ convierte en el segundo lote. Decision de Inigo, 10/09.
 
 | Lote | Equipos | Presupuesto pedido | Oferta recibida | Pedido | Enviado | Vuelto y cerrado |
 |---|---|---|---|---|---|---|
-| ~~**1 · RS Calibration**~~ | ~~3~~ | **ANULADO 10/09** — los certificados dicen que era Applus. Los 3 equipos pasan al lote 5 | | | | |
+| ~~**1 · RS / Amidata**~~ | ~~3~~ | **DESCARTADO 10/09** — se va **directo a Applus**, que es quien calibra de verdad. Los 3 equipos pasan al lote 5 | | | | |
 | **2 · Leica** | 1 | — | — | — | — | — |
 | **3 · Klotz** | 1 | *sin correo* | — | — | — | — |
 | **4 · Neurylan** | 7 + 2 | — | — | — | — | — |
-| **5 · Applus** | **7** *(4 FLUKE + los 3 de RS)* | **10/09/2026** | — | — | — | — |
+| **5 · Applus** | **7** *(4 FLUKE + los 3 que iban via RS)* | **10/09/2026** | — | — | — | — |
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
 
 **Historial del lote 5 (Applus, antes 1+5):** el 10/09 se pide presupuesto de **los 7 juntos** a
-`izaskun.conde@applus.com`, con copia a `comercial.ac6m@applus.com` y `calibraciones.applusleganes@applus.com`
-por si son laboratorios distintos. **En el correo van las referencias de sus propios certificados anteriores**
+`izaskun.Conde@applus.com` *(con C mayuscula — corregido por Inigo)*, con copia a `comercial.ac6m@applus.com`
+y `calibraciones.applusleganes@applus.com` por si son laboratorios distintos. **En el correo van las referencias de sus propios certificados anteriores**
 (`OT00275926/27/29`, `OT00281928`, `25E020693`, `25LC124636`): es lo que mas acelera una oferta, porque no
 tienen que buscar nada.
 
-**Historial del lote 1 (RS):** enviado a Raquel Delgado el **09/09**. Respondio **autorespuesta de
+**Historial del lote 1 (RS — CERRADO):** enviado a Raquel Delgado el **09/09**. Respondio **autorespuesta de
 vacaciones hasta el 13/09** con la lista de buzones generales. Reenviado el mismo **09/09** a `ofertas@RS.rsgroup.com` con
 copia a Raquel, para no perder 4 dias y que ella lo tenga al volver.
 > ⚠️ Ese buzon es de *"solicitud de ofertas de **material**"* y esto es un **servicio** de calibracion:
 > puede que redirijan otra vez. Siguiente parada: `soporte.tecnico@RS.rsgroup.com` o el telefono
 > **91 512 96 99 opcion 2**, que suele resolver en un minuto a que buzon va.
+
+**Cierre de RS (10/09):** Natalia Murata (Customer Service BBDD, `Data.RSIberia@rs.rsgroup.com`) pidio
+alta como cliente nuevo —direccion fiscal, tarjeta NIF, persona de contacto— pese a existir el pedido
+`2507486` de octubre de 2025. Se responde declinando el alta con cortesia, sin dar detalles del cambio de via.
+
+**Retenido tambien `T-100-4`:** es el mismo modelo que el `T-017` (RS PRO 135). Se manda primero el `T-017`,
+vencido hace 286 dias, y el otro cuando vuelva. **Los 4 FLUKE NO se pueden escalonar**: miden magnitudes
+distintas (4-20 mA, 1500 V, 1000 A, infrarrojos) y no hay reserva posible.
 
 **Retenidos a proposito, para no quedarse sin repuesto:** `M-001` (2º nivel optico LEICA) y `S-002`
 (3ª camara TESTO 872). Se mandan **cuando vuelva** el primero de su pareja.
