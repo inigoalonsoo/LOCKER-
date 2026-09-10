@@ -471,28 +471,40 @@ Asi queda siempre **una pinza y un calibrador** dentro, y salen primero el venci
 > Inigo que les comunique el envio en DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al
 > hacer el pedido, saldran los 7 (u 8) de golpe y el locker se queda vacio.
 
-### ❓ POSIBLE TESTO 340 NUEVO, PEGATINA `A-0031` — aviso de Inigo, 10/09
+### 📍 `A-0031` — TESTO 340 que NO es del locker (confirmado por Inigo, 10/09)
 
 *"Igual me llega un analizador de gases TESTO para calibrar, no esta registrado en el locker, aunque tiene
-pegatina A-0031. Te voy avisando."* **Sin confirmar todavia; queda anotado para no perderlo.**
+pegatina A-0031."* Y al preguntar por el formato raro del codigo:
+**"Es A-0031, si si, aunque sea raro."**
 
-⚠️ **El codigo chirria:** `A-0031` lleva **cuatro digitos** y todos los del locker llevan tres
-(`A-003`, `A-004`, `A-005`). Puede ser un codigo nuevo, una pegatina antigua, o el `A-003` leido deprisa
-— que es justamente un TESTO 340.
+> **CORRECCION:** se sospecho que `A-0031` (cuatro digitos) fuese el `A-003` mal leido, porque todos los del
+> locker llevan tres. **No lo es: el codigo es correcto tal cual.** Es un instrumento distinto de los tres
+> TESTO 340 conocidos (`A-003` `61186226` · `A-004` `62370623` · `T-100-1` `63862113`).
 
-**Lo que lo resuelve sin ambiguedad es el NUMERO DE SERIE.** Los tres TESTO 340 conocidos:
+**Matiz clave de Inigo:** *"igual me mandan calibrarlo, eso no quiere decir que lo registre en el locker,
+puede ir al cuarto de instrumentacion que no tiene locker"*.
 
-| Codigo | N.º de serie | Donde esta |
-|---|---|---|
-| `A-003` | `61186226` | consigna 5 — **extraido por Javier de Lamo el 10/09** |
-| `A-004` | `62370623` | consigna 6 |
-| `T-100-1` | `63862113` | consigna 22 |
+**Calibrar un instrumento NO implica darlo de alta en ACTUM.** Hay instrumentos que viven en el **cuarto de
+instrumentacion**, fuera del alcance de este sistema.
 
-> **Si el serie no es ninguno de esos tres, es un instrumento NUEVO.** Habria que darlo de alta en ACTUM para
-> que se controle; si no, le pasara como al **Phoenix TM PTM1010**: no sale en ningun dashboard y su
-> calibracion no la vigila nadie.
+#### ⚠️ AGUJERO CONOCIDO: el cuarto de instrumentacion no lo vigila nada
 
-**Datos a capturar cuando llegue:** numero de serie · modelo exacto · fecha de caducidad · de quien viene.
+Los instrumentos de ese cuarto **no estan ni en ACTUM ni en el Excel del locker** — el Excel tiene
+exactamente las **32 filas** de las 32 consignas, ni una mas. Consecuencia medida:
+
+| Control | ¿Cubre el cuarto? |
+|---|---|
+| Dashboard y pestana Calibracion | **no** |
+| Banner de salud | **no** |
+| Excel `INSTRUMENTOS LOCKER.xlsx` | **no** |
+| Campana de calibraciones de septiembre | **no** |
+
+**Si un instrumento de ahi caduca, no salta en ningun sitio.** Ya hay al menos dos casos conocidos:
+el **Phoenix TM PTM1010** (`1774+KD-9083/4/5/6`) y, si acaba alli, este `A-0031`.
+
+> **No se propone meterlos en el locker** — eso es otra decision, y Inigo ya dijo el 09/09 que el Phoenix
+> queda fuera del alcance del proyecto a proposito. **Lo que si conviene es saber si existe alguna lista de
+> ese cuarto**, porque hoy su calibracion depende solo de que alguien se acuerde. Pregunta abierta a Inigo.
 
 ### ✅ COLUMNA `CALIBRAR EN` — creada por Inigo el 10/09, revisada
 
