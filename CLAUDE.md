@@ -620,6 +620,82 @@ Y hay una diferencia importante entre los dos tipos de dano:
 
 ---
 
+# 📍 TRASPASO — 2026-09-10, fin de sesion de Claude Code → CONTINUA CODEX
+
+> **LEE ESTO PRIMERO.** Es el estado real a 10/09. Lo de abajo (bloque del 08/09) sigue siendo valido como
+> contexto, pero **esto es lo ultimo**.
+
+## El sistema, en una linea
+
+**Software reparado, probado y vuelve solo tras un corte.** Riesgos abiertos: la **corriente** (sin SAI) y
+que **nadie se entera si se cae** — el banner de salud solo habla si alguien genera el HTML y abre el Admin.
+
+## Hecho estos dos dias (todo verificado sobre el sujeto)
+
+| | Que | Evidencia medida |
+|---|---|---|
+| **v2.6** | Causa raiz de los duplicados: el marcador perdia los milisegundos | reproceso parado · `[EVENTOS] Encontrados: 0` |
+| **v2.7** | Guarda anti-duplicado antes de escribir en el CSV | 638 lineas · 0 errores |
+| paso 2.5 | `CorreccionesManuales.csv` ahora **SUSTITUYE**, no solo anade | 343 lineas · **5 correcciones protegidas** |
+| — | `<script>` del banner rojo de SharePoint eliminado | 705 lineas · el banner desaparecio |
+| **salud** | Chequeo en `GenerarDashboardAdmin.ps1`, se ve **siempre** | 1.281 lineas · HTML `verde=1 rojo=0` |
+| timeouts | Eran **TRES**, no uno. En junio se cambio el que no era | `Parametros` = **20 \| 120 \| 120** |
+| calibr. | Campana montada: **21 instrumentos, 5 lotes** | cruce ACTUM + Excel, 32/32 |
+
+**CSV a 10/09: 536/536 lineas, ratio 1,00, 535 movimientos, 0 bytes NULL.**
+
+## ⚡ LO QUE HAY QUE HACER AHORA, por orden
+
+### A · Cerrar lo del timeout (2 minutos, es lo unico a medio hacer)
+1. **Reiniciar `ACTUM_EPI_Gestion.exe`** — sin esto el panel sigue con los valores viejos.
+2. **Cronometrar una extraccion real.** Debe dar ~120 s. Si sigue cortando a los 20, manda otro sitio.
+3. **DEJAR `ACTUM_EPI_Gestion.exe` ABIERTO.** Mientras este cerrado el locker **no registra nada**, y eso
+   no se recupera de ningun sitio.
+
+### B · Calibraciones — esperando a Applus
+**Lote enviado el 10/09** a `izaskun.Conde@applus.com`: **7 equipos** (4 FLUKE + Martindale + 2 RS PRO 135).
+Cuando llegue la oferta, **comprobar tres cosas**:
+- **Precio POR EQUIPO**, no un total — si no, no se puede comparar con lo que cobro RS: Martindale
+  **76,86 EUR** y RS PRO 135 **239,00 EUR** (pedido 2507486, oct-2025).
+- **Plazo**: tienen que estar operativos **antes de noviembre** (auditoria).
+- Si el desglose dice **"calibracion y ajuste"** o solo "calibracion" — responde solo a si cubren un equipo
+  fuera de tolerancia, que es lo unico que aportaba el intermediario.
+
+**Quedan 4 lotes sin pedir:** Neurylan (7+2) · Leica (1) · Klotz (1, **falta el correo**) · CS (1).
+Los correos estan escritos y listos en la seccion de calibraciones. **RS descartado el 10/09.**
+
+### C · Pendientes fisicos de Inigo
+1. **Consigna 31** — abrir con llave, leer el n.º de serie del `E-002` (indicador de dial x2 + base) y
+   ponerlo en ACTUM. **No consta en ninguna parte: el viaje SI hace falta.**
+2. **`L-004`** — pegatina y meterlo en la consigna 9 **identificandose**.
+3. **Atornillador `D-001`** — perdido. Su serie (`EA 10.00047`) si esta en el Excel: se puede poner en
+   ACTUM sin bajar.
+4. **TESTO 340 de la consigna 22** (`63862113`) — preguntar a Sergio Vega e Iker Lasso.
+5. **Correo de Klotz** — no consta.
+6. **Retirar el acceso SAT a Julian de Lamo** cuando devuelva el `A-003`, si se le dio solo para eso.
+
+### D · Lo grande, sin tocar
+1. **SAI + cuadro electrico** — la unica causa raiz viva. 8 apagones en 5 semanas.
+2. **Alerta de sistema caido de verdad** — el vigilante debe correr **FUERA** del locker.
+3. **Quitarse OneDrive + `fabricacion1`** — se rompe solo cada ~42 dias. Graph con certificado, o IIS local.
+4. **Leer `Consigna.Usuario_Codigo`** para la pestana Estado.
+
+## ⚠️ LO QUE CODEX NO DEBE HACER
+
+1. **NO tocar `MonitoreoLockerTiempoReal.ps1`** sin pasar las 6 condiciones de la REGLA DURA (arriba del todo).
+2. **NO desplegar en el locker.** Lo hace la persona, por Notepad/TeamViewer, con la verificacion de
+   lineas + no-ASCII + sintaxis.
+3. **NO dar por bueno un cambio sin releer el sujeto.** Esta semana se cazaron asi: un watchdog que mentia,
+   un `<script>` que se contaba a si mismo, un `powercfg` que no se aplico y un test que dio falso positivo
+   porque comparaba con `$null`.
+4. **NO concluir que una fuente miente sin comprobar si las dos pueden ser ciertas.** El 10/09 se dio por
+   falso el Excel de calibraciones y **estaba bien**: el Excel dice a quien se COMPRA y el certificado quien
+   CALIBRA. Eran dos preguntas distintas.
+5. **NO anadir puntos a la plantilla de correo.** Inigo la dejo en dos: **precio y plazo**. Esta razonado
+   arriba.
+
+---
+
 # ⚡ ESTADO ACTUAL Y SIGUIENTE PASO — actualizado 2026-09-08 (fin de sesion)
 
 > **BLOQUE DE TRASPASO.** Si retomas el proyecto en otra sesion, otra terminal u otro modelo (Codex, etc.),
