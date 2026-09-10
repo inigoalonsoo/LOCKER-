@@ -408,6 +408,64 @@ RS PRO y 76,86 EUR por el Martindale), se evita el alta que pedia RS, y queda **
 **Precios de referencia para negociar** (pedido 2507486, oct-2025): Martindale **76,86 EUR** ·
 RS PRO 135 **239,00 EUR**.
 
+### ✏️ EL EXCEL LO ACTUALIZA INIGO A MANO — NINGUN AGENTE ESCRIBE EN EL
+
+> **Regla de Inigo, 10/09/2026:** *"del Excel no edites tu nada, voy a esperar a que respondan y ya pondre
+> yo a mano"*. **Aplica a Claude Code, Codex, GLM y a cualquier script.** El
+> `INSTRUMENTOS LOCKER.xlsx` del servidor documental **se lee, no se escribe.**
+
+Motivos de sobra: lo tiene abierto a menudo (aparece su fichero de bloqueo `~$`), **no tiene autoguardado**,
+y es un documento compartido del departamento. Un agente escribiendo ahi puede pisar trabajo de una persona.
+
+#### Cambios que le tocara hacer a Inigo — columna **M** (`EMPRESA`)
+
+**Decididos, se pueden poner ya:**
+
+| Celda | Codigo | Dice | Debe decir | Por que |
+|---|---|---|---|---|
+| **M32** | `T-017` | `RS CALIBRATION` | **`APPLUS`** | se va directo al laboratorio |
+| **M17** | `T-100-4` | `RS CALIBRATION` | **`APPLUS`** | idem |
+| **M20** | `L-002` | `RS CALIBRATION` | **`APPLUS`** | idem |
+| **M5** | `C-002` | `NEURYLAN (Testo)` | **`NEURYLAN`** | es el mismo Neurylan |
+
+**En espera, NO tocar hasta que contesten:**
+
+| Celda | Codigo | Dice | A que espera |
+|---|---|---|---|
+| M7 | `M-006` | `Bosch / Neurylan?` | a que Neurylan diga si acepta el Bosch |
+| M16 | `A-005` | `KLOTZ` | a que Neurylan diga si acepta el Klotz |
+| M35 | `D-001` | `GEDORE / Neurylan?` | idem, y ademas **el instrumento esta perdido** |
+| M30 | `M-017` | `Neurylan?` | **a que Inigo confirme** a que empresa mando el correo de los cuatro instrumentos. El certificado lo firma **Testo** y Neurylan es su distribuidor, pero no esta confirmado |
+
+**Ya correctas:** `M11`, `M13`, `M14` (pinzas FLUKE) y `M31` (pistola FLUKE) — todas `APPLUS`.
+
+### 📦 LOTE APPLUS — tambien en DOS TANDAS (decision de Inigo, 10/09)
+
+*"Vamos a hacer tambien 2 tandas en Applus, que se va a quedar vacio esto si no."* Con 6 equipos en Neurylan
+y 6 en Applus a la vez serian **12 de 32 fuera del locker**.
+
+**1.ª tanda — 4 equipos, los mas urgentes:**
+
+| Codigo | Instrumento | Caduca |
+|---|---|---|
+| `T-017` | Calibrador de procesos RS PRO 135 | **vencido hace 286 dias** |
+| `L-006` | Pinza amperimetrica 4-20 mA FLUKE 771 | 21/10 |
+| `L-010` | Pinza amperimetrica 1500 V FLUKE 393 | 21/10 |
+| `T-007` | Pistola de temperatura infrarroja FLUKE 561 | 22/10 |
+
+**2.ª tanda — 3 equipos, con mas margen:**
+
+| Codigo | Instrumento | Caduca | Nota |
+|---|---|---|---|
+| `T-100-4` | Calibrador de procesos RS PRO 135 | 30/10 | **gemelo del `T-017`**: espera a que vuelva |
+| `L-002` | Comprobador de fases MARTINDALE PC15250 | 30/10 | |
+| `L-001` | Pinza amperimetrica 1000 A FLUKE 376 FC | 13/11 | |
+
+Asi queda siempre **una pinza y un calibrador** dentro, y salen primero el vencido y los tres de octubre.
+
+> **NO hace falta reescribir a Applus:** la oferta pedida cubre los 7. Las tandas se le comunican **al hacer
+> el pedido**, cuando ya se conozca su plazo.
+
 ### 🔍 BUSCAR EL ATORNILLADOR `D-001` — el rastro, medido el 10/09
 
 **Ultimo movimiento registrado, y ahi se acaba:**
