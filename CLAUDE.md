@@ -471,6 +471,29 @@ Asi queda siempre **una pinza y un calibrador** dentro, y salen primero el venci
 > Inigo que les comunique el envio en DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al
 > hacer el pedido, saldran los 7 (u 8) de golpe y el locker se queda vacio.
 
+### ❓ POSIBLE TESTO 340 NUEVO, PEGATINA `A-0031` — aviso de Inigo, 10/09
+
+*"Igual me llega un analizador de gases TESTO para calibrar, no esta registrado en el locker, aunque tiene
+pegatina A-0031. Te voy avisando."* **Sin confirmar todavia; queda anotado para no perderlo.**
+
+⚠️ **El codigo chirria:** `A-0031` lleva **cuatro digitos** y todos los del locker llevan tres
+(`A-003`, `A-004`, `A-005`). Puede ser un codigo nuevo, una pegatina antigua, o el `A-003` leido deprisa
+— que es justamente un TESTO 340.
+
+**Lo que lo resuelve sin ambiguedad es el NUMERO DE SERIE.** Los tres TESTO 340 conocidos:
+
+| Codigo | N.º de serie | Donde esta |
+|---|---|---|
+| `A-003` | `61186226` | consigna 5 — **extraido por Javier de Lamo el 10/09** |
+| `A-004` | `62370623` | consigna 6 |
+| `T-100-1` | `63862113` | consigna 22 |
+
+> **Si el serie no es ninguno de esos tres, es un instrumento NUEVO.** Habria que darlo de alta en ACTUM para
+> que se controle; si no, le pasara como al **Phoenix TM PTM1010**: no sale en ningun dashboard y su
+> calibracion no la vigila nadie.
+
+**Datos a capturar cuando llegue:** numero de serie · modelo exacto · fecha de caducidad · de quien viene.
+
 ### ✅ COLUMNA `CALIBRAR EN` — creada por Inigo el 10/09, revisada
 
 Inigo la creo el mismo dia. **Los tres cambios decididos estan hechos:** `T-100-4`, `L-002` y `T-017`
