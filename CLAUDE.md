@@ -700,6 +700,64 @@ certificado al servidor documental.
 
 ---
 
+## ⚡ LA BIOS `POWER ON` — CONFIGURADA, **NO PROBADA** (medido el 10/09)
+
+**Pregunta de Inigo que destapo el hueco:** *"reiniciamos y se encendia, esa era la prueba. Pero si lo
+apago, ¿se va a encender tambien?"*
+
+**No.** Y la distincion importa:
+
+| Gesto | ¿Se enciende solo? | Por que |
+|---|---|---|
+| **Reiniciar** | si | el equipo nunca pierde la alimentacion |
+| **Apagar Windows** y dejar la corriente puesta | **NO, se queda apagado para siempre** | nada dispara el arranque |
+| **Apagon** (se va y vuelve la luz) | **deberia** — es para lo que sirve el ajuste | **SIN PROBAR** |
+
+> `Restore AC Power Loss = Power On` **no es "enciendete solo": es "enciendete cuando VUELVA la corriente"**.
+> Reacciona a la transicion sin-luz -> con-luz. Si la luz no se va, no se dispara nunca.
+
+**Lo que se probo el 08/09 fue un REINICIO**, es decir la cadena de software: Windows entra solo -> OneDrive
+-> tareas -> ACTUM. **El eslabon de la placa no se ha probado.**
+
+#### Comprobado en el log el 10/09: no ha habido ningun apagon desde el cambio
+
+`Get-WinEvent` con `Id=6008,6005,41`: **ni un `6008` ni un `41` desde el 08/09 14:32.** El ultimo apagon
+sucio sigue siendo el del **07/09 19:15**, anterior al cambio de BIOS. Por eso no hay prueba todavia.
+
+**Se investigo un arranque sospechoso** del 09/09 a las 17:30 sin `6008` previo, por si hubiera sido un corte
+con el equipo ya apagado —lo cual habria servido de prueba—. **No lo era:**
+
+```
+09/09 17:30:01  1074  svchost.exe en nombre de NT AUTHORITY\SYSTEM
+                      motivo: Sistema operativo: service pack (planeado)
+```
+
+Era **Windows Update**.
+
+#### ✅ PERO ESE REINICIO REGALO UNA PRUEBA MEJOR
+
+**El 09/09 a las 17:30 el equipo se reinicio SOLO, sin nadie delante**, y a la manana siguiente **registro
+perfectamente la extraccion de Javier de Lamo a las 09:30:21**.
+
+> Eso demuestra que, **sin supervision**: Windows entro solo, OneDrive arranco, las tareas volvieron a correr
+> **y ACTUM se abrio solo** — porque si no, esa extraccion no estaria en el CSV. El reinicio del 08/09 lo hizo
+> Inigo estando delante; **este ocurrio a solas y salio bien.** Toda la cadena de software queda probada
+> desatendida. Lo unico pendiente es el eslabon que no depende de Windows.
+
+#### Como cerrarlo cuando se quiera
+
+**Decision de Inigo (10/09): esperar a que pase de verdad**, sin provocarlo. Cuando ocurra, se lee del log:
+un `6008` seguido de un `6005` pocos minutos despues y sin que nadie bajara = **probado**.
+
+*(Alternativa sin riesgo alguno, por si algun dia se quiere cerrar antes: apagar Windows limpiamente, quitar
+la corriente de la regleta, esperar 10 s y devolverla sin tocar el boton. Como el apagado es limpio, no hay
+nada escribiendose y **no se puede danar el CSV**. Si arranca viniendo de estar apagado, con mas razon
+arrancara tras un apagon estando encendido: es el mismo disparador.)*
+
+> **Apunte menor:** **Windows Update reinicia el equipo por su cuenta** — paso el 09/09 a las 17:30. No es
+> grave, porque el sistema se recupera solo y esta medido, pero podria caer justo mientras alguien saca un
+> instrumento. Si algun dia molesta, se le fijan horas de actividad.
+
 ## ⏱️ LOS TRES TIMEOUTS DE ACTUM — medidos el 10/09/2026
 
 **Sintoma de Inigo:** *"el tiempo que hay para extraer es muy pequeno, como 15 segundos"*.
