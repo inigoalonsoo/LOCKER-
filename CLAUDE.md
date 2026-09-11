@@ -393,6 +393,63 @@ Los cinco primeros son **los cinco caducados**.
 > ultima vez. **Queda como "pendiente de localizar", no como "sin calibrar".** Conviene cerrarlo antes de
 > noviembre: en auditoria, un instrumento sin certificado no esta respaldado aunque ACTUM tenga fecha.
 
+#### 🔎 BARRIDO DEL SERVIDOR DOCUMENTAL — 11/09/2026 · 1 encontrado de 7, y un hallazgo peor
+
+**Pedido por Inigo** despues del `A-005`: *"mira a ver si puedes buscar alguno mas, de los que no tengo
+anteriores en las carpetas"*.
+
+**Como se busco** (para no repetirlo a ciegas): los **139 PDF** de `02 - INSTRUMENTACION` (**97 unicos**,
+el resto son copias del mismo documento en 4 sitios distintos), **por nombre Y por contenido**, con los
+numeros de serie exactos. Ampliado despues por nombre a **todo `Fabricacion`** y a **`Calidad` y `SAT`**.
+**7 PDF son escaneados** y no tienen texto buscable, pero los 7 estan identificados por su nombre y ninguno
+es de los que faltan.
+
+**Resultado: aparece UNO.**
+
+| | Donde estaba | Que es |
+|---|---|---|
+| **`M-005`** | `Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\2022\LEICA\` | **Certificado de Verificacion y Control de Leica Geosystems S.L.** (Barcelona) · nº **`301797221`** · **28/06/2022** · producto NA730 serie `5718201` · patron: estacion total Leica TCA2003 nº 442095 con certificado **CEM** `211466001` · incertidumbre k=2 al 95 % segun EA-4/02 |
+
+Copiado al Escritorio como `Certificado M-005 Leica 301797221 (2022, ANTIGUO).pdf`.
+
+#### ⚠️ PERO ENCONTRAR EL CERTIFICADO VIEJO NO CIERRA EL HUECO — mide las fechas
+
+| Cod | Ultima calibracion (Excel) | Certificado que tenemos | Desfase |
+|---|---|---|---|
+| `M-005` | **30/04/2025** | 28/06/2022 | **casi 3 anos** |
+| `A-005` | **31/03/2025** | 09/11/2022 (vencia 11/2023) | **2,5 anos** |
+
+**Los dos certificados hallados son de 2022 y las calibraciones que ACTUM da por buenas son de 2025.**
+Es decir: **no falta "el certificado", falta el VIGENTE.** Sirven como ficha tecnica —fue el uso que se le
+dio al del KLOTZ con Neurylan, y para eso valen— pero **en una auditoria un certificado de 2022 no respalda
+una calibracion de 2025.**
+
+> **Y esto no es un problema del archivo historico: es que los certificados de 2024-2026 no estan en el
+> servidor.** El barrido cubrio todo `02 - INSTRUMENTACION` por contenido y `Fabricacion`, `Calidad` y `SAT`
+> por nombre. No aparecen. **Lo mas probable sigue siendo lo que dijo Inigo el 10/09: que se quedaran en el
+> correo y nunca se subieran.**
+
+#### ✅ LA VIA QUE SI PUEDE CERRARLO: pedir copia a quien lo calibro
+
+**5 de los 7 tienen fecha de calibracion registrada**, o sea que **alguien los calibro y tiene el
+certificado emitido**. Reemitir una copia es gratis y de tramite:
+
+| Cod | Calibrado el | A quien reclamar | Baza que tenemos |
+|---|---|---|---|
+| **`T-017`** | **27/11/2024** | **APPLUS** | ⭐ **el mejor candidato: ya hay un hilo abierto con ellos** por el presupuesto de los 7, y `T-017` va en ese lote |
+| **`M-005`** | **30/04/2025** | **LEICA** · `trinidad.vilallba@leica-geosystems.com` | tenemos su certificado de 2022 con nº: **prueba que son ellos** |
+| **`E-003`** | **16/02/2026** | RS CALIBRATION → **(APPLUS)** | el mas reciente de todos · mismo hilo de Applus |
+| `M-006` | 01/02/2025 | `Bosch / Neurylan?` | sin confirmar quien |
+| `D-001` | 09/06/2025 | `GEDORE / Neurylan?` | sin confirmar quien · ademas esta en reparacion |
+
+**Los otros dos no tienen ni fecha:** `D-002` (boroscopio) y `E-002` (indicador de dial) — que son
+**justo los dos sin numero de serie**, los del viaje a las consignas 23 y 31. Coherente: de esos no consta
+nada en ninguna parte.
+
+> **Accion de coste cero y alto valor:** al responder a Applus por el presupuesto, **pedir de paso copia de
+> los certificados del `T-017` (11/2024) y del `E-003` (02/2026)**. Y escribir a Leica por el del `M-005`
+> (04/2025). Tres de los siete huecos se cerrarian sin mover un instrumento.
+
 #### DECISION (Inigo, 10/09): ir DIRECTO a Applus con los 7
 
 *"Para que ellos subcontraten a Applus, para eso les escribimos nosotros directamente."*
