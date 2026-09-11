@@ -1466,11 +1466,19 @@ tanda** (`S-002` `6793520` · `T-100-1` `25G01074` · `T-005-1` `6792011` · `T-
 al dia, los huecos son de instrumentos concretos.
 
 > ⚠️ **Al cotejarlos aparecio una discrepancia: el `T-005-1`.** Su certificado dice serie **`347608073`**
-> (9 digitos) y el Excel —y el correo enviado— dicen **`34768073`** (8). Es el mismo instrumento (el
-> certificado lo marca como *N.º equipo cliente `T-0005 1`*), pero **un numero tiene un digito de mas o de
-> menos y no se puede saber cual desde aqui**. Se cierra **leyendo la pegatina**: el equipo esta dentro del
-> locker, consigna 12. **Hacerlo ANTES de enviarlo.** Detalle del mismo certificado: cubre tambien una
-> **sonda de superficie `T-0005_2`** que no es del locker — preguntar si debe ir con el termometro.
+> (9 digitos) y el Excel —y el correo enviado— dicen **`34768073`** (8).
+
+> ✅ **RESUELTO EL MISMO DIA — el error esta en el CERTIFICADO.** *"Estaba mal en el certificado, ya me
+> acuerdo de eso"* (Inigo, 11/09). La serie buena es la del Excel y ACTUM, **`34768073`**; el laboratorio
+> tecleo `347608073` al emitirlo. **No hay nada que corregir en el Excel ni en ACTUM, y el correo enviado a
+> Neurylan lleva el numero CORRECTO.**
+>
+> ⚠️ **Pero queda una accion, y mira justo a la auditoria de noviembre:** el certificado es el documento que
+> respalda la calibracion, y **ese lleva una serie que no coincide con la pegatina del instrumento**. Un
+> auditor puede objetar que ese papel no acredita ESE equipo. **Pedir a Neurylan un certificado corregido**
+> del `T-005-1` (cert. `6792011`, ped. 2507489) — hay hilo abierto, el equipo vuelve a ir a calibrar ahora y
+> es trabajo de tramite para ellos. Detalle del mismo certificado: cubre tambien una **sonda de superficie
+> `T-0005_2`** que no es del locker — preguntar si debe ir con el termometro.
 
 ⏰ **DOS COSAS QUE SE QUEDARON FUERA Y HAY QUE DECIR MAS ADELANTE** (no es un fallo: habra mas correos,
 pero las dos tenian funcion):

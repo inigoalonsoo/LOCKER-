@@ -96,16 +96,20 @@ del desfase de esta manana (`M-005` y `A-005`, de 2022 frente a calibraciones de
 > **El archivo de Neurylan SI esta al dia.** Los huecos de certificados son de instrumentos concretos, no un
 > fallo general: lo calibrado en nov-2025 tiene su certificado guardado y encontrable.
 
-#### ⚠️ Discrepancia de serie en el `T-005-1`, sin resolver
+#### ✅ Discrepancia de serie en el `T-005-1` — RESUELTA: el error es del certificado
 
 Es **el mismo instrumento** —el certificado lo identifica como *Termometro testo 925*, modelo `0560 9250`,
 **N.º equipo cliente `T-0005 1`**, cliente GHI—, pero **un numero tiene un digito de mas o de menos** y
 desde aqui no se puede saber cual de los dos esta mal.
 
-**Se cierra leyendo la pegatina del equipo**, que esta **dentro del locker** (consigna 12, disponible).
-**Conviene hacerlo ANTES de enviarlo:** va en la 1.a tanda, y a Neurylan se le dio el numero del Excel
-mientras su propio certificado dice otro. No es grave —lo identifican por el nº de pedido y el codigo— pero
-si alguien cruza series, chirria.
+**Resuelto el mismo dia por Inigo:** *"estaba mal en el certificado, ya me acuerdo de eso"*. **La serie
+buena es la del Excel y ACTUM, `34768073`**; el laboratorio la tecleo mal al emitir el documento. No hay que
+tocar el Excel ni ACTUM, y **el correo enviado lleva el numero correcto**.
+
+**Accion que si queda, y apunta a la auditoria:** el certificado es el papel que respalda la calibracion, y
+lleva una serie que **no coincide con la pegatina del equipo**. Un auditor puede objetar que no acredita ESE
+instrumento. **Pedir a Neurylan un certificado corregido** del `T-005-1` (cert. `6792011`, ped. 2507489):
+hay hilo abierto, el equipo vuelve a ir a calibrar ahora, y para ellos es tramite.
 
 **Dato extra:** ese certificado cubre **dos elementos**, el termometro (`T-0005 1`) y una **sonda de
 superficie** (`T-0005_2`, modelo `0602 0393`) que **no es instrumento del locker** pero si figura en la lista
