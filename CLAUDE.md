@@ -588,7 +588,22 @@ Cuando llegue ya me enterare."*
 > el **01/04/2026 13:25:33** y no consta devolucion. No lo perdio nadie: **salio del circuito para repararlo**
 > y por eso nunca volvio al locker. La busqueda se cierra; queda una pregunta concreta.
 
-**PENDIENTE: preguntar a NAROA a que empresa se mando.**
+**Cadena de la pista, para no repetir preguntas:**
+
+| Quien | Que dijo / que consta | Fecha |
+|---|---|---|
+| El historial del locker | `AITOR U. ULIBARRI` lo extrae y no consta devolucion | 01/04/2026 13:25:33 |
+| Companeros | *"se mando a arreglar"* | 11/09/2026 |
+| **Naroa** | *"cree que se llevo a **PRADA**"* · y remite a expediciones | 11/09/2026 |
+| **Miguel Rio** (expediciones) | ← **SIGUIENTE PASO: preguntarle** | pendiente |
+
+> **Expediciones es el sitio correcto para cerrarlo:** si el atornillador salio de la empresa, **hay un
+> albaran de salida** con fecha, destino y seguimiento. Eso lo resuelve con un documento, sin depender de
+> que alguien se acuerde.
+
+**Que pedirle a Miguel Rio:** albaran de salida a nombre de **PRADA**, de un **atornillador dinamometrico
+GEDORE LDA-40 EA**, numero de serie **`EA 10.00047`**, con fecha **posterior al 01/04/2026** — que es cuando
+salio del locker y ya no volvio.
 
 #### ⚠️ CONSECUENCIA DIRECTA: hay que corregir el correo de Neurylan
 
