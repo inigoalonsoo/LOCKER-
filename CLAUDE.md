@@ -764,6 +764,75 @@ con el `A-003` extraido por Javier de Lamo, mandar los **dos** analizadores TEST
 > **Desbloqueo:** el `T-100-1` es el de la consigna 22, que volvio el 09/09. **Antes no se podia mandar
 > porque no aparecia; ahora si.**
 
+### 🚨 5 DE LOS 17 EQUIPOS DE LA CAMPANA ESTAN EN USO — medido el 11/09
+
+> **Lo destapo Inigo:** *"de los 8 que hemos pedido, el 1, 2 y 7 estan en uso. Y el KLOTZ tambien.
+> ¿Como voy a enviarlos a reparar si estan en uso? Y en Applus habra pasado igual."*
+> **Tenia razon, y en Applus tambien: hay uno mas que nadie habia mirado.**
+
+**EL AGUJERO DE METODO:** la campana se monto el 09/09 cruzando `Caja.FechaCaducidad` de ACTUM con la
+columna EMPRESA del Excel — **fechas y proveedor, pero NUNCA disponibilidad fisica**. Se eligio que mandar
+sin comprobar que estuviera dentro del locker. El unico caso que se detecto (`A-003` extraido por Javier de
+Lamo) se vio **de rebote**, no por comprobacion sistematica.
+
+**Medido el 11/09** derivando la ultima accion de cada consigna del `HistorialCompleto.csv` sincronizado
+(ultimo movimiento 10/09 15:21:35) y **verificado contra el `DashboardLocker.html` publicado**, regenerado
+ese mismo dia a las 12:55: **17/17 coinciden entre las dos fuentes.**
+
+| Lote | Cod | Cons | Tanda | Quien lo tiene | Desde | Nota |
+|---|---|---|---|---|---|---|
+| **NEURYLAN** | `C-002` | 2 | 1.ª | **ALVARO T. TREPIANA** | 09/01/2026 · **244 d** | camara TESTO 872 |
+| **NEURYLAN** | `S-001` | 15 | 1.ª | **ALVARO T. TREPIANA** | 17/04/2026 · **146 d** | camara TESTO 872 |
+| **NEURYLAN** | `M-020` | 24 | 1.ª | **FELIPE C. CANARTE** | 16/06/2026 · **86 d** | **unidad unica** |
+| **NEURYLAN** | `A-005` | 13 | consulta | **ANGEL F. FERNANDEZ** | 21/05/2026 · **112 d** | el KLOTZ · **unidad unica** |
+| **APPLUS** | `L-010` | 11 | 1.ª | **IKER C. CAMIN** | 18/06/2026 · **84 d** | pinza 1500 V · **no intercambiable** |
+
+Los otros 12 estan **Disponible** y se pueden mandar en cuanto se decida.
+
+#### ⚠️ EL ABSURDO DE LAS TRES CAMARAS TESTO 872
+
+Hay tres (`C-002`, `S-001`, `S-002`) y el plan del 10/09 decia: **mandar `C-002` y `S-001`, quedarse
+`S-002` de reserva.** Cruzado con la realidad:
+
+| | Estado real |
+|---|---|
+| `C-002` y `S-001` — **las dos que se iban a mandar** | **las tiene Alvaro Trepiana** |
+| `S-002` — **la que se guardaba de reserva** | **es la unica que esta dentro del locker** |
+
+**El plan manda las dos que no tienes y guarda la unica que si tienes.** Si Alvaro las devuelve, se arregla
+solo. Si las necesita, lo coherente es **darle la vuelta: mandar `S-002` primero**. Pero eso deja el locker
+sin camara mientras Alvaro tenga las otras dos — **decision de Inigo**, y depende de si el las usa a diario.
+
+#### A QUIEN HAY QUE ESCRIBIR — 4 personas, 5 instrumentos
+
+| Persona | Que tiene | Para |
+|---|---|---|
+| **ALVARO T. TREPIANA** | `C-002` + `S-001` (2 camaras TESTO 872) | Neurylan 1.ª tanda |
+| **FELIPE C. CANARTE** | `M-020` (medidor presion dif. TESTO 512) | Neurylan 1.ª tanda |
+| **ANGEL F. FERNANDEZ** | `A-005` (analizador particulas KLOTZ) | consulta Neurylan |
+| **IKER C. CAMIN** | `L-010` (pinza 1500 V FLUKE 393) | Applus 1.ª tanda |
+
+**Mensajes redactados:** `runs/campana-calibraciones-2026-09/mensajes-recuperar-instrumentos.md`.
+
+> ⚠️ **CUIDADO CON LEER ESTO COMO "esa persona lo tiene ahora".** El dato dice **quien lo saco el ultimo y
+> no consta que lo devolviera** — no que lo tenga hoy encima. Es la limitacion estructural ya documentada:
+> quien lo saca con llave, o se lo pasa a otro de mano en mano, no deja rastro. `C-002` lleva **244 dias**
+> fuera; a esa distancia lo normal es que haya cambiado de manos. **El mensaje pregunta, no reclama.**
+
+> **Y AL DEVOLVERLOS, IDENTIFICANDOSE.** Si entran con llave, el sistema no se entera y seguiran figurando
+> en uso. Igual al sacarlos para mandarlos a calibrar: **con identificacion, nunca con llave** — si sale con
+> llave, sale sin rastro.
+
+#### 📌 REGLA NUEVA — disponibilidad ANTES de componer un lote
+
+> **Un instrumento no entra en un lote de calibracion hasta que se ha comprobado que esta DENTRO.** El
+> predicado es la ultima accion de su consigna en el `HistorialCompleto.csv` (o la columna Estado del
+> dashboard): si es `Extraccion`, el equipo no esta y el lote es papel mojado.
+>
+> Caducidad y proveedor dicen **cual toca** y **adonde va**; **no dicen si lo tienes**. Son tres preguntas,
+> y hasta el 11/09 solo se contestaban dos. Comprobarlo cuesta un minuto y evita prometer a un proveedor
+> equipos que no puedes enviar.
+
 ### 📨 NEURYLAN CONTESTA — 11/09/2026 · plazos si, precios el lunes
 
 **Responde Alazne Larroca.** No es la oferta todavia: es acuse + plazos. *"El lunes os mando el presupuesto
@@ -870,7 +939,7 @@ certificado al servidor documental.
 | 1 | **Buscar el atornillador `D-001`** | Lo dejo cerca de su sitio para mandarlo a arreglar y **no esta**. La consigna 32 lo da *En uso*, asi que abrirla con llave probablemente este vacia |
 | ~~2~~ | ~~**Serie del `D-001` en ACTUM**~~ | ❌ **NO ERA PENDIENTE.** La serie `EA 10.00047` **ya estaba** en la descripcion desde 2025; se leyo truncada. Ver la correccion en la seccion de busqueda del `D-001` |
 | 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
-| 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
+| 4 | **Bajar a las consignas 31 Y 23** — el mismo viaje | **Son los DOS unicos instrumentos sin numero de serie** (medido el 11/09 sobre el Excel: 2 de 32). `E-002` (consigna 31) = INDICADOR DE DIAL x2 + BASE, Insize/Mitutoyo. **`D-002` (consigna 23) = BOROSCOPIO P 50** — apuntado por Inigo el 11/09. En ninguno consta la serie ni en Excel ni en ACTUM: hay que leerla del instrumento y ponerla desde el Visor. **Aqui el viaje SI hace falta, y se hace UNA sola vez para los dos** |
 | ~~5~~ | ~~**Localizar el TESTO 340 de la consigna 22**~~ | **RESUELTO 09/09:** lo tenia Sergio Vega y lo devolvio identificandose a las **11:52:50**. CSV: una sola devolucion, serie `63862113`. |
 | ~~6~~ | ~~**Buscar el correo de Klotz**~~ | ✅ **RESUELTO 11/09:** `info@fa-klotz.de` · **+49 (0)7052 9 23 36**. Estaba en su certificado de 2022, en el archivo historico de instrumentacion. Ver la seccion del KLOTZ |
 

@@ -5,6 +5,16 @@
 
 > **NO ENVIADO.** Lo envia Inigo. Adjuntar el certificado KLOTZ (ver abajo).
 
+> 🚨 **LEER ANTES DE ENVIAR (11/09):** de los 8 equipos, **3 de la 1.ª tanda estan EN USO** (`C-002`,
+> `S-001`, `M-020`) y tambien lo esta el **KLOTZ `A-005`** de las consultas. **El presupuesto de los 8
+> sigue valiendo** —pedir precio no obliga a enviar—, pero **la composicion de las tandas de este correo
+> es provisional** hasta que vuelvan. Si Alvaro Trepiana necesita sus dos camaras, la 1.ª tanda cambia:
+> saldria la `S-002` en su lugar. Ver `mensajes-recuperar-instrumentos.md`.
+>
+> **Opciones:** (a) enviar el correo tal cual —las tandas se concretan al hacer el pedido, que es cuando
+> toca— o (b) esperar un dia a ver quien devuelve que. **La (a) no pierde nada**: lo urgente del correo es
+> retirar el GEDORE y mandar la documentacion, y eso no depende de quien tenga que.
+
 ---
 
 ```
