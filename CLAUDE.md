@@ -410,7 +410,13 @@ es de los que faltan.
 |---|---|---|
 | **`M-005`** | `Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\2022\LEICA\` | **Certificado de Verificacion y Control de Leica Geosystems S.L.** (Barcelona) · nº **`301797221`** · **28/06/2022** · producto NA730 serie `5718201` · patron: estacion total Leica TCA2003 nº 442095 con certificado **CEM** `211466001` · incertidumbre k=2 al 95 % segun EA-4/02 |
 
-Copiado al Escritorio como `Certificado M-005 Leica 301797221 (2022, ANTIGUO).pdf`.
+Copiado al Escritorio como `Certificado M-005 Leica 301797221 (2022, ANTIGUO).pdf`, y **archivado por Inigo
+el 11/09** en su carpeta del servidor como `Certificado M-005 Leica 301797221 (antiguo).pdf` — igual que hizo
+con el del KLOTZ. **El sufijo "(antiguo)" es buen criterio**: deja claro de un vistazo que ese PDF no
+respalda la calibracion vigente.
+
+**Carpetas de `CERTIFICADOS DE CALIBRACION` que siguen VACIAS, medido el 11/09: 6 de 32** — `4. M-006` ·
+`23. D-002` · `29. T-017` · `30. E-003` · `31. E-002` · `32. D-001`. Eran 8 esta manana.
 
 #### ⚠️ PERO ENCONTRAR EL CERTIFICADO VIEJO NO CIERRA EL HUECO — mide las fechas
 
@@ -1431,7 +1437,7 @@ cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay q
 | Lote | Equipos | Enviado | Estado |
 |---|---|---|---|
 | **Applus** | 7 (4 FLUKE + Martindale + 2 RS PRO 135) | 10/09 a `izaskun.Conde@applus.com` | **esperando** |
-| **Neurylan** | 8 + 2 consultas | 10/09 a `administracion@neurylan.com` | **CONTESTO 11/09** — plazos si, precios el **lunes 14/09** |
+| **Neurylan** | 8 + 2 consultas | 10/09 a `administracion@neurylan.com` | **CONTESTO 11/09** (plazos si, precios no) · **RESPONDIDO 11/09** · esperando presupuesto el **lunes 14/09** |
 | Leica · CS | 1 + 1 | — | sin pedir, sin urgencia |
 | ~~RS~~ | — | — | cerrado (ver seccion propia) |
 | **Klotz** | 1 | — | ⚠️ **REABIERTO 11/09**: aparecio su certificado y su contacto `info@fa-klotz.de` |
@@ -1445,7 +1451,23 @@ cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay q
    digo, acuerdate me dices que se lo diga".)*
 4. **Decidir lo de la 2.ª tanda vs noviembre** — ver el calculo de plazos en la seccion anterior.
 
-**Borrador listo con los puntos 1-3:** `runs/campana-calibraciones-2026-09/respuesta-neurylan-2026-09-11.md`.
+**✅ ENVIADO EL 11/09.** Texto literal en `runs/campana-calibraciones-2026-09/respuesta-neurylan-2026-09-11.md`
+— se conserva tal cual porque es lo que la otra parte ha leido, y su respuesta hay que interpretarla contra eso.
+
+**Inigo mejoro un punto del borrador:** escribio *"te adjunto un certificado **antiguo** del KLOTZ"* donde
+decia *"el ultimo certificado"*. Mas exacto y mas seguro — el documento es de 2022 y la calibracion que
+consta en ACTUM es de 03/2025; ante un laboratorio que lo va a leer con lupa, nadie podra decir luego que
+se le vendio como vigente.
+
+⏰ **DOS COSAS QUE SE QUEDARON FUERA Y HAY QUE DECIR MAS ADELANTE** (no es un fallo: habra mas correos,
+pero las dos tenian funcion):
+1. **Que el presupuesto de reparacion de los gases venga DESGLOSADO POR CONCEPTO.** Alazne ya avisa de que
+   lo enviaran; sin desglose puede llegar un importe global que no se pueda aprobar por partes.
+   → **decirlo al contestar al presupuesto del lunes.**
+2. **Que hay auditoria en noviembre** y que avisen si algun plazo se va mas alla de finales de octubre.
+   → **decirlo al hacer el pedido**, que es cuando se acuerda la fecha de envio.
+> Ninguna de las dos es *"anadir puntos a la plantilla"*: esa regla cubre la solicitud inicial de oferta,
+> cerrada en precio y plazo. Esto es la negociacion del pedido, que es otra fase.
 
 **Cuando conteste APPLUS:** siguen valiendo los dos recordatorios originales — comunicar sus dos tandas
 (4 + 3) al hacer el pedido, y mirar precio **por equipo**, plazo y si el desglose dice *"calibracion y
