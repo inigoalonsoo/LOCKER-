@@ -1288,36 +1288,60 @@ que **nadie se entera si se cae** — el banner de salud solo habla si alguien g
 
 **CSV a 10/09: 536/536 lineas, ratio 1,00, 535 movimientos, 0 bytes NULL.**
 
-## ⚡ LO QUE HAY QUE HACER AHORA, por orden
+## ⚡ LO QUE HAY QUE HACER AHORA — actualizado al cierre del 11/09/2026
 
-### A · Cerrar lo del timeout (2 minutos, es lo unico a medio hacer)
-1. **Reiniciar `ACTUM_EPI_Gestion.exe`** — sin esto el panel sigue con los valores viejos.
-2. **Cronometrar una extraccion real.** Debe dar ~120 s. Si sigue cortando a los 20, manda otro sitio.
-3. **DEJAR `ACTUM_EPI_Gestion.exe` ABIERTO.** Mientras este cerrado el locker **no registra nada**, y eso
-   no se recupera de ningun sitio.
+> **Inigo aparca el tema del locker aqui.** Esta lista es el punto exacto donde se retoma.
 
-### B · Calibraciones — esperando a Applus
-**Lote enviado el 10/09** a `izaskun.Conde@applus.com`: **7 equipos** (4 FLUKE + Martindale + 2 RS PRO 135).
-Cuando llegue la oferta, **comprobar tres cosas**:
-- **Precio POR EQUIPO**, no un total — si no, no se puede comparar con lo que cobro RS: Martindale
-  **76,86 EUR** y RS PRO 135 **239,00 EUR** (pedido 2507486, oct-2025).
-- **Plazo**: tienen que estar operativos **antes de noviembre** (auditoria).
-- Si el desglose dice **"calibracion y ajuste"** o solo "calibracion" — responde solo a si cubren un equipo
-  fuera de tolerancia, que es lo unico que aportaba el intermediario.
+### A · Timeout — casi cerrado
+Valores **verificados en la base de datos**: `20 | 120 | 120`. Falta solo **cronometrar una extraccion real**
+cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay que volver a la tabla
+`Parametros`.
 
-**Quedan 4 lotes sin pedir:** Neurylan (7+2) · Leica (1) · Klotz (1, **falta el correo**) · CS (1).
-Los correos estan escritos y listos en la seccion de calibraciones. **RS descartado el 10/09.**
+> **Y LO DE SIEMPRE: dejar `ACTUM_EPI_Gestion.exe` ABIERTO.** Cerrado, el locker **no registra nada**, y eso
+> no se recupera de ningun sitio.
 
-### C · Pendientes fisicos de Inigo
-1. **Consigna 31** — abrir con llave, leer el n.º de serie del `E-002` (indicador de dial x2 + base) y
-   ponerlo en ACTUM. **No consta en ninguna parte: el viaje SI hace falta.**
-2. **`L-004`** — pegatina y meterlo en la consigna 9 **identificandose**.
-3. **Atornillador `D-001`** — perdido. Su serie (`EA 10.00047`) si esta en el Excel: se puede poner en
-   ACTUM sin bajar.
-4. ~~**TESTO 340 de la consigna 22** (`63862113`) — preguntar a Sergio Vega e Iker Lasso.~~
-   **RESUELTO 09/09:** devuelto por Sergio Vega a las **11:52:50**, una sola fila en el CSV.
-5. **Correo de Klotz** — no consta.
-6. **Retirar el acceso SAT a Julian de Lamo** cuando devuelva el `A-003`, si se le dio solo para eso.
+### B · Calibraciones — esperando dos ofertas
+
+| Lote | Equipos | Enviado | Estado |
+|---|---|---|---|
+| **Applus** | 7 (4 FLUKE + Martindale + 2 RS PRO 135) | 10/09 a `izaskun.Conde@applus.com` | esperando |
+| **Neurylan** | 8 + 2 consultas | 10/09 a `administracion@neurylan.com` | esperando |
+| Leica · CS | 1 + 1 | — | sin pedir, sin urgencia |
+| ~~RS~~ · ~~Klotz~~ | — | — | cerrados (ver secciones propias) |
+
+**⏰ CUANDO CONTESTE CUALQUIERA DE LOS DOS, LO PRIMERO ES RECORDARLE A INIGO:**
+1. **Comunicarles las DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al hacer el pedido,
+   salen todos de golpe y el locker se queda vacio.
+2. **Solo a Neurylan: retirar el atornillador GEDORE** de las consultas — ya esta en reparacion en otro sitio.
+
+**Que mirar en la oferta:** precio **por equipo** (no un total) · plazo **antes de noviembre** · si el
+desglose dice *"calibracion y ajuste"* o solo *"calibracion"*.
+**Referencia para negociar** (pedido 2507486, oct-2025): Martindale **76,86 EUR** · RS PRO 135 **239,00 EUR**.
+
+### C · Pendientes fisicos
+
+| | Que | Estado |
+|---|---|---|
+| 1 | **Consigna 31** — abrir con llave, leer el n.º de serie del `E-002` y ponerlo en ACTUM | **el viaje SI hace falta**: no consta en ninguna parte |
+| 2 | **`L-004`** — pegatina y meterlo en la consigna 9 **identificandose** | pendiente |
+| 3 | **Atornillador `D-001`** — preguntar a **Miguel Rio** (expediciones) por el albaran de salida a PRADA | mensaje de Teams ya redactado |
+| 4 | **Retirar el acceso SAT a Julian de Lamo** cuando devuelva el `A-003` | si se le dio solo para eso |
+| 5 | **`A-0031`** — TESTO 340 que puede llegar | **puede no ser del locker**: decidir si se da de alta |
+| ~~6~~ | ~~TESTO 340 de la consigna 22~~ | ✅ **volvio el 09/09** |
+| ~~7~~ | ~~Serie del `D-001` en ACTUM~~ | ✅ **ya estaba puesta** |
+| ~~8~~ | ~~Correo de Klotz~~ | ✅ **fusionado con Neurylan**: no existia contacto |
+
+### C-bis · Dos casillas del Excel, de un minuto
+
+**Las hace Inigo a mano — ningun agente escribe en ese fichero.**
+- **`M34`** → `INSIZE / MITUTOYO` *(la marca esta en la columna MODELO)*
+- **`N30`** → quitar el interrogante a `M-017` si confirma que aquel correo fue a Neurylan
+
+### C-ter · La BIOS, pendiente de que pase un apagon
+
+**Configurada en `Power On`, NO probada.** Decision de Inigo: **esperar a que ocurra**, sin provocarlo.
+Cuando pase, se lee del log: un `6008` seguido de un `6005` a los pocos minutos **sin que nadie bajara** =
+probado. Detalle completo en la seccion de la BIOS.
 
 ### D · Lo grande, sin tocar
 1. **SAI + cuadro electrico** — la unica causa raiz viva. 8 apagones en 5 semanas.
