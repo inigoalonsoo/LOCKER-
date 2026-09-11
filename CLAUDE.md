@@ -503,8 +503,33 @@ exactamente las **32 filas** de las 32 consignas, ni una mas. Consecuencia medid
 el **Phoenix TM PTM1010** (`1774+KD-9083/4/5/6`) y, si acaba alli, este `A-0031`.
 
 > **No se propone meterlos en el locker** — eso es otra decision, y Inigo ya dijo el 09/09 que el Phoenix
-> queda fuera del alcance del proyecto a proposito. **Lo que si conviene es saber si existe alguna lista de
-> ese cuarto**, porque hoy su calibracion depende solo de que alguien se acuerde. Pregunta abierta a Inigo.
+> queda fuera del alcance del proyecto a proposito. ~~**Lo que si conviene es saber si existe alguna lista de
+> ese cuarto.** Pregunta abierta a Inigo.~~
+
+#### ✅ LA LISTA DEL CUARTO SI EXISTE — encontrada el 11/09 (de rebote, buscando el KLOTZ)
+
+`...\02 - INSTRUMENTACION\Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\`
+**`2023\CUARTO METROLOGIA 2023.xlsx`** (291.153 bytes) y su equivalente **`2022\CUARTO METROLOGIA 2022_001.xlsx`**.
+
+**Medido:** 77 filas · 5 hojas — `Almacen Metrologia` · `codigos equipos` · `plano almacen metrologia` ·
+`listado de E y S metrologia` · `Almacen Metrologia viejo`. Columnas: *Codigo GHI · Tipo o modelo ·
+Serial number · Observaciones/estado*.
+
+**Y ahi esta el Phoenix**, que en ACTUM no aparece: `T-010 · PHOENIX TM PTM-1010 · contiene sensor tc-k`.
+Tambien codigos que **no existen en las 32 consignas** del locker (`T-001`, `T-002`, `T-005_2`, `M-031`,
+`M-032`, `M-033`, `A-011`, `A-012`, `A-013`...), asi que el inventario real de GHI es **bastante mayor que
+el locker**.
+
+> ⚠️ **La lista existe, pero esta CONGELADA en 2023 y vive en una carpeta llamada `Obsoleto`.** No es un
+> sistema vivo: es una foto de hace tres anos. **No convierte el agujero en cubierto** — sigue sin haber
+> nada que avise cuando caduca un instrumento de ese cuarto. Lo que si hace es dar un punto de partida si
+> algun dia se decide cubrirlo. **Decision de Inigo, fuera del alcance actual.**
+>
+> Hay ademas un archivo historico de certificados por proveedor (`2022\`, `2023\`: TESTO, LEICA, NEURYLAN,
+> DRÄGER, RS Components, New COSMOS, ROECKLE, CISA, SERCOIN, AVATEC, KLOTZ) que **no se habia mirado nunca
+> en esta campana**. Ahi aparecieron el certificado del KLOTZ y varios de equipos del locker
+> (`M-001`, `M-005`, `A-004`, `T-008`, `T-100-1`). **Sitio a consultar antes de volver a dar por perdido un
+> certificado** — ver los 8 que figuran como "pendientes de localizar".
 
 ### ✅ COLUMNA `CALIBRAR EN` — creada por Inigo el 10/09, revisada
 
@@ -697,13 +722,38 @@ DOS TANDAS**, para no quedarse sin ningun instrumento operativo de un tipo.
 
 #### Por que el KLOTZ va aqui y no a Klotz
 
-Buscado el 10/09 en todo el servidor documental: **no hay certificado del `A-005`, no hay carpeta de pedidos
-de KLOTZ, y no hay ningun fichero con ese nombre.** Las carpetas de pedidos son solo APPLUS, CS, LEICA,
-NEURYLAN y RS AMIDATA.
+~~Buscado el 10/09 en todo el servidor documental: **no hay certificado del `A-005`, no hay carpeta de pedidos
+de KLOTZ, y no hay ningun fichero con ese nombre.**~~ **CORREGIDO EL 11/09 — el certificado SI EXISTE.**
 
-> **No consta que el `A-005` lo haya calibrado nunca nadie.** El "KLOTZ" del Excel parece ser **el fabricante**,
-> no la empresa a la que se mando. Por eso se pregunta a Neurylan, que ya acepto un PEAK TECH fuera de su
-> linea. Si dicen que no, entonces se busca a Klotz directamente.
+> ⚠️ **La busqueda del 10/09 fue incompleta, no el archivo.** Se miro solo la carpeta
+> `Locker instrumentacion\`, y el certificado esta un nivel por encima, en el archivo historico:
+> `02 - INSTRUMENTACION\Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\2023\KLOTZ\Certificados y facturas validadas\Medidor de partículas.pdf`
+> (2 paginas, 148.693 bytes). **Mismo patron que el `D-001` "sin numero de serie" y que los `<tr>`: fallaba
+> el instrumento de busqueda, no el sujeto.** Antes de declarar que un documento no existe, buscar por
+> CONTENIDO en todo el arbol, no por nombre en una carpeta.
+
+**Lo que dice el certificado** (PDF escaneado, leido con vision el 11/09):
+
+| Campo | Valor |
+|---|---|
+| Equipo | contador de particulas **KLOTZ AMF-touch**, n.º **AMF-20707** ← coincide con el `A-005` |
+| Sensor | **LDS-45/50**, n.º `LDS-1828` · rango **4-200 um** · caudal **30 ml/min** |
+| Metodo | **ISOMTD conforme a ISO 11171** · incluye ensayo electrico **EN 61010** (pag. 2, todo `bestanden`) |
+| Quien calibra | **Markus Klotz GmbH** — el propio fabricante, Bad Liebenzell (Alemania) |
+| Fecha | **09/11/2022**, firmado por R. Staib · **valido hasta 11/2023** |
+
+**EL CONTACTO DE KLOTZ, que se daba por inexistente:** `info@fa-klotz.de` · **+49 (0)7052 9 23 36** ·
+`www.fa-klotz.de` · Theodor-Heuss-Straße 27, 75378 Bad Liebenzell.
+
+> **Dos consecuencias que NO son decision mia:**
+> 1. **La premisa que mando el `A-005` a Neurylan era falsa.** Se fusiono con Neurylan "porque no consta
+>    contacto ni pedido ni certificado de Klotz" — y los tres constan. El fabricante ya lo calibro una vez,
+>    asi que su capacidad esta **demostrada, no supuesta**. Es exactamente el argumento que llevo a ir
+>    directo a Applus en vez de por RS. **Decidir si se mantiene la consulta a Neurylan o se pregunta
+>    tambien a Klotz** — pero que sea decision, no inercia.
+> 2. **Hay un hueco de fechas sin explicar.** El certificado vence en **11/2023** y ACTUM dice que el
+>    `A-005` caduco el **31/03/2026**. O hubo una calibracion intermedia cuyo certificado no esta, o la
+>    fecha de ACTUM se puso a mano. **No se resuelve con lo que hay: preguntar.**
 
 #### El ajuste que obligo a rehacer el lote
 
@@ -714,6 +764,64 @@ con el `A-003` extraido por Javier de Lamo, mandar los **dos** analizadores TEST
 > **Desbloqueo:** el `T-100-1` es el de la consigna 22, que volvio el 09/09. **Antes no se podia mandar
 > porque no aparecia; ahora si.**
 
+### 📨 NEURYLAN CONTESTA — 11/09/2026 · plazos si, precios el lunes
+
+**Responde Alazne Larroca.** No es la oferta todavia: es acuse + plazos. *"El lunes os mando el presupuesto
+de la primera parte de equipos, ya que me tienen que confirmar el precio del certificado electrico para el
+EXTECH PRC30 (hoy es festivo en Barcelona)."* → **presupuesto esperado el lunes 14/09.**
+
+> ⚠️ **OJO A LA PALABRA "TANDA", QUE AHORA SIGNIFICA DOS COSAS.** Su *"primera parte de equipos"* NO es
+> nuestra *1.ª tanda*: ella parte la lista porque le falta **un precio** (el certificado electrico del
+> `T-004` EXTECH PRC30), nosotros la partimos por **logistica** para no quedarnos sin reserva. Son cortes
+> distintos y no coinciden. Al hablar con ella, decir siempre "envio en dos tandas", no "primera parte".
+
+**Plazos que da, desde que reciben el equipo hasta que vuelve:**
+
+| Tipo | Plazo | Letra pequena |
+|---|---|---|
+| **Analizadores de gases** (TESTO 340) | **10-15 dias** | *"normalmente hay que hacerles algun tipo de reparacion (cambio de sensores si estan agotados, filtros, juntas etc)"* |
+| **Resto de equipos** | **~2 semanas** | *"siempre y cuando el equipo mida dentro de valores, y no necesite reparacion/ajuste"* |
+
+**Avisan de un SEGUNDO presupuesto para los gases**, de reparacion, a aceptar despues de revisarlos.
+
+> **Esto es justo el punto "fuera de tolerancia" que Inigo descarto de la plantilla el 09/09** — y ha
+> aparecido igual, puesto por el proveedor. **La plantilla NO se toca** (regla cementada: dos puntos, precio
+> y plazo). Lo que cambia es que **la factura de los gases no se parecera a la oferta**, y conviene saberlo
+> antes de comparar precios con nadie.
+
+**Los 3 de marca ajena: pendientes del laboratorio**, y **piden fichas tecnicas** para ir mas rapido.
+
+#### ⚠️ EL RIESGO QUE APARECE AL CRUZAR SUS PLAZOS CON NOVIEMBRE
+
+Con la 2.ª tanda esperando a que vuelva **toda** la 1.ª, las cuentas no cuadran:
+
+```
+14/09 presupuesto -> ~17/09 salen los 6 de la 1.ª tanda
+  no-gases  ~2 semanas ............................ vuelven ~01/10
+  T-100-1 (gases) 10-15 d + reparacion + aceptacion  vuelve ~20/10  <- marca el ritmo
+~20/10 saldria la 2.ª tanda
+  S-002 (camara) ~2 semanas ....................... vuelve ~03/11   (caduca 04/11)
+  A-004 (gases) 10-15 d + posible reparacion ...... vuelve >=10/11  (caduca 11/11)
+```
+
+**La 2.ª tanda llega justo o tarde, y si los gases necesitan sensores, tarde seguro.** La auditoria es en
+noviembre.
+
+**La causa es tratar la tanda como un bloque atomico, y no hace falta.** La regla de Inigo es *"dejar
+siempre uno de cada tipo"* — eso se cumple **por pareja**, no por lote entero:
+
+- **`S-002`** (3.ª camara TESTO 872) solo necesita que haya vuelto **una** camara. Las camaras no son las
+  lentas: podria salir a **primeros de octubre** en vez de esperar al analizador.
+- **`A-004`** si depende del `T-100-1`, que es el equipo lento. Ahi el margen es real.
+
+> **DECISION DE INIGO, no mia.** Tres salidas: **(a)** desacoplar por pareja y sacar `S-002` en cuanto
+> vuelva una camara; **(b)** mandar los dos TESTO 340 juntos ahora y aceptar unas semanas sin analizador de
+> gases en el locker; **(c)** dejar el `A-004` sin calibrar para la auditoria y documentarlo. La (a) no
+> rompe ninguna regla y recupera ~3 semanas.
+
+**Borrador de respuesta preparado** (retirar el GEDORE + adjuntar el certificado KLOTZ + comunicar las dos
+tandas): `runs/campana-calibraciones-2026-09/respuesta-neurylan-2026-09-11.md`. **Sin enviar: lo manda Inigo.**
+
 ### 📊 ESTADO DE LA CAMPANA — se actualiza segun vayan contestando
 
 > **Este es el cuaderno de la campana.** Inigo ira diciendo que manda y que le responden; se apunta aqui,
@@ -723,8 +831,8 @@ con el `A-003` extraido por Javier de Lamo, mandar los **dos** analizadores TEST
 |---|---|---|---|---|---|---|
 | ~~**1 · RS / Amidata**~~ | ~~3~~ | **DESCARTADO 10/09** — se va **directo a Applus**, que es quien calibra de verdad. Los 3 equipos pasan al lote 5 | | | | |
 | **2 · Leica** | 1 | — | — | — | — | — |
-| ~~**3 · Klotz**~~ | ~~1~~ | **FUSIONADO 10/09** con Neurylan: no consta contacto ni pedido ni certificado de Klotz | | | | |
-| **4 · Neurylan** | **8 + 3** | **10/09/2026 · ENVIADO** | — | — | — | — |
+| **3 · Klotz** | 1 | ⚠️ **REABIERTO 11/09** — se fusiono con Neurylan por una premisa FALSA (*"no consta contacto ni pedido ni certificado"*). Aparecio el certificado del fabricante y su contacto `info@fa-klotz.de`. **Decidir si se pregunta tambien a Klotz** | | | | |
+| **4 · Neurylan** | **8 + 3** | **10/09/2026 · ENVIADO** | **11/09 · RESPUESTA PARCIAL** (plazos si, precios no — presupuesto el **lunes 14/09**) | — | — | — |
 | **5 · Applus** | **7** *(4 FLUKE + los 3 que iban via RS)* | **10/09/2026** | — | — | — | — |
 | **6 · CS Instruments** | 1 | — | — | — | — | — |
 
@@ -764,7 +872,7 @@ certificado al servidor documental.
 | 3 | **Pegatina `L-004` + meterlo en la consigna 9** | Megger MIT320 `102465739`, vuelto calibrado hasta 26/05/2027. **Meterlo identificandose** para que la devolucion quede registrada a su nombre |
 | 4 | **Bajar a la consigna 31, abrirla con llave** | `E-002` = **INDICADOR DE DIAL x2 + BASE** (Insize/Mitutoyo). **El numero de serie no esta en ninguna parte** —ni Excel ni ACTUM—, hay que leerlo del instrumento y ponerlo en el nombre desde el Visor. **Aqui el viaje SI hace falta** |
 | ~~5~~ | ~~**Localizar el TESTO 340 de la consigna 22**~~ | **RESUELTO 09/09:** lo tenia Sergio Vega y lo devolvio identificandose a las **11:52:50**. CSV: una sola devolucion, serie `63862113`. |
-| 6 | **Buscar el correo de Klotz** | No consta. Mirar el certificado anterior; si no, preguntarselo a Neurylan |
+| ~~6~~ | ~~**Buscar el correo de Klotz**~~ | ✅ **RESUELTO 11/09:** `info@fa-klotz.de` · **+49 (0)7052 9 23 36**. Estaba en su certificado de 2022, en el archivo historico de instrumentacion. Ver la seccion del KLOTZ |
 
 > **Correccion del mismo dia:** se dijo primero que el viaje a por el numero de serie era a la consigna 32 y
 > que se podia ahorrar. **Era la 31, y ahi el viaje si hace falta.** Son dos instrumentos distintos: el 32 es
@@ -1133,15 +1241,26 @@ cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay q
 
 | Lote | Equipos | Enviado | Estado |
 |---|---|---|---|
-| **Applus** | 7 (4 FLUKE + Martindale + 2 RS PRO 135) | 10/09 a `izaskun.Conde@applus.com` | esperando |
-| **Neurylan** | 8 + 2 consultas | 10/09 a `administracion@neurylan.com` | esperando |
+| **Applus** | 7 (4 FLUKE + Martindale + 2 RS PRO 135) | 10/09 a `izaskun.Conde@applus.com` | **esperando** |
+| **Neurylan** | 8 + 2 consultas | 10/09 a `administracion@neurylan.com` | **CONTESTO 11/09** — plazos si, precios el **lunes 14/09** |
 | Leica · CS | 1 + 1 | — | sin pedir, sin urgencia |
-| ~~RS~~ · ~~Klotz~~ | — | — | cerrados (ver secciones propias) |
+| ~~RS~~ | — | — | cerrado (ver seccion propia) |
+| **Klotz** | 1 | — | ⚠️ **REABIERTO 11/09**: aparecio su certificado y su contacto `info@fa-klotz.de` |
 
-**⏰ CUANDO CONTESTE CUALQUIERA DE LOS DOS, LO PRIMERO ES RECORDARLE A INIGO:**
-1. **Comunicarles las DOS TANDAS**, con la lista de que sale en cada una. Si no se dice al hacer el pedido,
-   salen todos de golpe y el locker se queda vacio.
-2. **Solo a Neurylan: retirar el atornillador GEDORE** de las consultas — ya esta en reparacion en otro sitio.
+**⏰ NEURYLAN YA CONTESTO (11/09). LO QUE TOCA AHORA, por orden:**
+1. **Responder retirando el atornillador GEDORE `D-001`** — esta en reparacion en otro sitio y el
+   laboratorio lo esta valorando para nada. **Es lo unico que corre prisa hoy.**
+2. **Mandar la documentacion que piden:** el certificado del KLOTZ (encontrado el 11/09, trae sensor,
+   rango y norma — mejor que una ficha tecnica). Del BOSCH GOL 20 D **no hay ficha en el servidor**.
+3. **Comunicar las DOS TANDAS** con la lista de cada una. *(Inigo, 10/09: "en cuanto me respondan se lo
+   digo, acuerdate me dices que se lo diga".)*
+4. **Decidir lo de la 2.ª tanda vs noviembre** — ver el calculo de plazos en la seccion anterior.
+
+**Borrador listo con los puntos 1-3:** `runs/campana-calibraciones-2026-09/respuesta-neurylan-2026-09-11.md`.
+
+**Cuando conteste APPLUS:** siguen valiendo los dos recordatorios originales — comunicar sus dos tandas
+(4 + 3) al hacer el pedido, y mirar precio **por equipo**, plazo y si el desglose dice *"calibracion y
+ajuste"* o solo *"calibracion"*.
 
 **Que mirar en la oferta:** precio **por equipo** (no un total) · plazo **antes de noviembre** · si el
 desglose dice *"calibracion y ajuste"* o solo *"calibracion"*.
