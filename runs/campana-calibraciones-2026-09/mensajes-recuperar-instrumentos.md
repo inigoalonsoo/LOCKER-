@@ -1,15 +1,13 @@
-# Mensajes para recuperar los 5 instrumentos bloqueados — 11/09/2026
+# Mensajes de Teams para recuperar los 5 instrumentos bloqueados — 11/09/2026
 
 > **NO ENVIADOS.** Los manda Inigo. 4 personas, 5 instrumentos.
 > **Urgencia:** el presupuesto de Neurylan llega el **lunes 14/09**. Para enviar la semana del 15 hay que
 > pedirlos **hoy**.
 
-**Antes de escribir, dos avisos:**
-
-- El sistema dice **quien lo saco el ultimo sin que conste devolucion**, no que lo tenga hoy. `C-002` lleva
-  **244 dias** fuera: a esa distancia lo normal es que haya cambiado de manos. **Preguntar, no reclamar.**
-- **Al devolverlo tienen que IDENTIFICARSE** en el locker. Si lo meten con llave, seguira figurando en uso
-  y volvemos a lo mismo.
+**Criterio de redaccion (v2, pedido por Inigo):** cortos y directos, **citando la fecha en que lo cogieron**
+—que es el dato que le refresca la memoria a la persona y evita el "yo no tengo nada"—, y **sin la coletilla
+de identificarse al devolver**: *"la llave solo la tengo yo"*, asi que cualquier devolucion queda registrada
+por fuerza.
 
 ---
 
@@ -18,85 +16,68 @@
 ```
 Hola Alvaro, buenas.
 
-Estamos organizando las calibraciones antes de la auditoria de noviembre y me
-salen a tu nombre las dos camaras termograficas TESTO 872:
+Me salen a tu nombre las dos camaras termograficas TESTO 872: la C-002
+(nº 62826812), que cogiste el 9 de enero, y la S-001 (nº 62813457), del 17 de
+abril. ¿Las tienes tu?
 
-  - C-002 (n.º 62826812), consigna 2
-  - S-001 (n.º 62813457), consigna 15
-
-¿Las tienes tu todavia, o han cambiado de manos? Si puedes devolverlas al locker
-estos dias me vendria bien, porque las quiero mandar a calibrar la semana que
-viene. Importante: al meterlas, identificate en la pantalla en vez de usar la
-llave, si no el sistema no se entera y me siguen saliendo como prestadas.
-
-Si alguna la necesitas si o si, dimelo y organizo el envio de otra manera: hay
-una tercera camara igual en el locker y puedo mandar esa primero.
+Las quiero mandar a calibrar la semana que viene, antes de la auditoria de
+noviembre. Si puedes devolverlas al locker estos dias, genial. Y si necesitas
+alguna, dimelo y mando primero la tercera.
 
 Gracias!
 ```
 
-> **Este es el caso raro:** el plan mandaba `C-002` y `S-001`, que son las que el tiene, y guardaba de
-> reserva la `S-002`, que es la unica que esta dentro. Si Alvaro necesita las suyas, **lo logico es dar la
-> vuelta al plan y mandar la `S-002`**.
-
----
-
-## 2 · FELIPE C. CANARTE — medidor de presion diferencial
+## 2 · FELIPE C. CANARTE
 
 ```
 Hola Felipe, buenas.
 
 Me sale a tu nombre el medidor de presion diferencial TESTO 512 (M-020,
-n.º BA150023, consigna 24). ¿Lo tienes tu, o sabes quien lo tiene?
+nº BA150023, consigna 24), que cogiste el 16 de junio. ¿Lo tienes tu?
 
-Lo necesito para mandarlo a calibrar antes de la auditoria de noviembre. Si
-puedes devolverlo al locker estos dias, perfecto - eso si, identificandote en
-la pantalla, que si se mete con llave el sistema no lo registra.
-
-Aviso de que es el unico que tenemos de ese tipo, asi que mientras este fuera
-calibrandose no habra otro.
+Lo mando a calibrar antes de la auditoria de noviembre. Si puedes devolverlo
+al locker estos dias te lo agradezco. Es el unico de ese tipo que tenemos, asi
+que mientras este fuera no habra otro.
 
 Gracias!
 ```
 
----
-
-## 3 · ANGEL F. FERNANDEZ — analizador de particulas KLOTZ
+## 3 · ANGEL F. FERNANDEZ
 
 ```
 Hola Angel, buenas.
 
-Me sale a tu nombre el analizador de particulas de aceite KLOTZ ABAKUS
-(A-005, n.º AMF-20707, consigna 13). ¿Lo tienes tu?
+Me sale a tu nombre el analizador de particulas KLOTZ (A-005, nº AMF-20707,
+consigna 13), que cogiste el 21 de mayo. ¿Lo tienes tu?
 
-Esta caducado de calibracion desde marzo y lo quiero meter en la tanda de
-noviembre. Si puedes acercarlo al locker estos dias te lo agradezco -
-identificandote al meterlo, que si no el sistema no lo registra.
+Esta caducado de calibracion desde marzo y quiero mandarlo ya. Si puedes
+acercarlo al locker estos dias, perfecto.
 
 Gracias!
 ```
 
----
-
-## 4 · IKER C. CAMIN — pinza amperimetrica 1500 V
+## 4 · IKER C. CAMIN — este es el del lote de Applus
 
 ```
 Hola Iker, buenas.
 
 Me sale a tu nombre la pinza amperimetrica de 1500 V FLUKE 393 (L-010,
-n.º 59260351WS, consigna 11). ¿La tienes tu, o sabes donde anda?
+nº 59260351WS, consigna 11), que cogiste el 18 de junio. ¿La tienes tu?
 
-Va en el lote que mando a Applus a calibrar y caduca el 21/10. Si puedes
-devolverla al locker estos dias, mejor - acuerdate de identificarte al meterla
-en vez de abrir con llave.
-
-Ojo que las otras pinzas no valen de repuesto: cada una mide una cosa distinta
-(esta es la de tension, las otras son de corriente).
+Va en el lote que mando a Applus y caduca el 21/10. Si puedes devolverla estos
+dias, mejor. Ojo que las otras pinzas no valen de repuesto: cada una mide una
+cosa distinta.
 
 Gracias!
 ```
 
 ---
+
+## Aviso al leer las respuestas
+
+El sistema dice **quien lo saco el ultimo sin que conste devolucion**, no que lo tenga hoy. `C-002` lleva
+**244 dias** fuera: a esa distancia lo normal es que haya cambiado de manos. **Por eso los mensajes
+preguntan en vez de reclamar.**
 
 ## Como se midio
 
@@ -104,3 +85,11 @@ Gracias!
   por consigna.
 - Fuente 2: `DashboardLocker.html` publicado, regenerado el 11/09 a las 12:55.
 - **Las dos fuentes coinciden en los 17 instrumentos de la campana.** 5 en uso, 12 disponibles.
+
+| Cod | Cons | Quien | Cogido el | Dias |
+|---|---|---|---|---|
+| `C-002` | 2 | ALVARO T. TREPIANA | 09/01/2026 | 244 |
+| `S-001` | 15 | ALVARO T. TREPIANA | 17/04/2026 | 146 |
+| `A-005` | 13 | ANGEL F. FERNANDEZ | 21/05/2026 | 112 |
+| `M-020` | 24 | FELIPE C. CANARTE | 16/06/2026 | 86 |
+| `L-010` | 11 | IKER C. CAMIN | 18/06/2026 | 84 |

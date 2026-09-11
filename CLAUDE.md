@@ -845,9 +845,28 @@ sin camara mientras Alvaro tenga las otras dos — **decision de Inigo**, y depe
 > quien lo saca con llave, o se lo pasa a otro de mano en mano, no deja rastro. `C-002` lleva **244 dias**
 > fuera; a esa distancia lo normal es que haya cambiado de manos. **El mensaje pregunta, no reclama.**
 
-> **Y AL DEVOLVERLOS, IDENTIFICANDOSE.** Si entran con llave, el sistema no se entera y seguiran figurando
-> en uso. Igual al sacarlos para mandarlos a calibrar: **con identificacion, nunca con llave** — si sale con
-> llave, sale sin rastro.
+#### 🔑 LA LLAVE LA TIENE SOLO INIGO — dato nuevo del 11/09, y cambia varias conclusiones
+
+> **Inigo, 11/09:** *"Lo de la llave no te preocupes, solo la tengo yo."*
+
+**Consecuencia inmediata:** sobra avisar a la gente de que devuelva identificandose. **No pueden hacerlo de
+otra forma** — sin llave, la unica manera de abrir una consigna es identificarse, asi que toda devolucion
+queda registrada por fuerza. Los mensajes se acortaron quitando esa coletilla.
+
+> ⚠️ **Consecuencia de fondo, que toca a varios diagnosticos de este documento:** aqui se ha escrito varias
+> veces *"alguien lo saco con llave, o en una apertura manual"* como explicacion de un instrumento que
+> desaparece sin dejar rastro — el caso del **`A-003`** (consigna 5, vacia con el sistema diciendo
+> *Disponible*) y el del **`D-001`**. **Esa explicacion ya no vale para cualquiera: exige que fuera Inigo.**
+>
+> Quedan estas salidas, y conviene tenerlas separadas:
+> 1. **Lo saco el propio Inigo** con la llave (es el caso del `D-001`: lo aparto para mandarlo a arreglar).
+> 2. **Salio identificandose y se lo paso a otro de mano en mano**, sin volver a pasar por el locker — lo
+>    que ya se documento con el `D-001` el 01/04 (Alabort lo "devuelve" sin constar que lo sacara).
+> 3. **Una apertura manual con boton**, de las que generan rafagas con `Usuario = 0`.
+>
+> **No se cierra ninguna con lo que hay hoy**, pero el abanico es mas estrecho de lo que este documento
+> daba por supuesto. **Si un instrumento falta y no consta salida, la primera pregunta es para Inigo**, no
+> para el resto de la plantilla.
 
 #### 📌 REGLA NUEVA — disponibilidad ANTES de componer un lote
 
