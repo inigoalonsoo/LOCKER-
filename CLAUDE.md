@@ -506,6 +506,32 @@ el **Phoenix TM PTM1010** (`1774+KD-9083/4/5/6`) y, si acaba alli, este `A-0031`
 > queda fuera del alcance del proyecto a proposito. ~~**Lo que si conviene es saber si existe alguna lista de
 > ese cuarto.** Pregunta abierta a Inigo.~~
 
+#### 📦 TRES INSTRUMENTOS DEL CUARTO, FISICAMENTE EN LA MESA DE INIGO (11/09)
+
+> **Dicho por Inigo, "sin mas, para que sepas por si en algun momento hiciera falta y lo apuntes".**
+> **NO son del locker**, no estan en ACTUM y no salen en ningun dashboard. Se apuntan aqui porque este
+> documento es lo unico que los recuerda.
+
+Los tres estan en la lista del cuarto (ver abajo) y **los tres llevan caducados desde 2023**:
+
+| # | Lo que dijo Inigo | Codigo | Que es, segun la lista y los certificados | Caduco |
+|---|---|---|---|---|
+| 1 | *"Indicador de temperatura PHOENIX (el que igual estaba roto)"* | **`T-010`** | **PHOENIX TM PTM-1010** · registrador de Tª tc-K de **10 canales** · *"contiene sensor tc-k calibrado"* · la lista anota **"Se envia a TESTO (Neurylan)"** | **13/05/2023** |
+| 2 | *"Cal. pro y gen. señ RS PRO 135 · 22120632"* | **`M-032`** | **RS PRO 135 Thermometer/Calibrator** · certificado **UKAS** nº `1807748` de **RS Components Ltd** (Corby, UK), **12/06/2023** | 2024 aprox. |
+| 3 | *"Indicador Dial + base magnetica (M29)"* | **`M-029`** | **ECOTEK NTK021** · reloj comparador **con base** · comprado el 07/06/2022 | **20/04/2023** |
+
+**Dato util del certificado del `M-032`**, leido del PDF: RS ofrece **recogida gratuita** para recalibrar,
+citando el numero de serie — `calibration.uk@rs-components.com` · **01536 405545**.
+
+> ⚠️ **Eso es RS en el REINO UNIDO, no RS Iberia.** No confundir con el episodio del 10/09, donde RS Iberia
+> pidio alta como cliente nuevo y se decidio ir directo a Applus. **Son dos interlocutores distintos** y
+> esta via no esta probada: no se ha preguntado si la recogida gratuita aplica desde Espana.
+
+> **Confirma ademas que el `T-010` es "el Phoenix"** del que se hablaba el 09/09 como posiblemente
+> averiado y fuera de ACTUM. **Ya tiene codigo GHI (`T-010`) y un sitio donde ir a calibrar
+> (TESTO via Neurylan)**, que era justo lo que faltaba saber. **Sigue fuera del alcance del proyecto por
+> decision de Inigo** — se apunta, no se mete en la campana.
+
 #### ✅ LA LISTA DEL CUARTO SI EXISTE — encontrada el 11/09 (de rebote, buscando el KLOTZ)
 
 `...\02 - INSTRUMENTACION\Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\`
