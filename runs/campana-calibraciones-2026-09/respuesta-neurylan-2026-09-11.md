@@ -1,82 +1,57 @@
-# Borrador de respuesta a Neurylan — 11/09/2026 (v2, con la situacion real)
+# Respuesta a Neurylan — 11/09/2026 (v3 corta · ESTA ES LA QUE SE ENVIA)
 
 **Para:** Alazne Larroca · `administracion@neurylan.com`
-**Asunto:** RE: Solicitud de presupuesto - calibracion de equipos - GHI Smart Furnaces
+**Asunto:** `RE: Solicitud de presupuesto - calibracion de equipos - GHI Smart Furnaces`
+**Adjunto:** `C:\Users\ialopez\Desktop\Certificado KLOTZ A-005 AMF-20707.pdf`
+*(copia del original del servidor documental, SHA256 identico, 148.693 bytes)*
 
-> **NO ENVIADO.** Lo envia Inigo. **Adjuntar el certificado del KLOTZ** (ruta al final).
->
-> **v2 (11/09):** reescrito despues de descubrir que **3 de los 8 equipos y el KLOTZ estan en uso**.
-> Decision de Inigo: contarselo tal cual. El presupuesto de los 8 sigue pedido — pedir precio no obliga
-> a enviar — pero **las fechas de envio se dan cuando esten recuperados**.
+> **Decision de Inigo (11/09): este correo SI se envia.** Version acortada de la v2.
 
 ---
 
 ```
 Buenos dias Alazne,
 
-Gracias por la respuesta y por adelantarnos los plazos. Quedamos a la espera
-del presupuesto del lunes.
+Gracias por la respuesta y por los plazos. Quedamos a la espera del
+presupuesto del lunes.
 
-Te cuento cuatro cosas, una de ellas para corregir algo por mi parte.
+Cuatro cosas:
 
-1. RETIRAR EL ATORNILLADOR GEDORE.
+1. Retira el atornillador dinamometrico GEDORE LDA-40 EA (nº 10.00047) de la
+consulta: ya esta en reparacion en otro taller. Disculpa el trabajo de mas.
+Las consultas de marca ajena quedan en dos, el nivel optico BOSCH y el
+analizador de particulas KLOTZ.
 
-   El atornillador dinamometrico GEDORE LDA-40 EA (n.º de serie 10.00047) ya
-   esta en reparacion en otro taller, asi que no hace falta que el laboratorio
-   lo valore. Disculpa el trabajo de mas. Las consultas de marca ajena quedan
-   en dos: el nivel optico BOSCH y el analizador de particulas KLOTZ.
+2. Te adjunto el ultimo certificado del KLOTZ, emitido por el propio
+fabricante (Markus Klotz GmbH). Trae el metodo y los datos del sensor, asi que
+al laboratorio le servira mejor que una ficha tecnica: contador AMF-touch
+nº AMF-20707, sensor LDS-45/50, rango 4-200 um, calibrado con ISOMTD conforme
+a ISO 11171 y con ensayo electrico EN 61010. Del nivel optico BOSCH GOL 20 D
+(nº 801000535) no tengo ficha tecnica; si el laboratorio necesita algun dato
+concreto, dime cual y lo miro sobre el propio equipo.
 
-2. DOCUMENTACION PARA EL LABORATORIO.
+3. Al preparar el envio he visto que tres de los equipos que os pedi los
+tienen prestados compañeros, y el KLOTZ tambien. Ya les he escrito para
+recuperarlos. El presupuesto de los ocho me sigue interesando igual; lo que
+cambia es el orden en que os los mando.
 
-   Del KLOTZ os adjunto su ultimo certificado, emitido por el propio fabricante
-   (Markus Klotz GmbH, Bad Liebenzell). Creo que os sirve mejor que una ficha
-   tecnica, porque trae el metodo y los parametros del sensor:
+4. Os los enviare en dos tandas, para no quedarnos sin ningun equipo operativo
+de un mismo tipo:
 
-     - Equipo: contador de particulas KLOTZ AMF-touch, n.º de serie AMF-20707
-     - Sensor: LDS-45/50, n.º de serie LDS-1828
-     - Rango: 4 - 200 um  ·  Caudal: 30 ml/min
-     - Calibrado con ISOMTD conforme a ISO 11171
-     - Incluye ensayo de seguridad electrica segun EN 61010
-     - Ultimo certificado: 09/11/2022
+   1ª tanda - los tengo aqui, salen en cuanto me digais:
+     - Camara termografica TESTO 872, nº 62826952
+     - Analizador de gases TESTO 340, nº 63862113
+     - Termometro con sonda TESTO 925, nº 34768073
+     - Calibrador multifuncion EXTECH PRC30, nº 15549
 
-   Del nivel optico BOSCH GOL 20 D (n.º de serie 801000535) no tengo ficha
-   tecnica; es el nivel optico automatico estandar de Bosch, aumento 20x. Si el
-   laboratorio necesita algun dato concreto, decidme cual y lo miro sobre el
-   propio equipo.
+   2ª tanda - segun me vayan volviendo:
+     - Camaras termograficas TESTO 872, nº 62826812 y nº 62813457
+     - Medidor de presion diferencial TESTO 512, nº BA150023
+     - Analizador de gases TESTO 340, nº 62370623
 
-3. UNA COSA QUE HEMOS VISTO HOY.
-
-   Al preparar el envio he repasado uno por uno donde esta cada equipo, y
-   resulta que tres de los que os pedi los tienen prestados compañeros ahora
-   mismo, ademas del KLOTZ. Ya les he escrito para recuperarlos.
-
-   No cambia el presupuesto: me sigue interesando de los ocho equipos, tal y
-   como lo teniais previsto. Lo que hago es organizar el envio para no
-   deteneros: en la primera tanda van solo los que tengo ya en el almacen, que
-   esos son seguros, y los demas en la segunda segun me vayan volviendo.
-
-4. ENVIO EN DOS TANDAS.
-
-   Ademas, para no quedarnos sin ningun equipo operativo de un mismo tipo, no
-   os los enviaremos todos a la vez. Quedaria asi:
-
-     1.ª tanda - los tengo aqui, salen en cuanto me digais:
-        - Camara termografica TESTO 872, nº 62826952
-        - Analizador de gases TESTO 340, nº 63862113
-        - Termometro con sonda TESTO 925, nº 34768073
-        - Calibrador multifuncion EXTECH PRC30, nº 15549
-
-     2.ª tanda - segun vuelvan, y el analizador cuando regrese el primero:
-        - Camara termografica TESTO 872, nº 62826812
-        - Camara termografica TESTO 872, nº 62813457
-        - Medidor de presion diferencial TESTO 512, nº BA150023
-        - Analizador de gases TESTO 340, nº 62370623
-
-   Os confirmo fechas de la segunda tanda en cuanto los tenga.
-
-Sobre los analizadores de gases: de acuerdo con el presupuesto aparte si
-necesitan sensores, filtros o juntas. Os agradeceria que en ese caso venga
-desglosado por concepto, para poder aprobarlo rapido y no perder dias.
+De acuerdo con el presupuesto aparte si los analizadores necesitan sensores,
+filtros o juntas. Te agradeceria que venga desglosado por concepto, para poder
+aprobarlo rapido y no perder dias.
 
 Y un aviso de fechas: tenemos auditoria en noviembre. Si al revisar algun
 equipo veis que el plazo se va a ir mas alla de finales de octubre, decidmelo
@@ -91,27 +66,20 @@ ialopez@ghifurnaces.com
 
 ---
 
-## Por que se cuenta lo del punto 3 y no se disimula
+## Lo que este correo compromete, y lo que no
 
-Tres razones, por si alguien lo discute dentro de un ano:
+| Compromete | NO compromete |
+|---|---|
+| Los 4 equipos de la 1.ª tanda — **estan fisicamente dentro del locker**, medido el 11/09 | Ninguna fecha de los 4 que no se tienen |
+| Interes en el presupuesto de los 8 | Obligacion de enviar los 8 |
 
-1. **Se va a notar igual.** Si se pide presupuesto de 8 y llegan 5, el proveedor lo ve. Mejor que lo sepa
-   antes y por nosotros.
-2. **Protege el plazo.** Alazne avisa de que los gases pueden necesitar reparacion y que eso mete un
-   segundo presupuesto. Si ademas los equipos llegan tarde y a destiempo, el plazo se descontrola.
-   Diciendolo, la conversacion sobre fechas ya esta abierta.
-3. **No cuesta nada.** No es un error tecnico ni afecta a lo que nos van a cobrar: es logistica interna.
+**Por que la 1.ª tanda son 4 y no los 5 disponibles:** `T-100-1` y `A-004` son los dos analizadores de gases
+que estan dentro, y el tercero (`A-003`) lo tiene Javier de Lamo porque lo necesita. Mandando los dos, el
+locker se queda sin ningun analizador. `A-004` se retiene y sale cuando vuelva su gemelo.
 
-**Lo que NO dice el correo, a proposito:** que el plan mandaba las dos camaras que estan prestadas y se
-quedaba la que si esta. Eso es cosa nuestra y no aporta nada al proveedor.
+## Que mirar cuando llegue el presupuesto del lunes
 
-## Adjunto
-
-`\srvdocumental\Ghihornos\Fabricacion\FABRICACION\Departamental\02 - INSTRUMENTACION\Obsoleto\DOCUMENTOS VIEJOS\2024\Organización\60 - INSTRUMENTACION\2023\KLOTZ\Certificados y facturas validadas\Medidor de partículas.pdf`
-
-2 paginas, 148.693 bytes. Pag. 1 = certificado de calibracion; pag. 2 = protocolo EN 61010.
-
-## Si Alvaro no puede soltar sus dos camaras
-
-Cambia la 1.ª tanda: sale la `S-002` (n.º 62826952) en su lugar y las suyas pasan a la 2.ª. No hace falta
-reescribir a Neurylan por eso — las tandas se confirman al hacer el pedido.
+- Precio **por equipo**, no un total.
+- Plazo que quepa **antes de finales de octubre**.
+- Si el desglose dice *"calibracion y ajuste"* o solo *"calibracion"*.
+- **Referencia para negociar** (pedido RS `2507486`, oct-2025): Martindale **76,86 EUR** · RS PRO 135 **239,00 EUR**.

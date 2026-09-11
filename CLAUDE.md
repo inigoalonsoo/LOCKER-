@@ -840,6 +840,24 @@ sin camara mientras Alvaro tenga las otras dos — **decision de Inigo**, y depe
 
 **Mensajes redactados:** `runs/campana-calibraciones-2026-09/mensajes-recuperar-instrumentos.md`.
 
+#### ⏸️ DECISION DE INIGO (11/09): NO se manda ningun Teams de momento
+
+*"No voy a mandar ningun mensaje de Teams, esperaré a ver. Tampoco voy a andar diciendo aquí a todos sin
+necesidad."* **Los mensajes quedan escritos y en espera**, no descartados.
+
+**Y la decision se sostiene**, porque al recomponer la 1.ª tanda sobre lo que esta fisicamente dentro,
+**ninguno de los 5 bloquea ya el envio inmediato**. Orden de urgencia si hiciera falta tirar del hilo:
+
+| # | Quien | Que | Caduca | Por que ese puesto |
+|---|---|---|---|---|
+| **1** | **IKER C. CAMIN** | `L-010` pinza 1500 V | **21/10 · 40 d** | la fecha **mas proxima** de las cinco · va en la **1.ª tanda de APPLUS**, que sale en cuanto contesten · **sin repuesto**: las otras pinzas miden otra magnitud |
+| **2** | **ANGEL F. FERNANDEZ** | `A-005` KLOTZ | **caducado · 164 d** | el mas caducado del locker y unidad unica · **pero** su envio depende de que el laboratorio de Neurylan lo acepte, asi que hoy no bloquea |
+| 3 | FELIPE C. CANARTE | `M-020` | 05/11 · 55 d | unidad unica, pero va en 2.ª tanda: aguanta una o dos semanas |
+| 4-5 | ALVARO T. TREPIANA | `C-002` · `S-001` | 29/10 · 04/11 | **los menos urgentes ahora**: la 1.ª tanda ya no depende de ellas (va la `S-002`) y hay tres camaras |
+
+> **El disparador para escribir a Iker es que conteste Applus.** Ese lote no se ha recompuesto sobre
+> disponibilidad — cuando llegue su oferta, `L-010` sigue haciendo falta y no esta.
+
 > ⚠️ **CUIDADO CON LEER ESTO COMO "esa persona lo tiene ahora".** El dato dice **quien lo saco el ultimo y
 > no consta que lo devolviera** — no que lo tenga hoy encima. Es la limitacion estructural ya documentada:
 > quien lo saca con llave, o se lo pasa a otro de mano en mano, no deja rastro. `C-002` lleva **244 dias**
