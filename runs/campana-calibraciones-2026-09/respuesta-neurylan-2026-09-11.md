@@ -44,40 +44,35 @@ Te cuento cuatro cosas, una de ellas para corregir algo por mi parte.
    laboratorio necesita algun dato concreto, decidme cual y lo miro sobre el
    propio equipo.
 
-3. UNA COSA QUE HEMOS VISTO HOY Y QUE OS AFECTA AL CALENDARIO.
+3. UNA COSA QUE HEMOS VISTO HOY.
 
-   Al preparar el envio hemos repasado uno por uno donde esta cada equipo, y
-   resulta que cuatro de los que os pedi estan prestados a compañeros y no los
-   tengo fisicamente en el almacen ahora mismo:
+   Al preparar el envio he repasado uno por uno donde esta cada equipo, y
+   resulta que tres de los que os pedi los tienen prestados compañeros ahora
+   mismo, ademas del KLOTZ. Ya les he escrito para recuperarlos.
 
-     - Camara termografica TESTO 872, n.º 62826812
-     - Camara termografica TESTO 872, n.º 62813457
-     - Medidor de presion diferencial TESTO 512, n.º BA150023
-     - Y tambien el analizador de particulas KLOTZ
-
-   Ya les he escrito para recuperarlos. Os lo digo por transparencia y para que
-   no os cuadre mal despues: el presupuesto de los ocho equipos me sigue
-   interesando tal y como lo teniais previsto, pero las fechas de envio os las
-   confirmo cuando los tenga de vuelta. Si alguno se retrasase mucho, lo
-   sacariamos de esta tanda y lo dejariamos para la siguiente.
+   No cambia el presupuesto: me sigue interesando de los ocho equipos, tal y
+   como lo teniais previsto. Lo que hago es organizar el envio para no
+   deteneros: en la primera tanda van solo los que tengo ya en el almacen, que
+   esos son seguros, y los demas en la segunda segun me vayan volviendo.
 
 4. ENVIO EN DOS TANDAS.
 
-   Para no quedarnos sin ningun equipo operativo de un mismo tipo, no os los
-   enviaremos todos a la vez, sino en dos tandas. La idea es esta, y la
-   confirmo al hacer el pedido:
+   Ademas, para no quedarnos sin ningun equipo operativo de un mismo tipo, no
+   os los enviaremos todos a la vez. Quedaria asi:
 
-     1.ª tanda:
-        - Camara termografica TESTO 872, n.º 62826812
-        - Camara termografica TESTO 872, n.º 62813457
-        - Analizador de gases TESTO 340, n.º 63862113
-        - Termometro con sonda TESTO 925, n.º 34768073
-        - Medidor de presion diferencial TESTO 512, n.º BA150023
-        - Calibrador multifuncion EXTECH PRC30, n.º 15549
+     1.ª tanda - los tengo aqui, salen en cuanto me digais:
+        - Camara termografica TESTO 872, nº 62826952
+        - Analizador de gases TESTO 340, nº 63862113
+        - Termometro con sonda TESTO 925, nº 34768073
+        - Calibrador multifuncion EXTECH PRC30, nº 15549
 
-     2.ª tanda, cuando vuelva la primera:
-        - Camara termografica TESTO 872, n.º 62826952
-        - Analizador de gases TESTO 340, n.º 62370623
+     2.ª tanda - segun vuelvan, y el analizador cuando regrese el primero:
+        - Camara termografica TESTO 872, nº 62826812
+        - Camara termografica TESTO 872, nº 62813457
+        - Medidor de presion diferencial TESTO 512, nº BA150023
+        - Analizador de gases TESTO 340, nº 62370623
+
+   Os confirmo fechas de la segunda tanda en cuanto los tenga.
 
 Sobre los analizadores de gases: de acuerdo con el presupuesto aparte si
 necesitan sensores, filtros o juntas. Os agradeceria que en ese caso venga

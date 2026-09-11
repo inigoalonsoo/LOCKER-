@@ -4,7 +4,8 @@
 > **Urgencia:** el presupuesto de Neurylan llega el **lunes 14/09**. Para enviar la semana del 15 hay que
 > pedirlos **hoy**.
 
-**Criterio de redaccion (v2, pedido por Inigo):** cortos y directos, **citando la fecha en que lo cogieron**
+**Criterio de redaccion (v3, pedido por Inigo):** **empezar diciendo que Inigo lleva el locker** — mucha
+gente no lo sabe y sin eso el mensaje llega a frio—, cortos y directos, **citando la fecha en que lo cogieron**
 —que es el dato que le refresca la memoria a la persona y evita el "yo no tengo nada"—, y **sin la coletilla
 de identificarse al devolver**: *"la llave solo la tengo yo"*, asi que cualquier devolucion queda registrada
 por fuerza.
@@ -15,6 +16,9 @@ por fuerza.
 
 ```
 Hola Alvaro, buenas.
+
+Estoy llevando yo el locker de instrumentacion y ando organizando las
+calibraciones antes de la auditoria de noviembre.
 
 Me salen a tu nombre las dos camaras termograficas TESTO 872: la C-002
 (nº 62826812), que cogiste el 9 de enero, y la S-001 (nº 62813457), del 17 de
@@ -32,6 +36,9 @@ Gracias!
 ```
 Hola Felipe, buenas.
 
+Estoy llevando yo el locker de instrumentacion y toca mandar equipos a
+calibrar antes de la auditoria de noviembre.
+
 Me sale a tu nombre el medidor de presion diferencial TESTO 512 (M-020,
 nº BA150023, consigna 24), que cogiste el 16 de junio. ¿Lo tienes tu?
 
@@ -47,6 +54,9 @@ Gracias!
 ```
 Hola Angel, buenas.
 
+Estoy llevando yo el locker de instrumentacion y estoy organizando las
+calibraciones pendientes.
+
 Me sale a tu nombre el analizador de particulas KLOTZ (A-005, nº AMF-20707,
 consigna 13), que cogiste el 21 de mayo. ¿Lo tienes tu?
 
@@ -60,6 +70,9 @@ Gracias!
 
 ```
 Hola Iker, buenas.
+
+Estoy llevando yo el locker de instrumentacion y toca mandar equipos a
+calibrar antes de la auditoria de noviembre.
 
 Me sale a tu nombre la pinza amperimetrica de 1500 V FLUKE 393 (L-010,
 nº 59260351WS, consigna 11), que cogiste el 18 de junio. ¿La tienes tu?
