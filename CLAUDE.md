@@ -1,5 +1,44 @@
 # CLAUDE.md — Sistema Locker Instrumentacion GHI
 
+## 📍 CIERRE DE SESION — 11/09/2026 · **EMPIEZA A LEER AQUI**
+
+> **Sesion de CALIBRACIONES, no de software.** No se toco ni un script: el sistema sigue sano y corriendo
+> (dashboard regenerandose, comprobado a las 12:55). Todo lo de abajo sigue valiendo como contexto; **esto
+> es lo ultimo.**
+
+### Lo que pasa mañana y el lunes
+
+| Cuando | Que | Donde mirarlo |
+|---|---|---|
+| **lunes 14/09** | Llega el **presupuesto de Neurylan** | § B · las **3 cosas** que hay que pedirles van en un solo correo |
+| **cualquier dia** | Si contesta **Applus** → **escribir a IKER C. CAMIN**: su lote lleva el `L-010`, prestado, y caduca el **21/10** | § B |
+| antes de enviar | **Leer la pegatina del `T-005-1`** (consigna 12) | § C · pendientes fisicos |
+
+### Lo hecho hoy, en seis lineas
+
+1. **Neurylan contesto** (plazos si, precios el lunes) y **se le respondio**, con los certificados vigentes
+   de la 1.ª tanda adjuntos. Avisan de que **los gases suelen necesitar reparacion** y mandaran un segundo
+   presupuesto.
+2. **5 de los 17 equipos de la campana estan PRESTADOS** — lo vio Inigo, se confirmo midiendo, y en Applus
+   habia uno mas que nadie habia mirado. **Las tandas se recompusieron sobre lo que hay fisicamente dentro.**
+3. **Aparecio el certificado del `A-005`** (KLOTZ) y con el **el contacto del fabricante**, que se daba por
+   inexistente. **Eso reabre el lote Klotz**, fusionado con Neurylan sobre una premisa falsa.
+4. **Barrido de los certificados que faltan:** aparece el `M-005`. **Pero los dos hallados son de 2022 y las
+   calibraciones son de 2025** — no falta el certificado, falta el VIGENTE. Via para cerrarlo: **pedir copia
+   a quien los calibro**.
+5. **Existe una lista del cuarto de metrologia** (2023) y los **3 instrumentos de la mesa de Inigo** ya
+   tienen codigo: `T-010` (el Phoenix), `M-032`, `M-029`.
+6. **`CLAUDE.md` tenia 171 lineas duplicadas**; eliminadas.
+
+### Dos datos nuevos que cambian conclusiones viejas
+
+- **La llave la tiene solo Inigo.** Este documento explicaba varias desapariciones con *"alguien lo saco con
+  llave"*; eso ahora **exige que fuera el**. Ver la seccion de la llave.
+- **Solo 2 de los 32 instrumentos no tienen numero de serie**: consignas **31** (`E-002`) y **23** (`D-002`).
+  Un solo viaje para los dos.
+
+---
+
 ## 📍 TRASPASO A CLAUDE CODE — 10/09/2026, despues de Codex
 
 > **ESTE ES EL ESTADO MAS RECIENTE.** Sustituye cualquier pendiente antiguo que lo contradiga.
@@ -1420,9 +1459,18 @@ que **nadie se entera si se cae** — el banner de salud solo habla si alguien g
 
 **CSV a 10/09: 536/536 lineas, ratio 1,00, 535 movimientos, 0 bytes NULL.**
 
-## ⚡ LO QUE HAY QUE HACER AHORA — actualizado al cierre del 11/09/2026
+## ⚡ LO QUE HAY QUE HACER AHORA — actualizado al cierre del 11/09/2026 (tarde)
 
-> **Inigo aparca el tema del locker aqui.** Esta lista es el punto exacto donde se retoma.
+> **Esta lista es el punto exacto donde se retoma.** Rehecha al cierre de la sesion del 11/09, que fue
+> **de calibraciones, no de software**: el sistema no se toco y sigue sano.
+
+### 🔴 LO PRIMERO AL VOLVER, en una linea cada uno
+
+| | Que | Cuando se dispara |
+|---|---|---|
+| 1 | **Llega el presupuesto de NEURYLAN** | **lunes 14/09** — ver que pedirles en el punto B |
+| 2 | **Si contesta APPLUS: escribir a IKER C. CAMIN** | su lote lleva el `L-010`, que **esta prestado** y caduca el **21/10** (40 dias, lo mas proximo) |
+| 3 | **Leer la pegatina del `T-005-1`** (consigna 12) antes de enviarlo | el certificado de Neurylan trae la serie mal |
 
 ### A · Timeout — casi cerrado
 Valores **verificados en la base de datos**: `20 | 120 | 120`. Falta solo **cronometrar una extraccion real**
@@ -1432,7 +1480,7 @@ cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay q
 > **Y LO DE SIEMPRE: dejar `ACTUM_EPI_Gestion.exe` ABIERTO.** Cerrado, el locker **no registra nada**, y eso
 > no se recupera de ningun sitio.
 
-### B · Calibraciones — esperando dos ofertas
+### B · Calibraciones — Neurylan contestado, Applus aun sin responder
 
 | Lote | Equipos | Enviado | Estado |
 |---|---|---|---|
@@ -1442,14 +1490,29 @@ cuando se baje al locker; si sigue cortando a los 20 s, manda otro sitio y hay q
 | ~~RS~~ | — | — | cerrado (ver seccion propia) |
 | **Klotz** | 1 | — | ⚠️ **REABIERTO 11/09**: aparecio su certificado y su contacto `info@fa-klotz.de` |
 
-**⏰ NEURYLAN YA CONTESTO (11/09). LO QUE TOCA AHORA, por orden:**
-1. **Responder retirando el atornillador GEDORE `D-001`** — esta en reparacion en otro sitio y el
-   laboratorio lo esta valorando para nada. **Es lo unico que corre prisa hoy.**
-2. **Mandar la documentacion que piden:** el certificado del KLOTZ (encontrado el 11/09, trae sensor,
-   rango y norma — mejor que una ficha tecnica). Del BOSCH GOL 20 D **no hay ficha en el servidor**.
-3. **Comunicar las DOS TANDAS** con la lista de cada una. *(Inigo, 10/09: "en cuanto me respondan se lo
-   digo, acuerdate me dices que se lo diga".)*
-4. **Decidir lo de la 2.ª tanda vs noviembre** — ver el calculo de plazos en la seccion anterior.
+**✅ LOS CUATRO PUNTOS QUE TOCABAN EL 11/09 ESTAN HECHOS:** retirado el GEDORE · mandada la documentacion
+del KLOTZ · comunicadas las dos tandas · y resuelto lo de la 2.ª tanda recomponiendola sobre disponibilidad
+real en vez de sobre el plan del 10/09.
+
+**📌 LAS TRES COSAS QUE HAY QUE DECIRLE A NEURYLAN CUANDO LLEGUE EL PRESUPUESTO (lunes 14/09)** — van
+juntas en un solo correo:
+
+| | Que pedir | Por que |
+|---|---|---|
+| 1 | Que el presupuesto de reparacion de los gases venga **DESGLOSADO POR CONCEPTO** | ellos ya avisan de que lo enviaran; sin desglose llega un importe global que no se puede aprobar por partes |
+| 2 | Avisar de la **auditoria de noviembre** y pedir que digan si algun plazo pasa de finales de octubre | es lo que abre la conversacion de fechas antes de que sea tarde |
+| 3 | **Certificado corregido del `T-005-1`** (cert. `6792011`, ped. 2507489) | su certificado lleva la serie mal (`347608073` en vez de `34768073`): un auditor puede objetar que no acredita ESE equipo |
+
+**Que mirar en el presupuesto:** precio **por equipo** (no un total) · plazo **antes de finales de octubre**
+· si el desglose dice *"calibracion y ajuste"* o solo *"calibracion"*.
+**Referencia para negociar** (pedido RS `2507486`, oct-2025): Martindale **76,86 EUR** · RS PRO 135 **239,00 EUR**.
+
+**⏰ Y CUANDO CONTESTE APPLUS, DOS COSAS:**
+1. **Comunicarles sus dos tandas** (4 + 3) al hacer el pedido.
+2. ⚠️ **Su lote NO se ha recompuesto sobre disponibilidad.** Lleva el **`L-010`, que esta prestado a
+   IKER C. CAMIN** y caduca el **21/10** — la fecha mas proxima de toda la campana. **Escribirle en cuanto
+   contesten.** Y de paso, **pedir a Applus copia de los certificados del `T-017` (11/2024) y del `E-003`
+   (02/2026)**, que los calibraron ellos y son dos de los seis huecos.
 
 **✅ ENVIADO EL 11/09.** Texto literal en `runs/campana-calibraciones-2026-09/respuesta-neurylan-2026-09-11.md`
 — se conserva tal cual porque es lo que la otra parte ha leido, y su respuesta hay que interpretarla contra eso.
@@ -1502,20 +1565,26 @@ desglose dice *"calibracion y ajuste"* o solo *"calibracion"*.
 
 | | Que | Estado |
 |---|---|---|
-| 1 | **Consigna 31** — abrir con llave, leer el n.º de serie del `E-002` y ponerlo en ACTUM | **el viaje SI hace falta**: no consta en ninguna parte |
+| 1 | **Consignas 31 Y 23** — un solo viaje: leer el n.º de serie del `E-002` y del `D-002` (boroscopio) y ponerlos en ACTUM | **medido el 11/09: son los DOS UNICOS sin serie** de los 32. El viaje SI hace falta |
+| 1b | **Consigna 12** — leer la pegatina del `T-005-1` | la serie **buena es `34768073`** (Excel/ACTUM); el certificado de Neurylan dice `347608073`. **Confirmar sobre el equipo antes de enviarlo** |
 | 2 | **`L-004`** — pegatina y meterlo en la consigna 9 **identificandose** | pendiente |
 | 3 | **Atornillador `D-001`** — preguntar a **Miguel Rio** (expediciones) por el albaran de salida a PRADA | mensaje de Teams ya redactado |
 | 4 | **Retirar el acceso SAT a Julian de Lamo** cuando devuelva el `A-003` | si se le dio solo para eso |
 | 5 | **`A-0031`** — TESTO 340 que puede llegar | **puede no ser del locker**: decidir si se da de alta |
 | ~~6~~ | ~~TESTO 340 de la consigna 22~~ | ✅ **volvio el 09/09** |
 | ~~7~~ | ~~Serie del `D-001` en ACTUM~~ | ✅ **ya estaba puesta** |
-| ~~8~~ | ~~Correo de Klotz~~ | ✅ **fusionado con Neurylan**: no existia contacto |
+| ~~8~~ | ~~Correo de Klotz~~ | ✅ **ENCONTRADO 11/09**: `info@fa-klotz.de` · +49 7052 92336. Estaba en su certificado de 2022 |
+| 9 | **5 instrumentos de la campana estan PRESTADOS** | Teams redactados y **en espera por decision de Inigo**. Orden: Iker · Angel · Felipe · Alvaro |
+| 10 | **Pedir copia de certificados a quien los calibro** | `T-017` y `E-003` a **Applus** (hilo abierto) · `M-005` a **Leica**. Cierra 3 de los 6 huecos sin mover un instrumento |
 
 ### C-bis · Dos casillas del Excel, de un minuto
 
 **Las hace Inigo a mano — ningun agente escribe en ese fichero.**
 - **`M34`** → `INSIZE / MITUTOYO` *(la marca esta en la columna MODELO)*
 - **`N30`** → quitar el interrogante a `M-017` si confirma que aquel correo fue a Neurylan
+- **`N16`** (`A-005`, KLOTZ) → **reconsiderar tras el 11/09**: aparecio el contacto del fabricante
+  (`info@fa-klotz.de`) y su certificado, asi que la premisa que lo mando a Neurylan («no consta contacto ni
+  pedido ni certificado») era falsa
 
 ### C-ter · La BIOS, pendiente de que pase un apagon
 
