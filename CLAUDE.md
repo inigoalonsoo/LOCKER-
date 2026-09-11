@@ -1459,6 +1459,19 @@ decia *"el ultimo certificado"*. Mas exacto y mas seguro — el documento es de 
 consta en ACTUM es de 03/2025; ante un laboratorio que lo va a leer con lupa, nadie podra decir luego que
 se le vendio como vigente.
 
+**SEGUNDO ENVIO el mismo dia:** Inigo manda ademas **los certificados vigentes de los 4 equipos de la 1.ª
+tanda** (`S-002` `6793520` · `T-100-1` `25G01074` · `T-005-1` `6792011` · `T-004` `6786702`, todos de
+**nov-2025**). Misma jugada que con Applus: el laboratorio no busca nada y la oferta sale antes.
+**Comprobados uno a uno: son los VIGENTES**, no antiguos — el archivo de lo calibrado en Neurylan si esta
+al dia, los huecos son de instrumentos concretos.
+
+> ⚠️ **Al cotejarlos aparecio una discrepancia: el `T-005-1`.** Su certificado dice serie **`347608073`**
+> (9 digitos) y el Excel —y el correo enviado— dicen **`34768073`** (8). Es el mismo instrumento (el
+> certificado lo marca como *N.º equipo cliente `T-0005 1`*), pero **un numero tiene un digito de mas o de
+> menos y no se puede saber cual desde aqui**. Se cierra **leyendo la pegatina**: el equipo esta dentro del
+> locker, consigna 12. **Hacerlo ANTES de enviarlo.** Detalle del mismo certificado: cubre tambien una
+> **sonda de superficie `T-0005_2`** que no es del locker — preguntar si debe ir con el termometro.
+
 ⏰ **DOS COSAS QUE SE QUEDARON FUERA Y HAY QUE DECIR MAS ADELANTE** (no es un fallo: habra mas correos,
 pero las dos tenian funcion):
 1. **Que el presupuesto de reparacion de los gases venga DESGLOSADO POR CONCEPTO.** Alazne ya avisa de que

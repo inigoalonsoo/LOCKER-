@@ -77,6 +77,41 @@ conviene no perderlas**:
 > **Ninguna de las dos es "anadir puntos a la plantilla"** —esa regla es para la solicitud inicial de oferta,
 > que quedo cerrada en precio y plazo—. Son parte de la negociacion del pedido, que es otra fase.
 
+### SEGUNDO ENVIO (11/09) — los certificados de la 1.a tanda
+
+*"Por si es de ayuda, te envio los ultimos certificados de calibracion de los instrumentos de la 1.a tanda."*
+
+Misma jugada que funciono con Applus: el laboratorio no tiene que buscar nada y la oferta sale antes.
+
+**Comprobado leyendo los cuatro PDF: SON LOS VIGENTES**, no antiguos — cosa que importa despues del hallazgo
+del desfase de esta manana (`M-005` y `A-005`, de 2022 frente a calibraciones de 2025).
+
+| Cod | Certificado | Calibrado | Recalibracion | Serie del certificado | vs Excel |
+|---|---|---|---|---|---|
+| `S-002` | `6793520` | 04/11/2025 | 04/11/2026 | `62826952` | ✅ |
+| `T-100-1` | `25G01074` (Testo, tec. Eduard Giner) | 04/11/2025 | — | `63862113` | ✅ |
+| `T-005-1` | `6792011` (ped. 2507489) | 05/11/2025 | 05/11/2026 | **`347608073`** | ❌ el Excel dice `34768073` |
+| `T-004` | `6786702` (ped. 2507489) | 03/11/2025 | 03/11/2026 | `015549` | ✅ (cero a la izquierda) |
+
+> **El archivo de Neurylan SI esta al dia.** Los huecos de certificados son de instrumentos concretos, no un
+> fallo general: lo calibrado en nov-2025 tiene su certificado guardado y encontrable.
+
+#### ⚠️ Discrepancia de serie en el `T-005-1`, sin resolver
+
+Es **el mismo instrumento** —el certificado lo identifica como *Termometro testo 925*, modelo `0560 9250`,
+**N.º equipo cliente `T-0005 1`**, cliente GHI—, pero **un numero tiene un digito de mas o de menos** y
+desde aqui no se puede saber cual de los dos esta mal.
+
+**Se cierra leyendo la pegatina del equipo**, que esta **dentro del locker** (consigna 12, disponible).
+**Conviene hacerlo ANTES de enviarlo:** va en la 1.a tanda, y a Neurylan se le dio el numero del Excel
+mientras su propio certificado dice otro. No es grave —lo identifican por el nº de pedido y el codigo— pero
+si alguien cruza series, chirria.
+
+**Dato extra:** ese certificado cubre **dos elementos**, el termometro (`T-0005 1`) y una **sonda de
+superficie** (`T-0005_2`, modelo `0602 0393`) que **no es instrumento del locker** pero si figura en la lista
+del cuarto de metrologia como `T-005_2`. **Preguntar si la sonda tiene que ir con el termometro**: se
+calibraron juntos.
+
 ## Estado tras este correo
 
 - **Neurylan:** contestado. Esperando **presupuesto el lunes 14/09**.
