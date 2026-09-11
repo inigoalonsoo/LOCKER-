@@ -942,10 +942,21 @@ sin camara mientras Alvaro tenga las otras dos — **decision de Inigo**, y depe
 
 **Mensajes redactados:** `runs/campana-calibraciones-2026-09/mensajes-recuperar-instrumentos.md`.
 
-#### ⏸️ DECISION DE INIGO (11/09): NO se manda ningun Teams de momento
+#### ⏸️ ESTADO DE LOS AVISOS — 1 enviado, 4 en espera (11/09)
 
-*"No voy a mandar ningun mensaje de Teams, esperaré a ver. Tampoco voy a andar diciendo aquí a todos sin
-necesidad."* **Los mensajes quedan escritos y en espera**, no descartados.
+Inigo dijo primero *"no voy a mandar ningun mensaje de Teams, esperaré a ver. Tampoco voy a andar diciendo
+aquí a todos sin necesidad"*, y despues **si escribio a Alvaro Trepiana**. Los otros cuatro siguen escritos
+y en espera.
+
+| Persona | Estado |
+|---|---|
+| **ALVARO T. TREPIANA** | ✅ **ENVIADO el 11/09** — solo la pregunta, **sin pedir la devolucion**: primero confirmar si las tiene. Texto literal y que decirle segun conteste, en el fichero de mensajes |
+| IKER C. CAMIN · ANGEL F. FERNANDEZ · FELIPE C. CANARTE | ⏸️ en espera, redactados |
+
+> ⚠️ **DE LA RESPUESTA DE ALVARO CUELGA UNA DECISION DE ENVIO.** Hay 3 camaras TESTO 872 y la 1.ª tanda
+> lleva la `S-002`, la unica que esta dentro. **Si devuelve las dos** hay 3 y se mandan 2 quedando 1 — lo
+> ideal. **Si no las devuelve**, la `S-002` sale sola y el locker se queda **sin camara disponible**, aunque
+> haya dos en la empresa en sus manos. Aceptable, pero **que sea decision, no descuido.**
 
 **Y la decision se sostiene**, porque al recomponer la 1.ª tanda sobre lo que esta fisicamente dentro,
 **ninguno de los 5 bloquea ya el envio inmediato**. Orden de urgencia si hiciera falta tirar del hilo:
